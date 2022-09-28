@@ -35,7 +35,6 @@ class Settings(BaseSettings):
     # quantity of workers for uvicorn
     workers_count: int = int(os.getenv("WORKERS_COUNT", 1))
     # Enable uvicorn reloading
-    # This is a terrible way to do this parsing
     reload: bool = bool(os.getenv("RELOAD_API", False))
 
     # Current environment
@@ -44,9 +43,6 @@ class Settings(BaseSettings):
     # log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    # This needs to also look at the .env file to configure and get the values from that.
-    # You could make the case that this file could be used for configs, but no, it should only
-    # Be used for reading the env file as a back up if it is not provided explicitly in this file.
     db_host: str = os.getenv("DB_HOST", "localhost")
     db_port: int = int(os.getenv("DB_PORT", 5432))
     db_user: str = os.getenv("DB_USER", "lira_backend_api")
@@ -73,8 +69,6 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        # WTF is this doing?
-        # env_prefix = "LIRA_BACKEND_API_"
         env_file_encoding = "utf-8"
 
 

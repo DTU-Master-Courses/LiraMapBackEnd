@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from datetime import datetime
 
+
 class MeasurementTypesBase(BaseModel):
     pass
 
@@ -15,4 +16,3 @@ class MeasurementTypes(MeasurementTypesBase):
 
     class Config:
         orm_mode = True
-
