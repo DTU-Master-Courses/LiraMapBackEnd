@@ -1,8 +1,5 @@
-import uuid
-from sqlalchemy import text
 from sqlalchemy.orm import Session
-from sqlalchemy.dialects.postgresql import UUID
-from lira_backend_api.core.models.measurements import MeasurementTypes
+from lira_backend_api.core.models import MeasurementTypes
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):

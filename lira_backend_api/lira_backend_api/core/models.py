@@ -1,6 +1,6 @@
 from lira_backend_api.database.db import Base
 
-from sqlalchemy import MetaData, Table, Column, String, DateTime, Text
+from sqlalchemy import Column, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID
 
 
