@@ -1,4 +1,5 @@
 import enum
+import os
 from pathlib import Path
 from tempfile import gettempdir
 
@@ -8,15 +9,15 @@ from yarl import URL
 TEMP_DIR = Path(gettempdir())
 
 
-class LogLevel(str, enum.Enum):  # noqa: WPS600
-    """Possible log levels."""
+# class LogLevel(str, enum.Enum):  # noqa: WPS600
+#     """Possible log levels."""
 
-    NOTSET = "NOTSET"
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    FATAL = "FATAL"
+#     NOTSET = "NOTSET"
+#     DEBUG = "DEBUG"
+#     INFO = "INFO"
+#     WARNING = "WARNING"
+#     ERROR = "ERROR"
+#     FATAL = "FATAL"
 
 
 class Settings(BaseSettings):
@@ -27,24 +28,26 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    host: str = "127.0.0.1"
-    port: int = 8000
+    project_name: str = os.getenv("PROJECT_NAME", "lira-map-fastapi")
+    project_version: str = os.getenv("PROJECT_VERSION", "0.0.1")
+    host: str = os.getenv("API_HOST_IP", "127.0.0.1")
+    port: int = int(os.getenv("API_PORT", 8000))
     # quantity of workers for uvicorn
-    workers_count: int = 1
+    workers_count: int = int(os.getenv("WORKERS_COUNT", 1))
     # Enable uvicorn reloading
-    reload: bool = False
+    reload: bool = bool(os.getenv("RELOAD_API", False))
 
     # Current environment
-    environment: str = "dev"
+    environment: str = os.getenv("DEPLOY_ENVIRONMENT", "dev")
 
-    log_level: LogLevel = LogLevel.INFO
+    # log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
-    db_host: str = "localhost"
-    db_port: int = 5432
-    db_user: str = "lira_backend_api"
-    db_pass: str = "lira_backend_api"
-    db_base: str = "lira_backend_api"
+    db_host: str = os.getenv("DB_HOST", "localhost")
+    db_port: int = int(os.getenv("DB_PORT", 5432))
+    db_user: str = os.getenv("DB_USER", "lira_backend_api")
+    db_pass: str = os.getenv("DB_PASS", "lira_backend_api")
+    db_base: str = os.getenv("DB_BASE", "lira_backend_api")
     db_echo: bool = False
 
     @property
@@ -55,17 +58,17 @@ class Settings(BaseSettings):
         :return: database URL.
         """
         return URL.build(
-            scheme="postgresql+asyncpg",
+            scheme="postgresql",
             host=self.db_host,
             port=self.db_port,
             user=self.db_user,
             password=self.db_pass,
             path=f"/{self.db_base}",
+            # scheme="postgresql+asyncpg",
         )
 
     class Config:
         env_file = ".env"
-        env_prefix = "LIRA_BACKEND_API_"
         env_file_encoding = "utf-8"
 
 

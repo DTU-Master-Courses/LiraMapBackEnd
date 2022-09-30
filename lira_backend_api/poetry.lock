@@ -694,6 +694,14 @@ toml = "*"
 virtualenv = ">=20.0.8"
 
 [[package]]
+name = "psycopg2"
+version = "2.9.3"
+description = "psycopg2 - Python-PostgreSQL Database Adapter"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
@@ -1132,7 +1140,7 @@ tokenize-rt = ">=2.1"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "ed80a795e6baebf33644b9a12fa4d8761c0d2a7a33d9256fd2e5545c1651e9ad"
+content-hash = "0cb658a9dc5911590b25d4c81e3350691941252ccd757479d463867b89062372"
 
 [metadata.files]
 aiofiles = []
@@ -1194,6 +1202,7 @@ pep8-naming = []
 platformdirs = []
 pluggy = []
 pre-commit = []
+psycopg2 = []
 py = []
 pycodestyle = []
 pydantic = []
