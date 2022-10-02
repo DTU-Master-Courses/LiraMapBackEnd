@@ -68,6 +68,13 @@ class Trip(Base):
     class Config:
         orm_mode = True
 
-
+class SourceTypes(Base):
+    id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)
+    sourceName = Column("SourceName", Text)
+    created_Date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    updated_Date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+    
+    class Config:
+        orm_mode = True
 
 
