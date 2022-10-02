@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field
 
 from datetime import datetime
 
+from sqlalchemy import BigInteger
+
 
 class MeasurementTypes(BaseModel):
     id: str
@@ -29,6 +31,12 @@ class MeasurementModel(BaseModel):
     fk_measurement_type: Union[str,None]
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
+
+class Device(BaseModel):
+    id: str
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    fk_sourcetype: Union[str,None]
 
     class Config:
         orm_mode = True

@@ -29,6 +29,16 @@ class MeasurementModel(Base):
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
+class Device(Base):
+    __tablename__ = "Devices"
+
+    id = Column("DeviceId", UUID, primary_key=True, nullable=False)
+    created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+    fk_sourcetype =  Column("FK_SourceType", UUID, nullable=False)
+
+
+
     class Config:
         orm_mode = True
 
