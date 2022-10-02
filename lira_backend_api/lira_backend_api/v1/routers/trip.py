@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Response, Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from lira_backend_api.core.schemas import Trip

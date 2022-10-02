@@ -1,9 +1,7 @@
 from typing import Union
-from pydantic import BaseModel, Field
-
+from pydantic import BaseModel
 
 from datetime import datetime
-
 
 class MeasurementTypes(BaseModel):
     id: str
@@ -30,30 +28,45 @@ class MeasurementModel(BaseModel):
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
 
+class Device(BaseModel):
+    id: str
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    fk_sourcetype: Union[str,None]
+
     class Config:
         orm_mode = True
 
 class Trip(BaseModel):
     id: str
-    taskId: int
-    startTimeUtc: Union[datetime,None]
-    endTimeUtc: Union[datetime,None]
-    startPositionLat: Union[str,None]
-    startPositionLng: Union[str,None]
-    startPositionDisplay: Union[str,None]
-    endPositionLat: Union[str,None]
-    endPositionLng: Union[str,None]
-    endPositionDisplay: Union[str,None]
+    task_id: int
+    start_time_utc: Union[datetime,None]
+    end_time_utc: Union[datetime,None]
+    start_position_lat: Union[str,None]
+    start_position_lng: Union[str,None]
+    start_position_display: Union[str,None]
+    end_position_lat: Union[str,None]
+    end_position_lng: Union[str,None]
+    end_position_display: Union[str,None]
     duration: Union[datetime,None]
-    distanceKm: Union[float,None]
+    distance_km: Union[float,None]
     fk_device: Union[str,None]
-    created_Date: Union[datetime,None]
-    updated_Date: Union[datetime,None]
-    fully_Imported: Union[bool,None]
-    fully_RouteAnnotated: Union[bool,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    fully_imported: Union[bool,None]
+    fully_route_annotated: Union[bool,None]
     description: Union[str,None]
-    changeLog: Union[str,None]
+    change_log: Union[str,None]
 
+    class Config:
+        orm_mode = True
+
+class SourceTypes(BaseModel):
+    id: str
+    source_name: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    
     class Config:
         orm_mode = True    
 
