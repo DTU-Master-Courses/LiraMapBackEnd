@@ -69,6 +69,8 @@ class Trip(Base):
         orm_mode = True
 
 class SourceTypes(Base):
+    __tablename__ = "SourceTypes"
+    
     id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)
     sourceName = Column("SourceName", Text)
     created_Date = Column("Created_Date", DateTime(timezone=True), nullable=False)

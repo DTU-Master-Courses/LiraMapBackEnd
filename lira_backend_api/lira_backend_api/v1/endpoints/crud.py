@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip,Device
+from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip,Device, SourceTypes
 
 
 
@@ -30,5 +30,12 @@ def get_deviceid(device_id: str, db: Session):
     return(
         db.query(Device)
         .filter(Device.id == device_id)
+        .first()
+    )
+
+def get_sourcetype(source_id: str, db: Session):
+    return(
+        db.query(SourceTypes)
+        .filter(SourceTypes.id == source_id)
         .first()
     )
