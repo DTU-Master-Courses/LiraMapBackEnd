@@ -1,6 +1,5 @@
 from typing import Union
 from pydantic import BaseModel
-
 from datetime import datetime
 
 class MeasurementTypes(BaseModel):
@@ -27,6 +26,9 @@ class MeasurementModel(BaseModel):
     fk_measurement_type: Union[str,None]
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
+
+    class Config:
+        orm_mode = True
 
 class Device(BaseModel):
     id: str
@@ -61,7 +63,7 @@ class Trip(BaseModel):
     class Config:
         orm_mode = True
 
-class SourceTypes(BaseModel):
+class SourceType(BaseModel):
     id: str
     source_name: Union[str,None]
     created_date: Union[datetime,None]

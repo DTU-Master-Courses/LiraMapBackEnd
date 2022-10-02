@@ -3,7 +3,6 @@ from lira_backend_api.database.db import Base
 from sqlalchemy import INTEGER, Column, DateTime, Text
 from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BOOLEAN
 
-
 class MeasurementTypes(Base):
     __tablename__ = "MeasurementTypes"
 
@@ -28,6 +27,9 @@ class MeasurementModel(Base):
     fk_measurement_type = Column("FK_MeasurementType", UUID, nullable=False)#, ForeignKey("MeasurementTypes.id")
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+
+    class Config:
+        orm_mode = True
 
 class Device(Base):
     __tablename__ = "Devices"
@@ -67,8 +69,7 @@ class Trip(Base):
         orm_mode = True
 
 
-
-class SourceTypes(Base):
+class SourceType(Base):
     __tablename__ = "SourceTypes"
     
     id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)
@@ -97,4 +98,3 @@ class DRDMeasurement(Base):
 
     class Config:
         orm_mode = True
-
