@@ -3,11 +3,12 @@ import os
 from pathlib import Path
 from tempfile import gettempdir
 
+from dotenv import load_dotenv
 from pydantic import BaseSettings
 from yarl import URL
 
 TEMP_DIR = Path(gettempdir())
-
+load_dotenv()
 
 # class LogLevel(str, enum.Enum):  # noqa: WPS600
 #     """Possible log levels."""
