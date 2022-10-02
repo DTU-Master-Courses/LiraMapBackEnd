@@ -37,8 +37,6 @@ class Device(Base):
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
     fk_sourcetype =  Column("FK_SourceType", UUID, nullable=False)
 
-
-
     class Config:
         orm_mode = True
 
@@ -46,24 +44,24 @@ class Trip(Base):
     __tablename__ = "Trips"
 
     id = Column("TripId", UUID, primary_key=True, nullable=False)
-    taskId = Column("TaskId", INTEGER, nullable=False)
-    startTimeUtc = Column("StartTimeUtc", DateTime(timezone=True))
-    endTimeUtc = Column("EndTimeUtc", DateTime(timezone=True))
-    startPositionLat = Column("StartPositionLat", Text)
-    startPositionLng = Column("StartPositionLng", Text)
-    startPositionDisplay = Column("StartPositionDisplay", Text)
-    endPositionLat = Column("EndPositionLat", Text)
-    endPositionLng = Column("EndPositionLng", Text)
-    endPositionDisplay = Column("EndPositionDisplay", Text)
+    task_id = Column("TaskId", INTEGER, nullable=False)
+    start_time_utc = Column("StartTimeUtc", DateTime(timezone=True))
+    end_time_utc = Column("EndTimeUtc", DateTime(timezone=True))
+    star_position_lat = Column("StartPositionLat", Text)
+    start_position_lng = Column("StartPositionLng", Text)
+    start_position_display = Column("StartPositionDisplay", Text)
+    end_position_lat = Column("EndPositionLat", Text)
+    end_position_lng = Column("EndPositionLng", Text)
+    end_position_display = Column("EndPositionDisplay", Text)
     duration = Column("Duration", DateTime(timezone=True))
-    distanceKm = Column("DistanceKm", DOUBLE_PRECISION)
+    distance_km = Column("DistanceKm", DOUBLE_PRECISION)
     fk_device = Column("FK_Device", UUID, nullable=False)
-    created_Date = Column("Created_Date", DateTime(timezone=True), nullable=False)
-    updated_Date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
-    fully_Imported = Column("Fully_Imported", BOOLEAN, nullable=False)
-    fully_RouteAnnotated = Column("Fully_RouteAnnotated", BOOLEAN)
+    created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+    fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
+    fully_route_annotated = Column("Fully_RouteAnnotated", BOOLEAN)
     description = Column("Description", Text)
-    changeLog = Column("ChangeLog", Text)
+    change_log = Column("ChangeLog", Text)
 
     class Config:
         orm_mode = True
@@ -72,9 +70,9 @@ class SourceTypes(Base):
     __tablename__ = "SourceTypes"
     
     id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)
-    sourceName = Column("SourceName", Text)
-    created_Date = Column("Created_Date", DateTime(timezone=True), nullable=False)
-    updated_Date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+    source_name = Column("SourceName", Text)
+    created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
     
     class Config:
         orm_mode = True
