@@ -56,3 +56,20 @@ class Trip(BaseModel):
 
     class Config:
         orm_mode = True    
+
+class DRDMeasurement(BaseModel):
+
+    id: str
+    distance: str
+    tag: Union[str,None]
+    lat: Union[float,None]
+    lon: Union[float,None]
+    message: Union[str,None]
+    is_computed: Union[bool,None]
+    fk_trip: Union[str,None]
+    fk_measurement_type: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+
+    class Config:
+        orm_mode = True

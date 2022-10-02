@@ -59,5 +59,21 @@ class Trip(Base):
         orm_mode = True
 
 
+class DRDMeasurement(Base):
+    __tablename__ = "DRDMeasurements"
 
+    id = Column("DRDMeasurementId", UUID, primary_key=True, nullable=False)
+    distance = Column("TS_or_Distance",  Text)
+    tag = Column("T", Text) 
+    lat = Column("lat", DOUBLE_PRECISION)
+    lon = Column("lon", DOUBLE_PRECISION)
+    message = Column("message", Text) 
+    is_computed = Column("isComputed", BOOLEAN, nullable=False)
+    fk_trip = Column("FK_Trip", UUID, nullable=False)
+    fk_measurement_type = Column("FK_MeasurementType", UUID, nullable=False)
+    created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
+
+    class Config:
+        orm_mode = True
 
