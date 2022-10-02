@@ -1,7 +1,7 @@
 from lira_backend_api.database.db import Base
 
-from sqlalchemy import INTEGER, Column, DateTime, Text, null
-from sqlalchemy.dialects.postgresql import UUID,DOUBLE_PRECISION,BOOLEAN
+from sqlalchemy import INTEGER, Column, DateTime, Text
+from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BOOLEAN
 
 
 class MeasurementTypes(Base):
