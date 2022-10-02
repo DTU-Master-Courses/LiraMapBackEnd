@@ -33,3 +33,26 @@ class MeasurementModel(BaseModel):
     class Config:
         orm_mode = True
 
+class Trip(BaseModel):
+    id: str
+    taskId: int
+    startTimeUtc: Union[datetime,None]
+    endTimeUtc: Union[datetime,None]
+    startPositionLat: Union[str,None]
+    startPositionLng: Union[str,None]
+    startPositionDisplay: Union[str,None]
+    endPositionLat: Union[str,None]
+    endPositionLng: Union[str,None]
+    endPositionDisplay: Union[str,None]
+    duration: Union[datetime,None]
+    distanceKm: Union[float,None]
+    fk_device: Union[str,None]
+    created_Date: Union[datetime,None]
+    updated_Date: Union[datetime,None]
+    fully_Imported: Union[bool,None]
+    fully_RouteAnnotated: Union[bool,None]
+    description: Union[str,None]
+    changeLog: Union[str,None]
+
+    class Config:
+        orm_mode = True    
