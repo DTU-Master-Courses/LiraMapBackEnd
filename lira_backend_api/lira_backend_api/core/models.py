@@ -68,7 +68,6 @@ class Trip(Base):
     class Config:
         orm_mode = True
 
-
 class SourceType(Base):
     __tablename__ = "SourceTypes"
     
@@ -79,7 +78,6 @@ class SourceType(Base):
     
     class Config:
         orm_mode = True
-
 
 class DRDMeasurement(Base):
     __tablename__ = "DRDMeasurements"

@@ -1,10 +1,8 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-
-from lira_backend_api.settings import settings
 from lira_backend_api.v1.routers import measurement, sourcetype, trip, DRDmeasurement, device, mapreference
-
+from lira_backend_api.settings import settings
 
 app = FastAPI()
 app.include_router(measurement.router)

@@ -89,7 +89,6 @@ class DRDMeasurement(BaseModel):
     class Config:
         orm_mode = True
 
-
 class MapReference(BaseModel):
 
     id: str
