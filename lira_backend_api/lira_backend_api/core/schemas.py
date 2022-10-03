@@ -88,3 +88,24 @@ class DRDMeasurement(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class MapReference(BaseModel):
+
+    id: str
+    lat_MapMatched: Union[float,None]
+    lon_MapMatched: Union[float,None]
+    way_point_name: Union[str,None]
+    leg_summary_map_matched: Union[str,None]
+    leg_distance_map_matched: Union[float,None]
+    node_id_map_matched: Union[str,None]
+    offset: Union[str,None]
+    lane: Union[str,None]
+    direction: Union[str,None]
+    possible_matching_routes: Union[str,None]
+    way_point: Union[str,None]
+    fk_measurement_id: Union[str,None]
+    fk_section: Union[int,None]
+
+    class Config:
+        orm_mode = True

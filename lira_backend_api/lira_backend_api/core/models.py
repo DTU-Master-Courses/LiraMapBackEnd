@@ -1,7 +1,7 @@
 from lira_backend_api.database.db import Base
 
 from sqlalchemy import INTEGER, Column, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BOOLEAN
+from sqlalchemy.dialects.postgresql import UUID, DOUBLE_PRECISION, BOOLEAN, BIGINT
 
 class MeasurementTypes(Base):
     __tablename__ = "MeasurementTypes"
@@ -98,3 +98,24 @@ class DRDMeasurement(Base):
 
     class Config:
         orm_mode = True
+
+class MapReference(Base):
+    __tablename__ = "MapReferences"
+    
+    id = Column("MapReferenceId", UUID, primary_key=True, nullable=False)
+    lat_map_matched = Column("lat_MapMatched", DOUBLE_PRECISION)
+    lon_map_matched = Column("lon_MapMatched", DOUBLE_PRECISION)
+    way_point_name = Column("wayPointName", Text)
+    leg_summary_map_matched = Column("legSummary_MapMatched", Text)
+    leg_distance_map_matched = Column("legDistance_MapMatched", DOUBLE_PRECISION)
+    node_id_map_matched = Column("nodeId_MapMatched", Text)
+    offset = Column("offset", Text)
+    lane = Column("lane", Text)
+    direction = Column("direction", Text)
+    possible_matching_routes = Column("PossibleMatchingRoutes", Text)
+    way_point = Column("WayPoint", Text)
+    fk_measurement_id = Column("FK_MeasurementId", UUID,nullable=False)
+    fk_section = Column("FK_Section", BIGINT)
+
+    class Config:
+        orm_mode = True 

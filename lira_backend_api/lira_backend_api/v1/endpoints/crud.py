@@ -1,7 +1,5 @@
 from sqlalchemy.orm import Session
-from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip, DRDMeasurement, Device, SourceType
-
-
+from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip, DRDMeasurement, Device, SourceType, MapReference
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):
@@ -47,5 +45,12 @@ def get_sourcetype(source_id: str, db: Session):
     return(
         db.query(SourceType)
         .filter(SourceType.id == source_id)
+        .first()
+    )
+
+def get_mapreference(mapreference_id: str, db: Session):
+    return(
+        db.query(MapReference)
+        .filter(MapReference.id == mapreference_id)
         .first()
     )
