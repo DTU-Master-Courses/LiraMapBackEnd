@@ -1,6 +1,6 @@
 from lira_backend_api.database.db import Base
 
-from sqlalchemy import INTEGER, Column, DateTime, Text, null
+from sqlalchemy import INTEGER, Column, DateTime, Text, null, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID,DOUBLE_PRECISION,BOOLEAN
 
 
@@ -24,7 +24,7 @@ class MeasurementModel(Base):
     lon = Column("lon", DOUBLE_PRECISION, nullable=False)
     message = Column("message", Text, nullable=False) 
     is_computed = Column("isComputed", BOOLEAN, nullable=False)
-    fk_trip = Column("FK_Trip", UUID, nullable=False)#, ForeignKey("MeasurementTypes.id")
+    fk_trip = Column("FK_Trip", UUID, ForeignKey("Trip.TripId"), nullable=False)#, ForeignKey("MeasurementTypes.id")
     fk_measurement_type = Column("FK_MeasurementType", UUID, nullable=False)#, ForeignKey("MeasurementTypes.id")
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)

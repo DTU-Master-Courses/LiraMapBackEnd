@@ -1,10 +1,8 @@
-from typing import Union
+from typing import List, Union
 from pydantic import BaseModel, Field
-
-
 from datetime import datetime
-
 from sqlalchemy import BigInteger
+from collections import namedtuple
 
 
 class MeasurementTypes(BaseModel):
@@ -70,6 +68,15 @@ class SourceTypes(BaseModel):
     sourceName: Union[str,None]
     created_Date: Union[datetime,None]
     updated_Date: Union[datetime,None]
+    
+    class Config:
+        orm_mode = True
+
+#for testing
+boundary = namedtuple("Boundary",["minX", "maxX", "minY", "maxY"])
+class TripsReturn(BaseModel):
+    path: List[Trip]
+    bounds: boundary
     
     class Config:
         orm_mode = True
