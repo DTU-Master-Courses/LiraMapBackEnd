@@ -22,5 +22,5 @@ def get_measurement_model(measurement_model_id: str, db: Session = Depends(get_d
 @router.get("/ride", response_model=TripsReturn)
 def get_single_ride(trip_id: str, tag: str, db: Session = Depends(get_db)):
     result = get_ride(trip_id,tag, db)
-    print(result)
+    
     return result

@@ -50,8 +50,8 @@ def get_ride(trip_id: str, tag: str, db: Session):
     res = db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon, MeasurementModel.created_date).where(
         MeasurementModel.fk_trip == trip_id ).filter(
             MeasurementModel.tag == tag and MeasurementModel.lon != None and MeasurementModel.lat != None).order_by(
-            MeasurementModel.created_date).all()
-    print(res)
+            MeasurementModel.created_date).limit(150)
+    # print(res)
     
     #document if created date is not available
     #try '@ts'
