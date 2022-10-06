@@ -1,250 +1,271 @@
-declare module namespace {
-
-    export interface acc.xyz{
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        acc.xyz.z: number;
-        acc.xyz.y: number;
-        acc.xyz.x: number;
-    }
-
-}
-
-declare module namespace {
-
-    # ec2x.data_usage
-    # obd.acc_long
-    # obd.acc_trans
-    # obd.acc_yaw
-    # obd.asr_trq_req_dyn
-    # obd.asr_trq_req_st
-    # obd.brk_trq_elec
-    # obd.brk_trq_req_dvr
-    # obd.brk_trq_req_elec
-    # obd.cons_avg
-    # obd.f_dist
-    # obd.msr_trq_req
-    # obd.odo
-    # obd.rpm_elec
-    # obd.rpm_fl
-    # obd.rpm_fr
-    # obd.rpm_rl
-    # obd.rpm_rr
-    # obd.sb_rem_fl
-    # obd.sb_rem_fr
-    # obd.sb_stat_rc
-    # obd.sb_stat_rl
-    # obd.sb_stat_rr
-    # odb.spd
-    # odb.spd_veh
-    # odb.strg_acc
-    # odb.strg_ang
-    # odb.strg_pos
-    # odb.temp
-    # odb.temp_ext
-    # odb.time
-    # odb.trac_cons
-    # odb.trip_cons
-    # odb.trip_con_avg
-    # odb.trip_dist
-    # odb.trip_spd_avg
-    # odb.trq_eff
-    # odb.trq_req
-    # obd.whl_prs_fr
-    # odb.whl_prs_rl
-    # odb.whl_prs_rr
-    # odb.whl_trq_est
-    # odb.whl_trq_pot_ri
-    # obd.ww_f_req
-    # obd.ww_f_stat
-    # obd.ww_f_stop
+from pydantic import BaseModel
+from datetime import datetime
 
 
-    export interface disk.percent {
-        id: string;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @vid: number;
-        @uid: string;
-        @ts: Date;
-        @t: string;
-        @rec: Date;
-    }
-
-}
-
-declare module namespace {
-
-    #  event.system.network.wwan0 is the same
-    # event.system.sleep_timer.event_driven
-    # event.system.sleep_timer.inactivity_after_sleep
-    # event.system.sleep_timer.inactivity_fallback
-    # event.system.stn
-    # event.vehicle.battery
-    # event.vehicle.engine
-    # event.vehicle.motor
-    # event.vehicle.position
-    # 
-    export interface event.system.device.ec2x.gnss
- {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @tag: string;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-    }
-
-}
-
-declare module namespace {
-
-    export interface event.system.power {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @tag: string;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        event.system.power.trigger: string;
-    }
-
-}
+class AccXyz(BaseModel):
+    """
+        I think that because we aren't typing these schemas to a database, but to a column within it, we can just
+        get rid of the @, and then change any . to _
+    """
+    id: str
+    # @vid: int
+    vid: int
+    # ISO 8601 Format
+    start_time_utc: datetime
+    end_time_utc: datetime
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    acc_xyz_z: float
+    acc_xyz_y: float
+    acc_xyz_x: float
 
 
-declare module namespace {
+    # ec2x_data_usage
+    # obd_acc_long
+    # obd_acc_trans
+    # obd_acc_yaw
+    # obd_asr_trq_req_dyn
+    # obd_asr_trq_req_st
+    # obd_brk_trq_elec
+    # obd_brk_trq_req_dvr
+    # obd_brk_trq_req_elec
+    # obd_cons_avg
+    # obd_f_dist
+    # obd_msr_trq_req
+    # obd_odo
+    # obd_rpm_elec
+    # obd_rpm_fl
+    # obd_rpm_fr
+    # obd_rpm_rl
+    # obd_rpm_rr
+    # obd_sb_rem_fl
+    # obd_sb_rem_fr
+    # obd_sb_stat_rc
+    # obd_sb_stat_rl
+    # obd_sb_stat_rr
+    # odb_spd
+    # odb_spd_veh
+    # odb_strg_acc
+    # odb_strg_ang
+    # odb_strg_pos
+    # odb_temp
+    # odb_temp_ext
+    # odb_time
+    # odb_trac_cons
+    # odb_trip_cons
+    # odb_trip_con_avg
+    # odb_trip_dist
+    # odb_trip_spd_avg
+    # odb_trq_eff
+    # odb_trq_req
+    # obd_whl_prs_fr
+    # odb_whl_prs_rl
+    # odb_whl_prs_rr
+    # odb_whl_trq_est
+    # odb_whl_trq_pot_ri
+    # obd_ww_f_req
+    # obd_ww_f_stat
+    # obd_ww_f_stop
+    # disk_percent
 
-    export interface event.system.time
- {
-        id: string;
-        @vid: number;
-        event.system.time.old: Date;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @tag: string;
-        @t: string;
-        event.system.time.source: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        event.system.time.new: string;
-    }
 
-}
+class Something1(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    uid: str
+    ts: datetime
+    t: str
+    rec: datetime
+    # @vid: int
+    # @uid: str
+    # @ts: datetime
+    # @t: str
+    # @rec: datetime
 
-declare module namespace {
 
-    export interface obd.bat {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        obd.bat.voltage: number;
-        obd.bat.state: string;
-        obd.bat.level: number;
-    }
+    # event_system_network_wwan0 is the same
+    # event_system_sleep_timer_event_driven
+    # event_system_sleep_timer_inactivity_after_sleep
+    # event_system_sleep_timer_inactivity_fallback
+    # event_system_stn
+    # event_vehicle_battery
+    # event_vehicle_engine
+    # event_vehicle_motor
+    # event_vehicle_position
+    # event_system_device_ec2x_gnss
+class Something2(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    tag: str
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @tag: str
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
 
-}
 
-declare module namespace {
+class EventSystemPower(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    # @vid: int
+    # @tag: str
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    vid: int
+    tag: str
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    event_system_power_trigger: str
 
-    export interface obd.rpm {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        obd.rpm.value: number;
-    }
 
-}
+class EventSystemTime(BaseModel):
+    id: str
+    event_system_time_old: datetime
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    tag: str
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @tag: str
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    event_system_time_source: str
+    event_system_time_new: str
 
-declare module namespace {
-    # obd.whl_prs_rl
 
-    export interface odb.whl_prs_fl {
-        id: string;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @vid: number;
-        @uid: string;
-        @ts: Date;
-        @t: string;
-        @rec: Date;
-        obd.whl_prs_fl.value: number;
-    }
+class OdbBat(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    obd_bat_voltage: float
+    obd_bat_state: str
+    obd_bat_level: int
 
-}
 
-declare module namespace {
+class OdbRpm(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    obd_rpm_value: float
 
-    export interface RpiTempCpu {
-        value: number;
-        unit: string;
-    }
 
-    export interface RpiTempGpu {
-        value: number;
-        unit: string;
-    }
+    # obd_whl_prs_rl
+    # odb_whl_prs_fl
 
-    export interface rpi.temp {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        rpi.temp.cpu: RpiTempCpu;
-        rpi.temp.gpu: RpiTempGpu;
-    }
+class OdbWhlPrsFl(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    uid: str
+    ts: datetime
+    t: str
+    rec: datetime
+    # @vid: int
+    # @uid: str
+    # @ts: datetime
+    # @t: str
+    # @rec: datetime
+    obd_whl_prs_fl_value: float
 
-}
 
-declare module namespace {
+class RpiTempCpu(BaseModel):
+    value: float
+    unit: str
 
-    export interface TrackPosLoc {
-        lat: number;
-        lon: number;
-    }
 
-    export interface TrackPos {
-        id: string;
-        @vid: number;
-        start_time_utc: Date;
-        end_time_utc: Date;
-        @t: string;
-        @ts: Date;
-        @uid: string;
-        @rec: Date;
-        track.pos.utc: Date;
-        track.pos.cog: number;
-        track.pos.nsat: number;
-        track.pos.alt: number;
-        track.pos.sog: number;
-        track.pos.loc: TrackPosLoc;
-    }
+class RpiTempGpu(BaseModel):
+    value: float
+    unit: str
 
-}
+
+class RpiTemp(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    rpi_temp_cpu: RpiTempCpu
+    rpi_temp_gpu: RpiTempGpu
+
+
+class TrackPosLoc(BaseModel):
+    lat: float
+    lon: float
+
+
+class TrackPos(BaseModel):
+    id: str
+    start_time_utc: datetime
+    end_time_utc: datetime
+    vid: int
+    t: str
+    ts: datetime
+    uid: str
+    rec: datetime
+    # @vid: int
+    # @t: str
+    # @ts: datetime
+    # @uid: str
+    # @rec: datetime
+    track_pos_utc: datetime
+    track_pos_cog: float
+    track_pos_nsat: float
+    track_pos_alt: float
+    track_pos_sog: float
+    track_pos_loc: TrackPosLoc
 
