@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Any, Dict, List, Union
 from pydantic import BaseModel, Field
 from datetime import datetime
 from sqlalchemy import BigInteger
@@ -72,11 +72,21 @@ class SourceTypes(BaseModel):
     class Config:
         orm_mode = True
 
+class TripTest(BaseModel):
+    trip_id: Union[str,None]
+    lat: Union[float, None]
+    lng: Union[float, None]
+    value: Union[int,None]
+    metadata: Any
+
+
+
 #for testing
 boundary = namedtuple("Boundary",["minX", "maxX", "minY", "maxY"])
 class TripsReturn(BaseModel):
-    path: List[Trip]
+    path: List[TripTest]
     bounds: boundary
     
     class Config:
         orm_mode = True
+

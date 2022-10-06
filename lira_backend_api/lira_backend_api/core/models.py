@@ -19,14 +19,14 @@ class MeasurementModel(Base):
 
     id = Column("MeasurementId", UUID, primary_key=True, nullable=False)
     timestamp = Column("TS_or_Distance", DateTime(timezone=True), nullable=False)
-    tag = Column("T", Text, nullable=False) 
-    lat = Column("lat", DOUBLE_PRECISION, nullable=False)
-    lon = Column("lon", DOUBLE_PRECISION, nullable=False)
-    message = Column("message", Text, nullable=False) 
+    tag = Column("T", Text, nullable=True) 
+    lat = Column("lat", DOUBLE_PRECISION, nullable=True)
+    lon = Column("lon", DOUBLE_PRECISION, nullable=True)
+    message = Column("message", Text, nullable=True) 
     is_computed = Column("isComputed", BOOLEAN, nullable=False)
     fk_trip = Column("FK_Trip", UUID, ForeignKey("Trip.TripId"), nullable=False)#, ForeignKey("MeasurementTypes.id")
     fk_measurement_type = Column("FK_MeasurementType", UUID, nullable=False)#, ForeignKey("MeasurementTypes.id")
-    created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
+    created_date = Column("Created_Date", DateTime(timezone=True), nullable=True)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
 class Device(Base):
