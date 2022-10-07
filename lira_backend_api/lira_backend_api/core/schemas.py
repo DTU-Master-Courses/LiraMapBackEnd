@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, List, Union
 
 from uuid import UUID
 
@@ -17,10 +17,6 @@ class MeasurementTypes(BaseModel):
         orm_mode = True
 
 class MeasurementModel(BaseModel):
-    """
-    Measurement model.
-    It returned when accessing measurements models from the API.
-    """
     id: str
     timestamp: datetime
     tag: Union[str,None]
@@ -46,34 +42,34 @@ class Device(BaseModel):
         orm_mode = True
 
 class Trip(BaseModel):
-    id: UUID
-    taskId: int
-    startTimeUtc: Union[datetime,None]
-    endTimeUtc: Union[datetime,None]
-    startPositionLat: Union[str,None]
-    startPositionLng: Union[str,None]
-    startPositionDisplay: Union[str,None]
-    endPositionLat: Union[str,None]
-    endPositionLng: Union[str,None]
-    endPositionDisplay: Union[str,None]
+    id: str
+    task_id: int
+    start_time_utc: Union[datetime,None]
+    end_time_utc: Union[datetime,None]
+    start_position_lat: Union[str,None]
+    start_position_lng: Union[str,None]
+    start_position_display: Union[str,None]
+    end_position_lat: Union[str,None]
+    end_position_lng: Union[str,None]
+    end_position_display: Union[str,None]
     duration: Union[datetime,None]
-    distanceKm: Union[float,None]
+    distance_km: Union[float,None]
     fk_device: Union[str,None]
-    created_Date: Union[datetime,None]
-    updated_Date: Union[datetime,None]
-    fully_Imported: Union[bool,None]
-    # fully_RouteAnnotated: Union[bool,None]
-    # description: Union[str,None]
-    # changeLog: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    fully_imported: Union[bool,None]
+    fully_route_annotated: Union[bool,None]
+    description: Union[str,None]
+    change_log: Union[str,None]
 
     class Config:
         orm_mode = True
 
-class SourceTypes(BaseModel):
+class SourceType(BaseModel):
     id: str
-    sourceName: Union[str,None]
-    created_Date: Union[datetime,None]
-    updated_Date: Union[datetime,None]
+    source_name: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
     
     class Config:
         orm_mode = True
@@ -84,13 +80,28 @@ class TripTest(BaseModel):
     lng: Union[float, None]
     value: Union[int,None]
     metadata: Any
+    
+    class Config:    
+        orm_mode = True    
+
+class DRDMeasurement(BaseModel):
+
+    id: str
+    distance: str
+    tag: Union[str,None]
+    lat: Union[float,None]
+    lon: Union[float,None]
+    message: Union[str,None]
+    is_computed: Union[bool,None]
+    fk_trip: Union[str,None]
+    fk_measurement_type: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
 
     class Config:
         orm_mode = True
 
 
-
-#for testing
 boundary = namedtuple("Boundary",["minX", "maxX", "minY", "maxY"])
 class TripsReturn(BaseModel):
     path: List[TripTest]
@@ -99,3 +110,22 @@ class TripsReturn(BaseModel):
     class Config:
         orm_mode = True
 
+class MapReference(BaseModel):
+
+    id: str
+    lat_MapMatched: Union[float,None]
+    lon_MapMatched: Union[float,None]
+    way_point_name: Union[str,None]
+    leg_summary_map_matched: Union[str,None]
+    leg_distance_map_matched: Union[float,None]
+    node_id_map_matched: Union[str,None]
+    offset: Union[str,None]
+    lane: Union[str,None]
+    direction: Union[str,None]
+    possible_matching_routes: Union[str,None]
+    way_point: Union[str,None]
+    fk_measurement_id: Union[str,None]
+    fk_section: Union[int,None]
+
+    class Config:
+        orm_mode = True

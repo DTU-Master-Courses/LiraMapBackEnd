@@ -1,22 +1,17 @@
-from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-
 import uvicorn
-
-from lira_backend_api.core.schemas import MeasurementTypes,MeasurementModel,Device
-from lira_backend_api.database.db import get_db
-from lira_backend_api.v1.routers.utils import get_measurementtype,get_measurementmodel,get_deviceid
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from lira_backend_api.v1.routers import drdmeasurement, measurement, sourcetype, trip, device, mapreference
 from lira_backend_api.settings import settings
 
-from lira_backend_api.v1.routers import measurements, trip, device, sourceTypes
-
-
 app = FastAPI()
-app.include_router(measurements.router)
+app.include_router(measurement.router)
 app.include_router(trip.router)
+app.include_router(drdmeasurement.router)
 app.include_router(device.router)
-app.include_router(sourceTypes.router)
+app.include_router(sourcetype.router)
+app.include_router(mapreference.router)
+
 # TODO: We need to change the origins of this for production
 app.add_middleware(
     CORSMiddleware,

@@ -1,6 +1,6 @@
-from typing import List
 
-from fastapi import APIRouter, status, Response, Depends, HTTPException
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from lira_backend_api.core.schemas import MeasurementTypes, MeasurementModel, TripsReturn, Trip
