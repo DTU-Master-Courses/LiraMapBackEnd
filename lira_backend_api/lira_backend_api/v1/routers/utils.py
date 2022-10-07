@@ -53,7 +53,6 @@ def convert_date(json_created_date: any):
 
 
 def get_ride(trip_id: str, tag: str, db: Session):
-    #db.query(MeasurementModel, Trip)
     tripList = list()
     values = list()
     res = db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon, MeasurementModel.created_date).where(
@@ -73,11 +72,11 @@ def get_ride(trip_id: str, tag: str, db: Session):
                 pass
             if json_created_date is not None:
                 date_as_iso = convert_date(json_created_date)
-                tripList.append({'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
+                tripList.append({'trip_id': trip_id, 'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
             else:
                 json_created_date = jsonobj.get("@ts")
                 date_as_iso = convert_date(json_created_date)
-                tripList.append({'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
+                tripList.append({'trip_id': trip_id, 'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
             
         except Exception as e:
             print(e)
