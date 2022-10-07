@@ -23,12 +23,13 @@ def get_measurementmodel(measurement_model_id: str, db: Session):
     )
 
 def get_trip(trip_id: str, db: Session):
-
-    return (
-        db.query(Trip)
-        .filter(Trip.id == trip_id)
+    # We need to swallow the value error, but one could argue that Pydantic should be failing first
+    result = db.query(Trip)\
+        .filter(Trip.id == trip_id)\
         .first()
-    )
+   
+    return result
+
 def get_deviceid(device_id: str, db: Session):
     return(
         db.query(Device)
@@ -50,7 +51,7 @@ def get_ride(trip_id: str, tag: str, db: Session):
     res = db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon, MeasurementModel.created_date).where(
         MeasurementModel.fk_trip == trip_id ).filter(
             MeasurementModel.tag == tag and MeasurementModel.lon != None and MeasurementModel.lat != None).order_by(
-            MeasurementModel.created_date).limit(150)
+            MeasurementModel.created_date).limit(150).all()
     # print(res)
     
     #document if created date is not available
@@ -62,12 +63,12 @@ def get_ride(trip_id: str, tag: str, db: Session):
     for x in res:
         jsonobj = json.loads(x[0])
         try: 
-            if int(jsonobj.get(f"{tag}.value")) is not None:
+            if jsonobj.get(f"{tag}.value") is not None:
                 value = int(jsonobj.get(f"{tag}.value"))
                 values.append(value)
                 json_created_date = jsonobj.get("Created_Date")
-            else: 
-                exit()
+            # else: 
+            #     exit()
             if json_created_date is not None:
                 str_format_date = json_created_date[:-6]
                 str_format_date = str_format_date.split(".")[0]
@@ -95,3 +96,14 @@ def get_ride(trip_id: str, tag: str, db: Session):
     maxY = max(values)
 
     return { 'path': tripList, 'bounds': boundary(minX, maxX, minY, maxY) }
+
+
+def get_trips(db: Session):
+    rides = db.query(Trip).where(Trip.taskId != 0)\
+        .filter(Trip.startPositionLat != None)\
+            .filter(Trip.startPositionLng != None)\
+                .filter(Trip.endPositionLat != None)\
+                    .filter(Trip.endPositionLng != None)\
+                .order_by(Trip.taskId).limit(150).all()
+
+    return rides

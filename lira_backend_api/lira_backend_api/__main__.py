@@ -6,7 +6,7 @@ import uvicorn
 
 from lira_backend_api.core.schemas import MeasurementTypes,MeasurementModel,Device
 from lira_backend_api.database.db import get_db
-from lira_backend_api.v1.endpoints.crud import get_measurementtype,get_measurementmodel,get_deviceid
+from lira_backend_api.v1.routers.utils import get_measurementtype,get_measurementmodel,get_deviceid
 from lira_backend_api.settings import settings
 
 from lira_backend_api.v1.routers import measurements, trip, device, sourceTypes

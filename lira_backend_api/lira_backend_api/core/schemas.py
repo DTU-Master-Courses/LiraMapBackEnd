@@ -1,4 +1,7 @@
 from typing import Any, Dict, List, Union
+
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 from datetime import datetime
 from sqlalchemy import BigInteger
@@ -30,6 +33,9 @@ class MeasurementModel(BaseModel):
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
 
+    class Config:
+        orm_mode = True
+
 class Device(BaseModel):
     id: str
     created_date: Union[datetime,None]
@@ -40,7 +46,7 @@ class Device(BaseModel):
         orm_mode = True
 
 class Trip(BaseModel):
-    id: str
+    id: UUID
     taskId: int
     startTimeUtc: Union[datetime,None]
     endTimeUtc: Union[datetime,None]
@@ -56,9 +62,9 @@ class Trip(BaseModel):
     created_Date: Union[datetime,None]
     updated_Date: Union[datetime,None]
     fully_Imported: Union[bool,None]
-    fully_RouteAnnotated: Union[bool,None]
-    description: Union[str,None]
-    changeLog: Union[str,None]
+    # fully_RouteAnnotated: Union[bool,None]
+    # description: Union[str,None]
+    # changeLog: Union[str,None]
 
     class Config:
         orm_mode = True
@@ -78,6 +84,9 @@ class TripTest(BaseModel):
     lng: Union[float, None]
     value: Union[int,None]
     metadata: Any
+
+    class Config:
+        orm_mode = True
 
 
 

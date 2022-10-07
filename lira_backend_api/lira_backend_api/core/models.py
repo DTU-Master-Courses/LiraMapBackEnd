@@ -64,9 +64,9 @@ class Trip(Base):
     created_Date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_Date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
     fully_Imported = Column("Fully_Imported", BOOLEAN, nullable=False)
-    fully_RouteAnnotated = Column("Fully_RouteAnnotated", BOOLEAN)
-    description = Column("Description", Text)
-    changeLog = Column("ChangeLog", Text)
+    # fully_RouteAnnotated = Column("Fully_RouteAnnotated", BOOLEAN)
+    # description = Column("Description", Text)
+    # changeLog = Column("ChangeLog", Text)
 
     class Config:
         orm_mode = True
