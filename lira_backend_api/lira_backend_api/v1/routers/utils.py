@@ -44,6 +44,14 @@ def get_sourcetype(source_id: str, db: Session):
         .first()
     )
 
+def convert_date(json_created_date: any):
+    str_format_date = json_created_date[:-6]
+    str_format_date = str_format_date.split(".")[0]
+    date_as_iso = datetime.fromisoformat(str_format_date)
+    return date_as_iso
+        
+
+
 def get_ride(trip_id: str, tag: str, db: Session):
     #db.query(MeasurementModel, Trip)
     tripList = list()
@@ -51,14 +59,8 @@ def get_ride(trip_id: str, tag: str, db: Session):
     res = db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon, MeasurementModel.created_date).where(
         MeasurementModel.fk_trip == trip_id ).filter(
             MeasurementModel.tag == tag and MeasurementModel.lon != None and MeasurementModel.lat != None).order_by(
-            MeasurementModel.created_date).limit(150).all()
-    # print(res)
-    
-    #document if created date is not available
-    #try '@ts'
-    #for x in res:
-    #TODO investigate any table with a column of TEXT and diff the JSON
-    #TODO else 
+            MeasurementModel.created_date).limit(300).all()
+    print(res)
 
     for x in res:
         jsonobj = json.loads(x[0])
@@ -67,29 +69,20 @@ def get_ride(trip_id: str, tag: str, db: Session):
                 value = int(jsonobj.get(f"{tag}.value"))
                 values.append(value)
                 json_created_date = jsonobj.get("Created_Date")
-            # else: 
-            #     exit()
+            else: 
+                pass
             if json_created_date is not None:
-                str_format_date = json_created_date[:-6]
-                str_format_date = str_format_date.split(".")[0]
-                date_as_iso = datetime.fromisoformat(str_format_date)
+                date_as_iso = convert_date(json_created_date)
                 tripList.append({'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
             else:
-            #json_created_date = datetime.strptime(jsonobj.get("@ts"), "%Y-%m-%d")
                 json_created_date = jsonobj.get("@ts")
-                str_format_date = json_created_date[:-6]
-                str_format_date = str_format_date.split(".")[0]
-                date_as_iso = datetime.fromisoformat(str_format_date)
-                tripList.append({'trip_id':trip_id, 'lat': x[1], 'lng': x[2], 'value': value, 'metadata':  date_as_iso })
+                date_as_iso = convert_date(json_created_date)
+                tripList.append({'lat': x[1], 'lng': x[2], 'value': value, 'metadata': date_as_iso})
             
         except Exception as e:
             print(e)
             value = None
     
-    #minX = min(json_created_date)
-    #maxX = max(json_created_date)
-
-    #Todo
     minX = min(tripList, key=lambda x: x["metadata"])
     maxX = max(tripList, key=lambda x: x["metadata"])
     minY = min(values)
@@ -105,5 +98,4 @@ def get_trips(db: Session):
                 .filter(Trip.endPositionLat != None)\
                     .filter(Trip.endPositionLng != None)\
                 .order_by(Trip.taskId).limit(150).all()
-
     return rides
