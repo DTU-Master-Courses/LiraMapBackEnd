@@ -1,6 +1,12 @@
-from typing import Union
-from pydantic import BaseModel
+from typing import Any, List, Union
+
+from uuid import UUID
+
+from pydantic import BaseModel, Field
 from datetime import datetime
+from sqlalchemy import BigInteger
+from collections import namedtuple
+
 
 class MeasurementTypes(BaseModel):
     id: str
@@ -11,10 +17,6 @@ class MeasurementTypes(BaseModel):
         orm_mode = True
 
 class MeasurementModel(BaseModel):
-    """
-    Measurement model.
-    It returned when accessing measurements models from the API.
-    """
     id: str
     timestamp: datetime
     tag: Union[str,None]
@@ -70,6 +72,16 @@ class SourceType(BaseModel):
     updated_date: Union[datetime,None]
     
     class Config:
+        orm_mode = True
+
+class TripTest(BaseModel):
+    trip_id: Union[str,None]
+    lat: Union[float, None]
+    lng: Union[float, None]
+    value: Union[int,None]
+    metadata: Any
+    
+    class Config:    
         orm_mode = True    
 
 class DRDMeasurement(BaseModel):
@@ -86,6 +98,15 @@ class DRDMeasurement(BaseModel):
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
 
+    class Config:
+        orm_mode = True
+
+
+boundary = namedtuple("Boundary",["minX", "maxX", "minY", "maxY"])
+class TripsReturn(BaseModel):
+    path: List[TripTest]
+    bounds: boundary
+    
     class Config:
         orm_mode = True
 
