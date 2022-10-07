@@ -58,9 +58,13 @@ def get_ride(trip_id: str, tag: str, db: Session):
     res = db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon, MeasurementModel.created_date).where(
         MeasurementModel.fk_trip == trip_id ).filter(
             MeasurementModel.tag == tag and MeasurementModel.lon != None and MeasurementModel.lat != None).order_by(
-            MeasurementModel.created_date).limit(300).all()
+            MeasurementModel.created_date).limit(500).all()
     print(res)
-
+    res1 = json.loads(res[0][0])
+    val = res1.get(f"{tag}.value")
+    if val is None:
+        return None
+    
     for x in res:
         jsonobj = json.loads(x[0])
         try: 
