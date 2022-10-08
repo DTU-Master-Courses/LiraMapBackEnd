@@ -57,10 +57,7 @@ class Trip(BaseModel):
     fk_device: Union[str,None]
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
-    fully_imported: Union[bool,None]
-    fully_route_annotated: Union[bool,None]
-    description: Union[str,None]
-    change_log: Union[str,None]
+    #fully_imported: Union[bool,None]
 
     class Config:
         orm_mode = True
@@ -125,7 +122,7 @@ class MapReference(BaseModel):
     possible_matching_routes: Union[str,None]
     way_point: Union[str,None]
     fk_measurement_id: Union[str,None]
-    fk_section: Union[int,None]
+    fk_osmwaypointid: Union[int,None]
 
     class Config:
         orm_mode = True

@@ -1,7 +1,7 @@
 from datetime import datetime
 import json
 from sqlalchemy.orm import Session
-from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip,Device, SourceTypes
+from lira_backend_api.core.models import MeasurementTypes, MeasurementModel, Trip,Device, SourceType, DRDMeasurement, MapReference
 from lira_backend_api.core.schemas import boundary
 
 
@@ -39,8 +39,22 @@ def get_deviceid(device_id: str, db: Session):
 
 def get_sourcetype(source_id: str, db: Session):
     return(
-        db.query(SourceTypes)
-        .filter(SourceTypes.id == source_id)
+        db.query(SourceType)
+        .filter(SourceType.id == source_id)
+        .first()
+    )
+
+def get_mapreference(source_id: str, db: Session):
+    return(
+        db.query(MapReference)
+        .filter(MapReference.id == source_id)
+        .first()
+    )
+
+def get_drdmeasurement(source_id: str, db: Session):
+    return(
+        db.query(DRDMeasurement)
+        .filter(DRDMeasurement.id == source_id)
         .first()
     )
 
@@ -49,8 +63,6 @@ def convert_date(json_created_date: any):
     str_format_date = str_format_date.split(".")[0]
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
-        
-
 
 def get_ride(trip_id: str, tag: str, db: Session):
     tripList = list()
@@ -95,10 +107,10 @@ def get_ride(trip_id: str, tag: str, db: Session):
 
 
 def get_trips(db: Session):
-    rides = db.query(Trip).where(Trip.taskId != 0)\
-        .filter(Trip.startPositionLat != None)\
-            .filter(Trip.startPositionLng != None)\
-                .filter(Trip.endPositionLat != None)\
-                    .filter(Trip.endPositionLng != None)\
-                .order_by(Trip.taskId).limit(150).all()
+    rides = db.query(Trip).where(Trip.task_id != 0)\
+        .filter(Trip.star_position_lat != None)\
+            .filter(Trip.start_position_lng != None)\
+                .filter(Trip.end_position_lat != None)\
+                    .filter(Trip.end_position_lng != None)\
+                .order_by(Trip.task_id).limit(150).all()
     return rides
