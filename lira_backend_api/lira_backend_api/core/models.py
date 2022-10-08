@@ -57,7 +57,7 @@ class Trip(Base):
     task_id = Column("TaskId", INTEGER, nullable=False)
     start_time_utc = Column("StartTimeUtc", DateTime(timezone=True))
     end_time_utc = Column("EndTimeUtc", DateTime(timezone=True))
-    star_position_lat = Column("StartPositionLat", Text)
+    start_position_lat = Column("StartPositionLat", Text)
     start_position_lng = Column("StartPositionLng", Text)
     start_position_display = Column("StartPositionDisplay", Text)
     end_position_lat = Column("EndPositionLat", Text)
@@ -68,10 +68,7 @@ class Trip(Base):
     fk_device = Column("FK_Device", UUID, nullable=False)
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
-    fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
-    fully_route_annotated = Column("Fully_RouteAnnotated", BOOLEAN)
-    description = Column("Description", Text)
-    change_log = Column("ChangeLog", Text)
+    #fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
 
     class Config:
         orm_mode = True
@@ -123,8 +120,8 @@ class MapReference(Base):
     direction = Column("direction", Text)
     possible_matching_routes = Column("PossibleMatchingRoutes", Text)
     way_point = Column("WayPoint", Text)
-    fk_measurement_id = Column("FK_MeasurementId", UUID, nullable=False)
-    fk_section = Column("FK_Section", BIGINT)
+    fk_measurement_id = Column("FK_MeasurementId", UUID,nullable=False)
+    fk_osmwaypointid = Column("FK_OSMWayPointId", BIGINT)
 
     class Config:
         orm_mode = True

@@ -62,7 +62,6 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
-
 def get_ride(trip_id: str, tag: str, db: Session):
     tripList = list()
     values = list()
@@ -137,12 +136,12 @@ def get_ride(trip_id: str, tag: str, db: Session):
 def get_trips(db: Session):
     rides = (
         db.query(Trip)
-        .where(Trip.taskId != 0)
-        .filter(Trip.startPositionLat != None)
-        .filter(Trip.startPositionLng != None)
-        .filter(Trip.endPositionLat != None)
-        .filter(Trip.endPositionLng != None)
-        .order_by(Trip.taskId)
+        .where(Trip.task_id != 0)
+        .filter(Trip.start_position_lat != None)
+        .filter(Trip.start_position_lng != None)
+        .filter(Trip.end_position_lat != None)
+        .filter(Trip.end_position_lng != None)
+        .order_by(Trip.task_id)
         .limit(150)
         .all()
     )
