@@ -61,15 +61,15 @@ class Trip(BaseModel):
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
     fully_imported: Union[bool, None]
-    fully_route_annotated: Union[bool, None]
-    description: Union[str, None]
-    change_log: Union[str, None]
+    # fully_route_annotated: Union[bool, None]
+    # description: Union[str, None]
+    # change_log: Union[str, None]
 
     class Config:
         orm_mode = True
 
 
-class SourceType(BaseModel):
+class SourceTypes(BaseModel):
     id: str
     source_name: Union[str, None]
     created_date: Union[datetime, None]

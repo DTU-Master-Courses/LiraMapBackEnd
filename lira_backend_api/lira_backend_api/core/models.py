@@ -57,7 +57,7 @@ class Trip(Base):
     task_id = Column("TaskId", INTEGER, nullable=False)
     start_time_utc = Column("StartTimeUtc", DateTime(timezone=True))
     end_time_utc = Column("EndTimeUtc", DateTime(timezone=True))
-    star_position_lat = Column("StartPositionLat", Text)
+    start_position_lat = Column("StartPositionLat", Text)
     start_position_lng = Column("StartPositionLng", Text)
     start_position_display = Column("StartPositionDisplay", Text)
     end_position_lat = Column("EndPositionLat", Text)
@@ -69,15 +69,15 @@ class Trip(Base):
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
     fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
-    fully_route_annotated = Column("Fully_RouteAnnotated", BOOLEAN)
-    description = Column("Description", Text)
-    change_log = Column("ChangeLog", Text)
+    # fully_route_annotated = Column("Fully_RouteAnnotated", BOOLEAN)
+    # description = Column("Description", Text)
+    # change_log = Column("ChangeLog", Text)
 
     class Config:
         orm_mode = True
 
 
-class SourceType(Base):
+class SourceTypes(Base):
     __tablename__ = "SourceTypes"
 
     id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)

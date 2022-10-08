@@ -7,7 +7,7 @@ from lira_backend_api.core.models import (
     MeasurementModel,
     Trip,
     Device,
-    SourceTypes,
+    SourceTypes
 )
 from lira_backend_api.core.schemas import boundary
 
@@ -83,7 +83,6 @@ def get_ride(trip_id: str, tag: str, db: Session):
         .limit(500)
         .all()
     )
-    print(res)
     res1 = json.loads(res[0][0])
     val = res1.get(f"{tag}.value")
     if val is None:
@@ -123,9 +122,11 @@ def get_ride(trip_id: str, tag: str, db: Session):
                 )
 
         except Exception as e:
+            # TODO: Hook this up to the logger we need to use!!!
             print(e)
             value = None
 
+    # TODO: This needs to be made more clear on which pair is starting point, and which is end
     minX = min(tripList, key=lambda x: x["metadata"])
     maxX = max(tripList, key=lambda x: x["metadata"])
     minY = min(values)
@@ -137,13 +138,19 @@ def get_ride(trip_id: str, tag: str, db: Session):
 def get_trips(db: Session):
     rides = (
         db.query(Trip)
-        .where(Trip.taskId != 0)
-        .filter(Trip.startPositionLat != None)
-        .filter(Trip.startPositionLng != None)
-        .filter(Trip.endPositionLat != None)
-        .filter(Trip.endPositionLng != None)
-        .order_by(Trip.taskId)
+        .where(Trip.task_id != 0)
+        .filter(Trip.start_position_lat != None)
+        .filter(Trip.start_position_lng != None)
+        .filter(Trip.end_position_lat != None)
+        .filter(Trip.end_position_lng != None)
+        .order_by(Trip.task_id)
         .limit(150)
         .all()
     )
     return rides
+
+
+def measurement_types(db: Session):
+    results = db.query(MeasurementTypes).order_by(MeasurementTypes.type).all()
+
+    return results

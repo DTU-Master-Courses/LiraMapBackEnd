@@ -11,7 +11,7 @@ from lira_backend_api.database.db import get_db
 router = APIRouter(prefix="/trips")
 
 
-@router.get("/id/{trip_id}", response_model=Trip)
+@router.get("/{trip_id}", response_model=Trip)
 def get_single_trip(trip_id: UUID, db: Session = Depends(get_db)):
     result = get_trip(str(trip_id), db)
 
@@ -24,5 +24,8 @@ def get_single_trip(trip_id: UUID, db: Session = Depends(get_db)):
 @router.get("", response_model=List[Trip])
 def get_all_trips(db: Session = Depends(get_db)):
     results = get_trips(db)
+
+    if results is None:
+        raise HTTPException(status_code=500, detail="Something unexpected happened")
 
     return results
