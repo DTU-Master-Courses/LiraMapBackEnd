@@ -66,7 +66,7 @@ class Trip(BaseModel):
         orm_mode = True
 
 
-class SourceTypes(BaseModel):
+class SourceType(BaseModel):
     id: str
     source_name: Union[str, None]
     created_date: Union[datetime, None]

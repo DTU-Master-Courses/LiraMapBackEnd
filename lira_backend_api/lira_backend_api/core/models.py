@@ -74,7 +74,7 @@ class Trip(Base):
         orm_mode = True
 
 
-class SourceTypes(Base):
+class SourceType(Base):
     __tablename__ = "SourceTypes"
 
     id = Column("SourceTypeId", UUID, primary_key=True, nullable=False)
