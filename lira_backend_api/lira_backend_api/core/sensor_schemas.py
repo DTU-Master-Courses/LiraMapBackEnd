@@ -3,10 +3,6 @@ from datetime import datetime
 
 
 class AccXyz(BaseModel):
-    """
-        I think that because we aren't typing these schemas to a database, but to a column within it, we can just
-        get rid of the @, and then change any . to _
-    """
     id: str
     # @vid: int
     vid: int
