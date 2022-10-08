@@ -47,25 +47,6 @@ class Device(BaseModel):
 class Trip(BaseModel):
     id: str
     task_id: int
-<<<<<<< HEAD
-    start_time_utc: Union[datetime, None]
-    end_time_utc: Union[datetime, None]
-    start_position_lat: Union[str, None]
-    start_position_lng: Union[str, None]
-    start_position_display: Union[str, None]
-    end_position_lat: Union[str, None]
-    end_position_lng: Union[str, None]
-    end_position_display: Union[str, None]
-    duration: Union[datetime, None]
-    distance_km: Union[float, None]
-    fk_device: Union[str, None]
-    created_date: Union[datetime, None]
-    updated_date: Union[datetime, None]
-    fully_imported: Union[bool, None]
-    # fully_route_annotated: Union[bool, None]
-    # description: Union[str, None]
-    # change_log: Union[str, None]
-=======
     start_time_utc: Union[datetime,None]
     end_time_utc: Union[datetime,None]
     start_position_lat: Union[str,None]
@@ -80,7 +61,6 @@ class Trip(BaseModel):
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
     #fully_imported: Union[bool,None]
->>>>>>> main
 
     class Config:
         orm_mode = True
