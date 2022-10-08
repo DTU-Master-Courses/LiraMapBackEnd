@@ -7,7 +7,7 @@ from lira_backend_api.core.models import (
     MeasurementModel,
     Trip,
     Device,
-    SourceTypes,
+    SourceType,
 )
 from lira_backend_api.core.schemas import boundary
 
@@ -30,7 +30,7 @@ def get_measurementmodel(measurement_model_id: str, db: Session):
     )
 
 
-def get_DRDmeasurement(DRDmeasurement_id: str, db: Session):
+def get_drdmeasurement(DRDmeasurement_id: str, db: Session):
 
     return (
         db.query(DRDMeasurement).filter(DRDMeasurement.id == DRDmeasurement_id).first()
@@ -53,7 +53,7 @@ def get_deviceid(device_id: str, db: Session):
 
 
 def get_sourcetype(source_id: str, db: Session):
-    return db.query(SourceTypes).filter(SourceTypes.id == source_id).first()
+    return db.query(SourceType).filter(SourceType.id == source_id).first()
 
 
 def convert_date(json_created_date: any):
