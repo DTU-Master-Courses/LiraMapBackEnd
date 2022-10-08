@@ -47,6 +47,7 @@ class Device(BaseModel):
 class Trip(BaseModel):
     id: str
     task_id: int
+<<<<<<< HEAD
     start_time_utc: Union[datetime, None]
     end_time_utc: Union[datetime, None]
     start_position_lat: Union[str, None]
@@ -64,6 +65,22 @@ class Trip(BaseModel):
     # fully_route_annotated: Union[bool, None]
     # description: Union[str, None]
     # change_log: Union[str, None]
+=======
+    start_time_utc: Union[datetime,None]
+    end_time_utc: Union[datetime,None]
+    start_position_lat: Union[str,None]
+    start_position_lng: Union[str,None]
+    start_position_display: Union[str,None]
+    end_position_lat: Union[str,None]
+    end_position_lng: Union[str,None]
+    end_position_display: Union[str,None]
+    duration: Union[datetime,None]
+    distance_km: Union[float,None]
+    fk_device: Union[str,None]
+    created_date: Union[datetime,None]
+    updated_date: Union[datetime,None]
+    #fully_imported: Union[bool,None]
+>>>>>>> main
 
     class Config:
         orm_mode = True
@@ -122,19 +139,19 @@ class TripsReturn(BaseModel):
 class MapReference(BaseModel):
 
     id: str
-    lat_MapMatched: Union[float, None]
-    lon_MapMatched: Union[float, None]
-    way_point_name: Union[str, None]
-    leg_summary_map_matched: Union[str, None]
-    leg_distance_map_matched: Union[float, None]
-    node_id_map_matched: Union[str, None]
-    offset: Union[str, None]
-    lane: Union[str, None]
-    direction: Union[str, None]
-    possible_matching_routes: Union[str, None]
-    way_point: Union[str, None]
-    fk_measurement_id: Union[str, None]
-    fk_section: Union[int, None]
+    lat_MapMatched: Union[float,None]
+    lon_MapMatched: Union[float,None]
+    way_point_name: Union[str,None]
+    leg_summary_map_matched: Union[str,None]
+    leg_distance_map_matched: Union[float,None]
+    node_id_map_matched: Union[str,None]
+    offset: Union[str,None]
+    lane: Union[str,None]
+    direction: Union[str,None]
+    possible_matching_routes: Union[str,None]
+    way_point: Union[str,None]
+    fk_measurement_id: Union[str,None]
+    fk_osmwaypointid: Union[int,None]
 
     class Config:
         orm_mode = True

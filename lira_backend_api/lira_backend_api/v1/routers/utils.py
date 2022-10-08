@@ -62,7 +62,6 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
-
 def get_ride(trip_id: str, tag: str, db: Session):
     tripList = list()
     values = list()
