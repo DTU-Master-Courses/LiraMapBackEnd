@@ -8,6 +8,7 @@ from lira_backend_api.core.models import (
     Trip,
     Device,
     SourceType,
+    MapReference
 )
 from lira_backend_api.core.schemas import boundary
 
