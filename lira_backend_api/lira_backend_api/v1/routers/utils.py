@@ -53,7 +53,7 @@ def get_deviceid(device_id: str, db: Session):
 
 
 def get_sourcetype(source_id: str, db: Session):
-    return db.query(SourceTypes).filter(SourceTypes.id == source_id).first()
+    return db.query(SourceType).filter(SourceType.id == source_id).first()
 
 
 def convert_date(json_created_date: any):
