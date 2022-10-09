@@ -68,7 +68,7 @@ class Trip(Base):
     fk_device = Column("FK_Device", UUID, nullable=False)
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
-    #fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
+    fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
 
     class Config:
         orm_mode = True

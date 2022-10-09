@@ -60,7 +60,7 @@ class Trip(BaseModel):
     fk_device: Union[str,None]
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
-    #fully_imported: Union[bool,None]
+    fully_imported: Union[bool,None]
 
     class Config:
         orm_mode = True
@@ -133,5 +133,19 @@ class MapReference(BaseModel):
     fk_measurement_id: Union[str,None]
     fk_osmwaypointid: Union[int,None]
 
+    class Config:
+        orm_mode = True
+
+class ContentAcceleration(BaseModel):
+    x: Union[float,None]
+    y: Union[float,None]
+    z: Union[float,None]
+
+    class Config:
+        orm_mode = True
+
+class Acceleration(BaseModel):
+    acceleration: List[ContentAcceleration]
+    
     class Config:
         orm_mode = True

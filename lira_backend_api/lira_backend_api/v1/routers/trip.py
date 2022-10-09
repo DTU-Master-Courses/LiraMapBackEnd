@@ -26,3 +26,7 @@ def get_all_trips(db: Session = Depends(get_db)):
     results = get_trips(db)
 
     return results
+
+
+    
+    

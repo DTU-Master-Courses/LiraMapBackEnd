@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+from re import T
+from typing import List
 from sqlalchemy.orm import Session
 from lira_backend_api.core.models import (
     DRDMeasurement,
@@ -8,10 +10,9 @@ from lira_backend_api.core.models import (
     Trip,
     Device,
     SourceType,
-    MapReference
+    MapReference,
 )
 from lira_backend_api.core.schemas import boundary
-
 
 def get_measurementtype(measurement_type_id: str, db: Session):
 
@@ -31,10 +32,10 @@ def get_measurementmodel(measurement_model_id: str, db: Session):
     )
 
 
-def get_drdmeasurement(DRDmeasurement_id: str, db: Session):
+def get_drdmeasurement(drdmeasurement_id: str, db: Session):
 
     return (
-        db.query(DRDMeasurement).filter(DRDMeasurement.id == DRDmeasurement_id).first()
+        db.query(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id).first()
     )
 
 
@@ -83,7 +84,7 @@ def get_ride(trip_id: str, tag: str, db: Session):
         .limit(500)
         .all()
     )
-    print(res)
+    #print(res)
     res1 = json.loads(res[0][0])
     val = res1.get(f"{tag}.value")
     if val is None:
@@ -147,3 +148,33 @@ def get_trips(db: Session):
         .all()
     )
     return rides
+
+def get_current_acceleration(trip_id: str,db: Session):
+    acc_vector = list()
+    res = db.query(
+                MeasurementModel.message
+                ).where(
+                    MeasurementModel.fk_trip == trip_id,
+                    MeasurementModel.tag == 'acc.xyz'
+                ).order_by(MeasurementModel.created_date).limit(1).all()
+    for i in res:
+        jsonobj = json.loads(i[0])
+        if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
+            x = jsonobj.get("acc.xyz.x")
+            y = jsonobj.get("acc.xyz.y")
+            z = jsonobj.get("acc.xyz.z")
+            acc_vector.append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "z": z,
+                    })
+        else:
+            acc_vector.append(
+                {
+                    "x": None,
+                    "y": None,
+                    "z": None,
+                }
+            )
+    return {"acceleration": acc_vector}
