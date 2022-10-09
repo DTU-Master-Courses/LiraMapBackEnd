@@ -137,9 +137,9 @@ class MapReference(BaseModel):
         orm_mode = True
 
 class ContentDirection(BaseModel):
-    alpha: Union[float,None] #Angle between x and y
-    beta: Union[float,None] #Angle between y and z
-    gamma: Union[float,None]
+    alpha: Union[float,None] #Angle of xyz-vector with respect to x-axis
+    beta: Union[float,None] #Angle of xyz-vector with respect to y-axis
+    gamma: Union[float,None] #Angle of xyz-vector with respect to z-axis
 
 class ContentAcceleration(BaseModel):
     x: Union[float,None]
