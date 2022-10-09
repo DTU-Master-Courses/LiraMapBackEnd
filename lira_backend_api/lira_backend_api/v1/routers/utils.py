@@ -156,7 +156,7 @@ def get_current_acceleration(trip_id: str,db: Session):
                 ).where(
                     MeasurementModel.fk_trip == trip_id,
                     MeasurementModel.tag == 'acc.xyz'
-                ).order_by(MeasurementModel.created_date).limit(1).all()
+                ).order_by(MeasurementModel.created_date).limit(100).all()
     for i in res:
         jsonobj = json.loads(i[0])
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
