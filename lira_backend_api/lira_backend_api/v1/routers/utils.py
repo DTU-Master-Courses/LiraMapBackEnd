@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+from math import sqrt, pow, acos, pi
+from random import betavariate
 from re import T
 from typing import List
 from sqlalchemy.orm import Session
@@ -159,15 +161,34 @@ def get_current_acceleration(trip_id: str,db: Session):
                 ).order_by(MeasurementModel.created_date).limit(100).all()
     for i in res:
         jsonobj = json.loads(i[0])
+        #print(i)
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
             x = jsonobj.get("acc.xyz.x")
             y = jsonobj.get("acc.xyz.y")
             z = jsonobj.get("acc.xyz.z")
+            length = sqrt(pow(x,2) + pow(y,2) + pow(z,2))
+            alpha = acos(x/length) * 180/pi #Angle of xyz-vector with respect to x-axis
+            beta = acos(y/length) * 180/pi #Angle of xyz-vector with respect to y-axis
+            gamma = acos(z/length) * 180/pi #Angle of xyz-vector with respect to z-axis
+            #Assuming created date is at least not
+            json_created_date = jsonobj.get("@rec") 
+            #print(json_created_date)
+            created_date = convert_date(json_created_date)
+            direction = list()
+            direction.append(
+                    {
+                        "alpha": alpha, 
+                        "beta": beta, 
+                        "gamma": gamma, 
+                    })
             acc_vector.append(
                     {
                         "x": x,
                         "y": y,
                         "z": z,
+                        "length": length,
+                        "direction": direction,
+                        "created_date": created_date,
                     })
         else:
             acc_vector.append(

@@ -136,10 +136,18 @@ class MapReference(BaseModel):
     class Config:
         orm_mode = True
 
+class ContentDirection(BaseModel):
+    alpha: Union[float,None] #Angle between x and y
+    beta: Union[float,None] #Angle between y and z
+    gamma: Union[float,None]
+
 class ContentAcceleration(BaseModel):
     x: Union[float,None]
     y: Union[float,None]
     z: Union[float,None]
+    length: Union[float,None]
+    direction: List[ContentDirection]
+    created_date: Union[datetime, None]
 
     class Config:
         orm_mode = True
