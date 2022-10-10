@@ -166,10 +166,10 @@ def get_current_acceleration(trip_id: str,db: Session):
             x = jsonobj.get("acc.xyz.x") #xyz-vector based on data from the database.
             y = jsonobj.get("acc.xyz.y") #What the reference frame is, is unclear. Need to ask in class. 
             z = jsonobj.get("acc.xyz.z") #Eg. in which direction does the reference frame of x, y & z point.
-            #Length is used to calculate the direction, but also the magnitude of the vector.
-            #Hence the relative acceleration wrt the xyz frame.
+            #Length is used to calculate the direction. It is also called the magnitude of the vector.
+            #Hence it is the relative acceleration wrt. the xyz frame.
             length = sqrt(pow(x,2) + pow(y,2) + pow(z,2)) 
-            alpha = acos(x/length) * 180/pi #Angle of xyz-vector wrt. x-axis
+            alpha = acos(x/length) * 180/pi #Angle(in degrees) of xyz-vector wrt. x-axis
             beta = acos(y/length) * 180/pi #Angle of xyz-vector wrt. y-axis
             gamma = acos(z/length) * 180/pi #Angle of xyz-vector wrt. z-axis
             #Assuming created date is at least not None.
