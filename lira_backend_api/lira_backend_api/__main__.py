@@ -10,6 +10,7 @@ from lira_backend_api.v1.routers import (
     mapreference,
 )
 from lira_backend_api.settings import settings
+from lira_backend_api.database.db import lira_database, setup_db
 
 app = FastAPI()
 app.include_router(measurement.router)
@@ -27,6 +28,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup():
+    await lira_database.connect()
+    await setup_db()
+    # TODO: We need to do the same for Altitude Database
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await lira_database.disconnect()
+    # TODO: We need to do the same for Altitude Database
 
 
 if __name__ == "__main__":

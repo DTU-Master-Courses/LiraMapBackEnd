@@ -22,6 +22,8 @@ async def get_measurementtype(measurement_type_id: str, db: Connection):
 
     query = select(MeasurementTypes).where(MeasurementTypes.id == measurement_type_id)
     result = await db.fetch_one(query)
+
+    result = MeasurementTypes(id=result._mapping["MeasurementTypeId"], created_date=result._mapping["Created_Date"], type=result._mapping["type"])
     
     return result
 

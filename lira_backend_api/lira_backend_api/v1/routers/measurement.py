@@ -26,7 +26,9 @@ router = APIRouter(prefix="/measurement")
 async def get_measurement_type(measurement_type_id: str, db: Connection = Depends(get_connection)):
     result = await get_measurementtype(measurement_type_id, db)
 
-    return result
+    # res_schema = MeasurementTypes(id=result._mapping["id"], created_date=result._mapping["created_date"], type=result._mapping["type"])
+
+    return MeasurementTypes(id=result.id, created_date=result.created_date, type=result.type)
 
 
 @router.get("/model/{measurement_model_id}", response_model=MeasurementModel)

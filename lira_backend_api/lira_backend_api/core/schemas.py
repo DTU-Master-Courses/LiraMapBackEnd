@@ -3,21 +3,22 @@ from typing import Any, List, Union
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+from pydantic.dataclasses import dataclass
 from datetime import datetime
 from sqlalchemy import BigInteger
 from collections import namedtuple
 
-
-class MeasurementTypes(BaseModel):
-    # id: str
+@dataclass
+class MeasurementTypes():
+    id: UUID
     # type: str
-    # created_date: datetime
-    MeasurementTypeId: UUID = Field(alias="id")
+    created_date: datetime
+    # MeasurementTypeId: UUID = Field(alias="id")
     type: str
     # created_date: datetime
-    Created_Date: datetime = Field(alias="created_date")
-    class Config:
-        allow_population_by_field_name = True
+    # Created_Date: datetime = Field(alias="created_date")
+    # class Config:
+        # allow_population_by_field_name = True
         # orm_mode = True
 
 
