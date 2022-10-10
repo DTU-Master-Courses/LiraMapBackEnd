@@ -9,12 +9,16 @@ from collections import namedtuple
 
 
 class MeasurementTypes(BaseModel):
-    id: str
+    # id: str
+    # type: str
+    # created_date: datetime
+    MeasurementTypeId: UUID = Field(alias="id")
     type: str
-    created_date: datetime
-
+    # created_date: datetime
+    Created_Date: datetime = Field(alias="created_date")
     class Config:
-        orm_mode = True
+        allow_population_by_field_name = True
+        # orm_mode = True
 
 
 class MeasurementModel(BaseModel):

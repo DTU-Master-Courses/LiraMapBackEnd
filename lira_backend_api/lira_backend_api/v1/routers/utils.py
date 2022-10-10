@@ -2,7 +2,11 @@ from datetime import datetime
 import json
 from re import T
 from typing import List
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
+
+from sqlalchemy.sql import select
+
+from databases.core import Connection
 from lira_backend_api.core.models import (
     DRDMeasurement,
     MeasurementTypes,
@@ -14,16 +18,15 @@ from lira_backend_api.core.models import (
 )
 from lira_backend_api.core.schemas import boundary
 
-def get_measurementtype(measurement_type_id: str, db: Session):
+async def get_measurementtype(measurement_type_id: str, db: Connection):
 
-    return (
-        db.query(MeasurementTypes)
-        .filter(MeasurementTypes.id == measurement_type_id)
-        .first()
-    )
+    query = select(MeasurementTypes).where(MeasurementTypes.id == measurement_type_id)
+    result = await db.fetch_one(query)
+    
+    return result
 
 
-def get_measurementmodel(measurement_model_id: str, db: Session):
+def get_measurementmodel(measurement_model_id: str, db: Connection):
 
     return (
         db.query(MeasurementModel)
@@ -32,29 +35,29 @@ def get_measurementmodel(measurement_model_id: str, db: Session):
     )
 
 
-def get_drdmeasurement(drdmeasurement_id: str, db: Session):
+def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
 
     return (
         db.query(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id).first()
     )
 
 
-def get_mapreference(mapreference_id: str, db: Session):
+def get_mapreference(mapreference_id: str, db: Connection):
     return db.query(MapReference).filter(MapReference.id == mapreference_id).first()
 
 
-def get_trip(trip_id: str, db: Session):
+def get_trip(trip_id: str, db: Connection):
     # We need to swallow the value error, but one could argue that Pydantic should be failing first
     result = db.query(Trip).filter(Trip.id == trip_id).first()
 
     return result
 
 
-def get_deviceid(device_id: str, db: Session):
+def get_deviceid(device_id: str, db: Connection):
     return db.query(Device).filter(Device.id == device_id).first()
 
 
-def get_sourcetype(source_id: str, db: Session):
+def get_sourcetype(source_id: str, db: Connection):
     return db.query(SourceType).filter(SourceType.id == source_id).first()
 
 
@@ -64,7 +67,7 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
-def get_ride(trip_id: str, tag: str, db: Session):
+def get_ride(trip_id: str, tag: str, db: Connection):
     tripList = list()
     values = list()
     res = (
@@ -135,7 +138,7 @@ def get_ride(trip_id: str, tag: str, db: Session):
     return {"path": tripList, "bounds": boundary(minX, maxX, minY, maxY)}
 
 
-def get_trips(db: Session):
+def get_trips(db: Connection):
     rides = (
         db.query(Trip)
         .where(Trip.task_id != 0)
@@ -149,7 +152,7 @@ def get_trips(db: Session):
     )
     return rides
 
-def get_current_acceleration(trip_id: str,db: Session):
+def get_current_acceleration(trip_id: str,db: Connection):
     acc_vector = list()
     res = db.query(
                 MeasurementModel.message
