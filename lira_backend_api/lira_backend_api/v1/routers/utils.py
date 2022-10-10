@@ -152,16 +152,16 @@ def get_trips(db: Session):
     return rides
 
 def get_current_acceleration(trip_id: str,db: Session):
-    acc_vector = list()
+    acceleration = list()
     res = db.query(
                 MeasurementModel.message
                 ).where(
                     MeasurementModel.fk_trip == trip_id,
                     MeasurementModel.tag == 'acc.xyz'
                 ).order_by(MeasurementModel.created_date).limit(100).all()
+    #print("What the RES!",res)
     for i in res:
         jsonobj = json.loads(i[0])
-        #print(i)
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
             x = jsonobj.get("acc.xyz.x")
             y = jsonobj.get("acc.xyz.y")
@@ -170,9 +170,8 @@ def get_current_acceleration(trip_id: str,db: Session):
             alpha = acos(x/length) * 180/pi #Angle of xyz-vector with respect to x-axis
             beta = acos(y/length) * 180/pi #Angle of xyz-vector with respect to y-axis
             gamma = acos(z/length) * 180/pi #Angle of xyz-vector with respect to z-axis
-            #Assuming created date is at least not
-            json_created_date = jsonobj.get("@rec") 
-            #print(json_created_date)
+            #Assuming created date is at least not None
+            json_created_date = jsonobj.get("@ts") 
             created_date = convert_date(json_created_date)
             direction = list()
             direction.append(
@@ -181,7 +180,7 @@ def get_current_acceleration(trip_id: str,db: Session):
                         "beta": beta, 
                         "gamma": gamma, 
                     })
-            acc_vector.append(
+            acceleration.append(
                     {
                         "x": x,
                         "y": y,
@@ -191,11 +190,14 @@ def get_current_acceleration(trip_id: str,db: Session):
                         "created_date": created_date,
                     })
         else:
-            acc_vector.append(
+            acceleration.append(
                 {
                     "x": None,
                     "y": None,
                     "z": None,
+                    "length": None,
+                    "direction": None,
+                    "created_date": None,
                 }
             )
-    return {"acceleration": acc_vector}
+    return {"acceleration": acceleration}
