@@ -160,7 +160,8 @@ def clear_acceleration(list):
     list[2].clear()
     list[3].clear()
     list[4].clear()
-    list[5].pop()
+    list[5].pop() #Single item stored, namely the datetime
+
 
 def append_acceleration(list, x, y, z, latitude,longitude):
     list[0].append(x)
@@ -185,10 +186,8 @@ def get_current_acceleration(trip_id: str,db: Session):
                     MeasurementModel.fk_trip == trip_id,
                     MeasurementModel.lon != None,
                     MeasurementModel.lat != None
-                ).order_by(MeasurementModel.created_date).limit(10000000).all()
-    base_index = 0
-    null_value_data = 0
-    for index, value in enumerate(res):
+                ).order_by(MeasurementModel.created_date).limit(1000).all()
+    for value in res:
         latitude = value[1]
         longitude = value[2]
         jsonobj = json.loads(value[0])
@@ -199,17 +198,16 @@ def get_current_acceleration(trip_id: str,db: Session):
             #Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts") 
             created_date = convert_date(json_created_date)
+            #Only need the date once. 
             if average_acceleration_100Hz[5] == []:
                 average_acceleration_100Hz[5].append(created_date)
+            #This statement is called when a dataset with a different date is encountered.
             elif average_acceleration_100Hz[5][0] != created_date:
-                #print("else", index, base_index, average_acceleration_100Hz)
-                x = sum(average_acceleration_100Hz[0])/(index - base_index  - null_value_data)
-                y = sum(average_acceleration_100Hz[1])/(index - base_index - null_value_data)
-                z = sum(average_acceleration_100Hz[2])/(index - base_index - null_value_data)
-                latitude = sum(average_acceleration_100Hz[3])/(index - base_index - null_value_data)
-                longitude = sum(average_acceleration_100Hz[4])/(index - base_index - null_value_data)
-                base_index = index
-                null_value_data = 0
+                x = sum(average_acceleration_100Hz[0])/len(average_acceleration_100Hz[0])
+                y = sum(average_acceleration_100Hz[1])/len(average_acceleration_100Hz[1])
+                z = sum(average_acceleration_100Hz[2])/len(average_acceleration_100Hz[2])
+                latitude = sum(average_acceleration_100Hz[3])/len(average_acceleration_100Hz[3])
+                longitude = sum(average_acceleration_100Hz[4])/len(average_acceleration_100Hz[4])
                 acceleration.append(
                 {
                     "x": x,
@@ -220,14 +218,9 @@ def get_current_acceleration(trip_id: str,db: Session):
                     "created_date": created_date,
                 })
                 clear_acceleration(average_acceleration_100Hz)
-            # if base_date != created_date and count != 0:
-            #     base_date = created_date
-            #     count = 0
-            #average_acceleration_100Hz()
             append_acceleration(average_acceleration_100Hz, x, y, z, latitude, longitude)
-            #print(average_acceleration_100Hz)
         else:
-            null_value_data += 1
-            print("acc.xyz: one of them is zero")
+            print("at least one of acc.xyz is zero")
+            continue
             
     return {"acceleration": acceleration}
