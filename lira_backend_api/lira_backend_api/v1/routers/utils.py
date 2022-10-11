@@ -1,5 +1,9 @@
 from datetime import datetime
 import json
+from math import sqrt, pow, acos, pi
+from random import betavariate
+from re import T
+from typing import List
 from sqlalchemy.orm import Session
 from lira_backend_api.core.models import (
     DRDMeasurement,
@@ -7,10 +11,10 @@ from lira_backend_api.core.models import (
     MeasurementModel,
     Trip,
     Device,
-    SourceType
+    SourceType,
+    MapReference,
 )
 from lira_backend_api.core.schemas import boundary
-
 
 def get_measurementtype(measurement_type_id: str, db: Session):
 
@@ -30,10 +34,10 @@ def get_measurementmodel(measurement_model_id: str, db: Session):
     )
 
 
-def get_drdmeasurement(DRDmeasurement_id: str, db: Session):
+def get_drdmeasurement(drdmeasurement_id: str, db: Session):
 
     return (
-        db.query(DRDMeasurement).filter(DRDMeasurement.id == DRDmeasurement_id).first()
+        db.query(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id).first()
     )
 
 
@@ -82,6 +86,7 @@ def get_ride(trip_id: str, tag: str, db: Session):
         .limit(500)
         .all()
     )
+    #print(res)
     res1 = json.loads(res[0][0])
     val = res1.get(f"{tag}.value")
     if val is None:
@@ -153,3 +158,57 @@ def measurement_types(db: Session):
     results = db.query(MeasurementTypes).order_by(MeasurementTypes.type).all()
 
     return results
+
+    
+def get_current_acceleration(trip_id: str,db: Session):
+    acceleration = list()
+    #Query to acquire messages from Measurements table 
+    res = db.query(
+                MeasurementModel.message 
+                ).where(
+                    MeasurementModel.fk_trip == trip_id,
+                    MeasurementModel.tag == 'acc.xyz'
+                ).order_by(MeasurementModel.created_date).limit(100).all()
+    for i in res:
+        jsonobj = json.loads(i[0])
+        if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
+            x = jsonobj.get("acc.xyz.x") #xyz-vector based on data from the database.
+            y = jsonobj.get("acc.xyz.y") #What the reference frame is, is unclear. Need to ask in class. 
+            z = jsonobj.get("acc.xyz.z") #Eg. in which direction does the reference frame of x, y & z point.
+            #Length is used to calculate the direction. It is also called the magnitude of the vector.
+            #Hence it is the relative acceleration wrt. the xyz frame.
+            length = sqrt(pow(x,2) + pow(y,2) + pow(z,2)) 
+            alpha = acos(x/length) * 180/pi #Angle(in degrees) of xyz-vector wrt. x-axis
+            beta = acos(y/length) * 180/pi #Angle of xyz-vector wrt. y-axis
+            gamma = acos(z/length) * 180/pi #Angle of xyz-vector wrt. z-axis
+            #Assuming created date is at least not None.
+            json_created_date = jsonobj.get("@ts") 
+            created_date = convert_date(json_created_date)
+            direction = list()
+            direction.append( #The 3d xyz-vector is pointing in a direction in each dimension.
+                    {
+                        "alpha": alpha, 
+                        "beta": beta, 
+                        "gamma": gamma, 
+                    })
+            acceleration.append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "z": z,
+                        "length": length,
+                        "direction": direction,
+                        "created_date": created_date,
+                    })
+        else:
+            acceleration.append(
+                {
+                    "x": None,
+                    "y": None,
+                    "z": None,
+                    "length": None,
+                    "direction": None,
+                    "created_date": None,
+                }
+            )
+    return {"acceleration": acceleration}
