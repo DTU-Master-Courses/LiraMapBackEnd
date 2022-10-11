@@ -155,23 +155,30 @@ def get_current_acceleration(trip_id: str,db: Session):
     acceleration = list()
     #Query to acquire messages from Measurements table 
     res = db.query(
-                MeasurementModel.message 
+                MeasurementModel.message,
+                MeasurementModel.lat,
+                MeasurementModel.lon
                 ).where(
-                    MeasurementModel.fk_trip == trip_id,
-                    MeasurementModel.tag == 'acc.xyz'
-                ).order_by(MeasurementModel.created_date).limit(100).all()
+                    MeasurementModel.fk_trip == trip_id
+                ).filter(
+            MeasurementModel.tag == 'acc.xyz'
+            and MeasurementModel.lon != None
+            and MeasurementModel.lat != None
+        ).order_by(MeasurementModel.created_date).limit(200).all()
     for i in res:
+        latitude = i[1]
+        longitude = i[2]
         jsonobj = json.loads(i[0])
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
             x = jsonobj.get("acc.xyz.x") #xyz-vector based on data from the database.
-            y = jsonobj.get("acc.xyz.y") #What the reference frame is, is unclear. Need to ask in class. 
+            y = jsonobj.get("acc.xyz.y") #The reference frame is the car itself. 
             z = jsonobj.get("acc.xyz.z") #Eg. in which direction does the reference frame of x, y & z point.
             #Length is used to calculate the direction. It is also called the magnitude of the vector.
             #Hence it is the relative acceleration wrt. the xyz frame.
-            length = sqrt(pow(x,2) + pow(y,2) + pow(z,2)) 
+            length = sqrt(pow(x,2) + pow(y,2))# + pow(z,2)) Z is mostly the earth's pull on the car.
             alpha = acos(x/length) * 180/pi #Angle(in degrees) of xyz-vector wrt. x-axis
             beta = acos(y/length) * 180/pi #Angle of xyz-vector wrt. y-axis
-            gamma = acos(z/length) * 180/pi #Angle of xyz-vector wrt. z-axis
+            #gamma = acos(z/length) * 180/pi #Angle of xyz-vector wrt. z-axis. Gamma is useless as long as we cant add altitude
             #Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts") 
             created_date = convert_date(json_created_date)
@@ -180,13 +187,15 @@ def get_current_acceleration(trip_id: str,db: Session):
                     {
                         "alpha": alpha, 
                         "beta": beta, 
-                        "gamma": gamma, 
+                        #"gamma": gamma, 
                     })
             acceleration.append(
                     {
                         "x": x,
                         "y": y,
                         "z": z,
+                        "lon": longitude,
+                        "lat": latitude,
                         "length": length,
                         "direction": direction,
                         "created_date": created_date,
