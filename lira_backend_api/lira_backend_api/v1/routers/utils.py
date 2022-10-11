@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+from math import sqrt, pow, acos, pi
+from random import betavariate
 from re import T
 from typing import List
 # from sqlalchemy.orm import Session
@@ -157,7 +159,7 @@ def get_trips(db: Connection):
 def get_current_acceleration(trip_id: str,db: Connection):
     acc_vector = list()
     res = db.query(
-                MeasurementModel.message
+                MeasurementModel.message 
                 ).where(
                     MeasurementModel.fk_trip == trip_id,
                     MeasurementModel.tag == 'acc.xyz'
@@ -165,21 +167,43 @@ def get_current_acceleration(trip_id: str,db: Connection):
     for i in res:
         jsonobj = json.loads(i[0])
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
-            x = jsonobj.get("acc.xyz.x")
-            y = jsonobj.get("acc.xyz.y")
-            z = jsonobj.get("acc.xyz.z")
-            acc_vector.append(
+            x = jsonobj.get("acc.xyz.x") #xyz-vector based on data from the database.
+            y = jsonobj.get("acc.xyz.y") #What the reference frame is, is unclear. Need to ask in class. 
+            z = jsonobj.get("acc.xyz.z") #Eg. in which direction does the reference frame of x, y & z point.
+            #Length is used to calculate the direction. It is also called the magnitude of the vector.
+            #Hence it is the relative acceleration wrt. the xyz frame.
+            length = sqrt(pow(x,2) + pow(y,2) + pow(z,2)) 
+            alpha = acos(x/length) * 180/pi #Angle(in degrees) of xyz-vector wrt. x-axis
+            beta = acos(y/length) * 180/pi #Angle of xyz-vector wrt. y-axis
+            gamma = acos(z/length) * 180/pi #Angle of xyz-vector wrt. z-axis
+            #Assuming created date is at least not None.
+            json_created_date = jsonobj.get("@ts") 
+            created_date = convert_date(json_created_date)
+            direction = list()
+            direction.append( #The 3d xyz-vector is pointing in a direction in each dimension.
+                    {
+                        "alpha": alpha, 
+                        "beta": beta, 
+                        "gamma": gamma, 
+                    })
+            acceleration.append(
                     {
                         "x": x,
                         "y": y,
                         "z": z,
+                        "length": length,
+                        "direction": direction,
+                        "created_date": created_date,
                     })
         else:
-            acc_vector.append(
+            acceleration.append(
                 {
                     "x": None,
                     "y": None,
                     "z": None,
+                    "length": None,
+                    "direction": None,
+                    "created_date": None,
                 }
             )
-    return {"acceleration": acc_vector}
+    return {"acceleration": acceleration}

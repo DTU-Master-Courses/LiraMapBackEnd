@@ -2,20 +2,18 @@ from fastapi import APIRouter, Depends, HTTPException
 # from sqlalchemy.orm import Session
 from databases.core import Connection
 from lira_backend_api.v1.routers.utils import get_current_acceleration
+from sqlalchemy.orm import Session
+
 
 from lira_backend_api.core.schemas import (
-    Acceleration,
     MeasurementTypes,
     MeasurementModel,
     TripsReturn,
-    Trip,
 )
 from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
     get_measurementmodel,
     get_ride,
-    get_trip,
-    get_trips,
 )
 from lira_backend_api.database.db import get_connection
 
