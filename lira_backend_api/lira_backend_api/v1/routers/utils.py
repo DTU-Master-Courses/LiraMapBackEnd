@@ -126,9 +126,11 @@ def get_ride(trip_id: str, tag: str, db: Session):
                 )
 
         except Exception as e:
+            # TODO: Hook this up to the logger we need to use!!!
             print(e)
             value = None
 
+    # TODO: This needs to be made more clear on which pair is starting point, and which is end
     minX = min(tripList, key=lambda x: x["metadata"])
     maxX = max(tripList, key=lambda x: x["metadata"])
     minY = min(values)
@@ -151,6 +153,13 @@ def get_trips(db: Session):
     )
     return rides
 
+
+def measurement_types(db: Session):
+    results = db.query(MeasurementTypes).order_by(MeasurementTypes.type).all()
+
+    return results
+
+    
 def get_current_acceleration(trip_id: str,db: Session):
     acceleration = list()
     #Query to acquire messages from Measurements table 
