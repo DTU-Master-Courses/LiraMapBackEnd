@@ -21,23 +21,23 @@ class MeasurementTypes():
         # allow_population_by_field_name = True
         # orm_mode = True
 
-
-class MeasurementModel(BaseModel):
-    id: str
+@dataclass
+class MeasurementModel():
+    id: UUID
     timestamp: datetime
     tag: Union[str, None]
     lat: Union[float, None]
     lon: Union[float, None]
     message: Union[str, None]
     is_computed: Union[bool, None]
-    fk_trip: Union[str, None]
-    fk_measurement_type: Union[str, None]
+    fk_trip: Union[UUID, None]
+    fk_measurement_type: Union[UUID, None]
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
 
-    class Config:
-        orm_mode = True
-
+    #class Config:
+        #orm_mode = True
+        #allow_population_by_field_name = True
 
 class Device(BaseModel):
     id: str
@@ -91,18 +91,18 @@ class TripTest(BaseModel):
     class Config:
         orm_mode = True
 
+@dataclass
+class DRDMeasurement():
 
-class DRDMeasurement(BaseModel):
-
-    id: str
+    id: UUID
     distance: str
     tag: Union[str, None]
     lat: Union[float, None]
     lon: Union[float, None]
     message: Union[str, None]
     is_computed: Union[bool, None]
-    fk_trip: Union[str, None]
-    fk_measurement_type: Union[str, None]
+    fk_trip: Union[UUID, None]
+    fk_measurement_type: Union[UUID, None]
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
 

@@ -35,7 +35,7 @@ class MeasurementModel(Base):
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
     class Config:
-        orm_mode = True
+        orm_mode = True 
 
 
 class Device(Base):

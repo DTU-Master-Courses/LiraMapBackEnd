@@ -1,3 +1,4 @@
+import re
 from fastapi import APIRouter, Depends, HTTPException
 # from sqlalchemy.orm import Session
 from databases.core import Connection
@@ -9,6 +10,7 @@ from lira_backend_api.core.schemas import (
     MeasurementTypes,
     MeasurementModel,
     TripsReturn,
+    Acceleration
 )
 from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
@@ -30,10 +32,12 @@ async def get_measurement_type(measurement_type_id: str, db: Connection = Depend
 
 
 @router.get("/model/{measurement_model_id}", response_model=MeasurementModel)
-def get_measurement_model(measurement_model_id: str, db: Connection = Depends(get_connection)):
-    result = get_measurementmodel(measurement_model_id, db)
+async def get_measurement_model(measurement_model_id: str, db: Connection = Depends(get_connection)):
+    result = await get_measurementmodel(measurement_model_id, db)
 
-    return result
+    return MeasurementModel(id=result.id, timestamp=result.timestamp, tag=result.tag, lat=result.lat,
+    lon=result.lon, message=result.message, is_computed=result.is_computed, fk_trip=result.fk_trip, 
+    fk_measurement_type=result.fk_measurement_type, created_date=result.created_date, updated_date=result.updated_date)
 
 
 @router.get("/ride", response_model=TripsReturn)

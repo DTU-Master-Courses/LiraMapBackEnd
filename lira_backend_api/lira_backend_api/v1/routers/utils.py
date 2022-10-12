@@ -3,7 +3,9 @@ import json
 from math import sqrt, pow, acos, pi
 from random import betavariate
 from re import T
+from turtle import distance
 from typing import List
+from unittest import result
 # from sqlalchemy.orm import Session
 
 from sqlalchemy.sql import select
@@ -30,20 +32,57 @@ async def get_measurementtype(measurement_type_id: str, db: Connection):
     return result
 
 
-def get_measurementmodel(measurement_model_id: str, db: Connection):
+async def get_measurementmodel(measurement_model_id: str, db: Connection):
 
-    return (
-        db.query(MeasurementModel)
-        .filter(MeasurementModel.id == measurement_model_id)
-        .first()
+    query = select(MeasurementModel).where(MeasurementModel.id == measurement_model_id)
+    result = await db.fetch_one(query)
+
+    result = MeasurementModel(id=result._mapping["MeasurementId"], 
+    timestamp=result._mapping["TS_or_Distance"],
+    tag=result._mapping["T"], 
+    lat=result._mapping["lat"],
+    lon=result._mapping["lon"],
+    message=result._mapping["message"],
+    is_computed=result._mapping["isComputed"],
+    fk_trip=result._mapping["FK_Trip"],
+    fk_measurement_type=result._mapping["FK_MeasurementType"],
+    created_date=result._mapping["Created_Date"],
+    updated_date=result._mapping["Updated_Date"])
+
+    return result
+    # return (
+    #     db.query(MeasurementModel)
+    #     .filter(MeasurementModel.id == measurement_model_id)
+    #     .first()
+    # )
+
+
+async def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
+
+    query = select(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id)
+    result = await db.fetch_one(query)
+    
+    result = DRDMeasurement(id=result._mapping["DRDMeasurementId"],
+    distance=result._mapping["TS_or_Distance"],
+    tag=result._mapping["T"],
+    lat=result._mapping["lat"],
+    lon=result._mapping["lon"],
+    message=result._mapping["message"],
+    is_computed=result._mapping["isComputed"],
+    fk_trip=result._mapping["FK_Trip"],
+    fk_measurement_type=result._mapping["FK_MeasurementType"],
+    created_date=result._mapping["Created_Date"],
+    updated_date=result._mapping["Updated_Date"]
     )
 
+    return result
 
-def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
-
-    return (
-        db.query(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id).first()
-    )
+    #result = DRDMeasurement(id=result._mapping["DRDMeasurementId"],
+    #distance)
+    
+    # return (
+    #     db.query(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id).first()
+    # )
 
 
 def get_mapreference(mapreference_id: str, db: Connection):
