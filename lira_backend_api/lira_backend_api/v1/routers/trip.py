@@ -14,14 +14,18 @@ router = APIRouter(prefix="/trips")
 
 
 @router.get("/id/{trip_id}", response_model=Trip)
-def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection)):
-    result = get_trip(str(trip_id), db)
-
+async def get_single_trip(trip_id: str, db: Connection = Depends(get_connection)):
+    result = await get_trip(trip_id, db)
     if result is None:
         raise HTTPException(status_code=404, detail="Trip not found")
-
-    return result
-
+    else:
+        return Trip(id=result.id, task_id=result.task_id, start_time_utc=result.start_time_utc,
+        end_time_utc=result.end_time_utc, start_position_lat=result.start_position_lat, 
+        start_position_lng=result.start_position_lng, start_position_display=result.start_position_display, 
+        end_position_display=result.end_position_display, end_position_lat=result.end_position_display, 
+        end_position_lng=result.end_position_display, duration=result.duration, distance_km=result.distance_km, 
+        fk_device=result.fk_device, created_date=result.created_date, updated_date=result.updated_date, 
+        fully_imported=result.fully_imported)
 
 @router.get("", response_model=List[Trip])
 def get_all_trips(db: Connection = Depends(get_connection)):

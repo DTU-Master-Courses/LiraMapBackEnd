@@ -41,8 +41,8 @@ async def get_measurement_model(measurement_model_id: str, db: Connection = Depe
 
 
 @router.get("/ride", response_model=TripsReturn)
-def get_single_ride(trip_id: str, tag: str, db: Connection = Depends(get_connection)):
-    result = get_ride(trip_id, tag, db)
+async def get_single_ride(trip_id: str, tag: str, db: Connection = Depends(get_connection)):
+    result = await get_ride(trip_id, tag, db)
     if result is None:
         raise HTTPException(status_code=404, detail="Tag does not contain values")
     else:

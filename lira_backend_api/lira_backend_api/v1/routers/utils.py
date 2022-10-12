@@ -20,8 +20,14 @@ from lira_backend_api.core.models import (
     SourceType,
     MapReference,
 )
-from lira_backend_api.core.schemas import boundary
+#TODO move schema processing to the endpoint
+from lira_backend_api.core.schemas import (
+    TripTest, 
+    TripsReturn, 
+    boundary,
+)
 
+#TODO add function return types to all functions
 async def get_measurementtype(measurement_type_id: str, db: Connection):
 
     query = select(MeasurementTypes).where(MeasurementTypes.id == measurement_type_id)
@@ -59,7 +65,7 @@ async def get_measurementmodel(measurement_model_id: str, db: Connection):
 
 async def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
 
-    query = select(DRDMeasurement).filter(DRDMeasurement.id == drdmeasurement_id)
+    query = select(DRDMeasurement).where(DRDMeasurement.id == drdmeasurement_id)
     result = await db.fetch_one(query)
     
     result = DRDMeasurement(id=result._mapping["DRDMeasurementId"],
@@ -85,13 +91,52 @@ async def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
     # )
 
 
-def get_mapreference(mapreference_id: str, db: Connection):
-    return db.query(MapReference).filter(MapReference.id == mapreference_id).first()
+async def get_mapreference(mapreference_id: str, db: Connection):
+    query = select(MapReference).where(MapReference.id == mapreference_id)
+    result = await db.fetch_one(query)
 
+    result = MapReference(id=result._mapping["MapReferenceId"],
+    lat_MapMatched=result._mapping["lat_MapMatched"],
+    lon_MapMatched=result._mapping["lon_MapMatched"],
+    way_point_name=result._mapping["wayPointName"],
+    leg_summary_map_matched=result._mapping["legSummary_MapMatched"],
+    leg_distance_map_matched=result._mapping["legDistance_MapMatched"],
+    node_id_map_matched=result._mapping["nodeId_MapMatched"],
+    offset=result._mapping["offset"],
+    lane=result._mapping["lane"],
+    direction=result._mapping["direction"],
+    possible_matching_routes=result._mapping["PossibleMatchingRoutes"],
+    way_point=result._mapping["WayPoint"],
+    fk_measurement_id=result._mapping["FK_MeasurementId"],
+    fk_osmwaypointid=result._mapping["FK_Section"]
+    )
+    
+    return result
 
-def get_trip(trip_id: str, db: Connection):
+#TODO add start city and end city
+async def get_trip(trip_id: str, db: Connection):
     # We need to swallow the value error, but one could argue that Pydantic should be failing first
-    result = db.query(Trip).filter(Trip.id == trip_id).first()
+    query = select(Trip).where(Trip.id == trip_id)
+    result = await db.fetch_one(query)
+    if result is None:
+        return None
+    result = Trip(id=result._mapping["TripId"],
+    task_id=result._mapping["TaskId"],
+    start_time_utc=result._mapping["StartTimeUtc"],
+    end_time_utc=result._mapping["EndTimeUtc"],
+    start_position_lat=result._mapping["StartPositionLat"],
+    start_position_lng=result._mapping["StartPositionLng"],
+    start_position_display=result._mapping["StartPositionDisplay"],
+    end_position_lat=result._mapping["EndPositionLat"],
+    end_position_lng=result._mapping["EndPositionLng"],
+    end_position_display=result._mapping["EndPositionDisplay"],
+    duration=result._mapping["Duration"],
+    distance_km=result._mapping["DistanceKm"],
+    fk_device=result._mapping["FK_Device"],
+    created_date=result._mapping["Created_Date"],
+    updated_date=result._mapping["Updated_Date"],
+    fully_imported=result._mapping["Fully_Imported"]
+    )
 
     return result
 
@@ -110,33 +155,36 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
-def get_ride(trip_id: str, tag: str, db: Connection):
+async def get_ride(trip_id: str, tag: str, db: Connection):
     tripList = list()
     values = list()
-    res = (
-        db.query(
-            MeasurementModel.message,
+    start_city_json = ""
+    end_city_json = ""
+    query = select(MeasurementModel.message,
             MeasurementModel.lat,
             MeasurementModel.lon,
             MeasurementModel.created_date,
-        )
-        .where(MeasurementModel.fk_trip == trip_id)
+            Trip.start_position_display,
+            Trip.end_position_display
+            ).where(MeasurementModel.fk_trip == trip_id)\
+            .join(Trip, Trip.id == trip_id)\
         .filter(
             MeasurementModel.tag == tag
             and MeasurementModel.lon != None
             and MeasurementModel.lat != None
-        )
-        .order_by(MeasurementModel.created_date)
-        .limit(500)
-        .all()
-    )
-    #print(res)
-    res1 = json.loads(res[0][0])
-    val = res1.get(f"{tag}.value")
+        )\
+        .order_by(MeasurementModel.created_date)\
+        .limit(150)
+
+    result = await db.fetch_all(query)
+    result1 = json.loads(result[0][0])
+    start, end= json.loads(result[0][4]), json.loads(result[0][5])
+    start_city_json, end_city_json = start.get("city"), end.get("city")
+    val = result1.get(f"{tag}.value")
     if val is None:
         return None
 
-    for x in res:
+    for x in result:
         jsonobj = json.loads(x[0])
         try:
             if jsonobj.get(f"{tag}.value") is not None:
@@ -178,7 +226,13 @@ def get_ride(trip_id: str, tag: str, db: Connection):
     minY = min(values)
     maxY = max(values)
 
-    return {"path": tripList, "bounds": boundary(minX, maxX, minY, maxY)}
+    result = TripsReturn(path=[x for x in tripList], 
+    bounds=boundary(minX=minX, maxX=maxY, minY=minY, maxY=maxY),
+    start_city=start_city_json, end_city=end_city_json )
+
+    return result
+    #
+    # return {"path": tripList, "bounds": boundary(minX, maxX, minY, maxY)}
 
 
 def get_trips(db: Connection):
@@ -225,7 +279,7 @@ def get_current_acceleration(trip_id: str,db: Connection):
                         "beta": beta, 
                         "gamma": gamma, 
                     })
-            acceleration.append(
+            acc_vector.append(
                     {
                         "x": x,
                         "y": y,
@@ -235,7 +289,7 @@ def get_current_acceleration(trip_id: str,db: Connection):
                         "created_date": created_date,
                     })
         else:
-            acceleration.append(
+            acc_vector.append(
                 {
                     "x": None,
                     "y": None,
@@ -245,4 +299,7 @@ def get_current_acceleration(trip_id: str,db: Connection):
                     "created_date": None,
                 }
             )
-    return {"acceleration": acceleration}
+    return {"acceleration": acc_vector}
+
+
+    

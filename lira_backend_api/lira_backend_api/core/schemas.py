@@ -48,9 +48,9 @@ class Device(BaseModel):
     class Config:
         orm_mode = True
 
-
-class Trip(BaseModel):
-    id: str
+@dataclass
+class Trip():
+    id: UUID
     task_id: int
     start_time_utc: Union[datetime,None]
     end_time_utc: Union[datetime,None]
@@ -62,13 +62,17 @@ class Trip(BaseModel):
     end_position_display: Union[str,None]
     duration: Union[datetime,None]
     distance_km: Union[float,None]
-    fk_device: Union[str,None]
+    fk_device: Union[UUID,None]
     created_date: Union[datetime,None]
     updated_date: Union[datetime,None]
     fully_imported: Union[bool,None]
+    #fully_route_annotated: Union[bool,None]
+    #description: Union[str,None]
+    #change_log: Union[str,None]
 
-    class Config:
-        orm_mode = True
+    # class Config:
+    #     orm_mode = True
+    #allow_population_by_field_name = True
 
 
 class SourceType(BaseModel):
@@ -116,11 +120,13 @@ boundary = namedtuple("Boundary", ["minX", "maxX", "minY", "maxY"])
 class TripsReturn(BaseModel):
     path: List[TripTest]
     bounds: boundary
+    start_city: str
+    end_city: str
 
     class Config:
         orm_mode = True
 
-
+@dataclass
 class MapReference(BaseModel):
 
     id: str
