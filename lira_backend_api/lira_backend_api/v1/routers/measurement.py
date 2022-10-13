@@ -12,7 +12,7 @@ from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
     get_measurementmodel,
     get_ride,
-    measurement_types
+    measurement_types,
 )
 from lira_backend_api.database.db import get_db
 
@@ -49,4 +49,3 @@ def get_single_ride(trip_id: str, tag: str, db: Session = Depends(get_db)):
     if result is None:
         raise HTTPException(status_code=404, detail="Tag does not contain values")
     return result
-

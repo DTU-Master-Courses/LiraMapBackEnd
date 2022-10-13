@@ -120,7 +120,7 @@ class MapReference(Base):
     direction = Column("direction", Text)
     possible_matching_routes = Column("PossibleMatchingRoutes", Text)
     way_point = Column("WayPoint", Text)
-    fk_measurement_id = Column("FK_MeasurementId", UUID,nullable=False)
+    fk_measurement_id = Column("FK_MeasurementId", UUID, nullable=False)
     fk_osmwaypointid = Column("FK_OSMWayPointId", BIGINT)
 
     class Config:
