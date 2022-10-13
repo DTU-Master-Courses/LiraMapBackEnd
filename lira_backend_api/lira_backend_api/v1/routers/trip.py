@@ -64,5 +64,5 @@ def get_trip_segments(trip_id, db: Session = Depends(get_db)):
 
     results_list = list()
     for result in results:
-        results_list.append(MeasurementLatLon(lat=result[0], long=result[1]))
+        results_list.append(MeasurementLatLon(lat=result[0], lon=result[1]))
     return results_list

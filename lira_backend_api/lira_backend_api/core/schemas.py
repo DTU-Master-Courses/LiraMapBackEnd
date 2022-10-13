@@ -158,7 +158,7 @@ class Acceleration(BaseModel):
 
 class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
-    long: Union[float, None]
+    lon: Union[float, None]
 
     class Config:
         orm_mode = True
