@@ -12,6 +12,7 @@ from lira_backend_api.core.models import (
 )
 from lira_backend_api.core.schemas import boundary
 
+
 def get_measurementtype(measurement_type_id: str, db: Session):
 
     return (
@@ -62,6 +63,7 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
+
 def get_ride(trip_id: str, tag: str, db: Session):
     tripList = list()
     values = list()
@@ -82,7 +84,7 @@ def get_ride(trip_id: str, tag: str, db: Session):
         .limit(500)
         .all()
     )
-    #print(res)
+    # print(res)
     res1 = json.loads(res[0][0])
     val = res1.get(f"{tag}.value")
     if val is None:
@@ -155,7 +157,6 @@ def measurement_types(db: Session):
 
     return results
 
-    
 
 def clear_acceleration(list):
     list[0].clear()
@@ -163,10 +164,10 @@ def clear_acceleration(list):
     list[2].clear()
     list[3].clear()
     list[4].clear()
-    list[5].pop() #Single item stored, namely the datetime
+    list[5].pop()  # Single item stored, namely the datetime
 
 
-def append_acceleration(list, x, y, z, latitude,longitude):
+def append_acceleration(list, x, y, z, latitude, longitude):
     list[0].append(x)
     list[1].append(y)
     list[2].append(z)
@@ -174,56 +175,104 @@ def append_acceleration(list, x, y, z, latitude,longitude):
     list[4].append(longitude)
 
 
-def get_current_acceleration(trip_id: str,db: Session):
+def get_current_acceleration(trip_id: str, db: Session):
     acceleration = list()
     average_acceleration_100Hz = list()
     created_date = None
     for _ in range(6):
         average_acceleration_100Hz.append(list())
-    #Query to acquire messages from Measurements table 
-    res = db.query(
-                MeasurementModel.message,
-                MeasurementModel.lat,
-                MeasurementModel.lon
-                ).where(
-                    MeasurementModel.fk_trip == trip_id,
-                    MeasurementModel.lon != None,
-                    MeasurementModel.lat != None
-                ).order_by(MeasurementModel.created_date).limit(1000).all()
+    # Query to acquire messages from Measurements table
+    res = (
+        db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
+        .where(
+            MeasurementModel.fk_trip == trip_id,
+            MeasurementModel.lon != None,
+            MeasurementModel.lat != None,
+        )
+        .order_by(MeasurementModel.created_date)
+        .limit(1000)
+        .all()
+    )
     for value in res:
         latitude = value[1]
         longitude = value[2]
         jsonobj = json.loads(value[0])
-        if jsonobj.get("acc.xyz.x") is not None and jsonobj.get("acc.xyz.y") is not None and jsonobj.get("acc.xyz.z")  is not None:
-            x = jsonobj.get("acc.xyz.x") #xyz-vector based on data from the database.
-            y = jsonobj.get("acc.xyz.y") #The reference frame is the car itself. 
-            z = jsonobj.get("acc.xyz.z") #Eg. in which direction does the reference frame of x, y & z point.
-            #Assuming created date is at least not None.
-            json_created_date = jsonobj.get("@ts") 
+        if (
+            jsonobj.get("acc.xyz.x") is not None
+            and jsonobj.get("acc.xyz.y") is not None
+            and jsonobj.get("acc.xyz.z") is not None
+        ):
+            x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
+            y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
+            z = jsonobj.get(
+                "acc.xyz.z"
+            )  # Eg. in which direction does the reference frame of x, y & z point.
+            # Assuming created date is at least not None.
+            json_created_date = jsonobj.get("@ts")
             created_date = convert_date(json_created_date)
-            #Only need the date once. 
+            # Only need the date once.
             if average_acceleration_100Hz[5] == []:
                 average_acceleration_100Hz[5].append(created_date)
-            #This statement is called when a dataset with a different date is encountered.
+            # This statement is called when a dataset with a different date is encountered.
             elif average_acceleration_100Hz[5][0] != created_date:
-                x = sum(average_acceleration_100Hz[0])/len(average_acceleration_100Hz[0])
-                y = sum(average_acceleration_100Hz[1])/len(average_acceleration_100Hz[1])
-                z = sum(average_acceleration_100Hz[2])/len(average_acceleration_100Hz[2])
-                latitude = sum(average_acceleration_100Hz[3])/len(average_acceleration_100Hz[3])
-                longitude = sum(average_acceleration_100Hz[4])/len(average_acceleration_100Hz[4])
+                x = sum(average_acceleration_100Hz[0]) / len(
+                    average_acceleration_100Hz[0]
+                )
+                y = sum(average_acceleration_100Hz[1]) / len(
+                    average_acceleration_100Hz[1]
+                )
+                z = sum(average_acceleration_100Hz[2]) / len(
+                    average_acceleration_100Hz[2]
+                )
+                latitude = sum(average_acceleration_100Hz[3]) / len(
+                    average_acceleration_100Hz[3]
+                )
+                longitude = sum(average_acceleration_100Hz[4]) / len(
+                    average_acceleration_100Hz[4]
+                )
                 acceleration.append(
-                {
-                    "x": x,
-                    "y": y,
-                    "z": z,
-                    "lon": longitude,
-                    "lat": latitude,
-                    "created_date": created_date,
-                })
+                    {
+                        "x": x,
+                        "y": y,
+                        "z": z,
+                        "lon": longitude,
+                        "lat": latitude,
+                        "created_date": created_date,
+                    }
+                )
                 clear_acceleration(average_acceleration_100Hz)
-            append_acceleration(average_acceleration_100Hz, x, y, z, latitude, longitude)
+            append_acceleration(
+                average_acceleration_100Hz, x, y, z, latitude, longitude
+            )
         else:
-            print("at least one of acc.xyz is zero")
+            # print("at least one of acc.xyz is zero")
             continue
-            
+
     return {"acceleration": acceleration}
+
+
+def get_segments(trip_id: str, db: Session):
+    # results = db.query(MapReference).where(MeasurementModel.fk_trip == trip_id).join(MapReference, MapReference.fk_measurement_id == MeasurementModel.id).limit(100).all()
+
+    # results = db.query(MeasurementModel).where(MeasurementModel.fk_trip == trip_id).order_by(MeasurementModel.timestamp).join(MapReference, MeasurementModel.id == MapReference.fk_measurement_id).filter((MapReference.lat_map_matched != -1) | (MapReference.lat_map_matched != None) | (MapReference.lon_map_matched != -1) | (MapReference.lon_map_matched != None)).all()
+
+    lat_lon_collection_all = list()
+    lat_lon_collection_minified = list()
+
+    results = (
+        db.query(MeasurementModel)
+        .where(
+            (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
+        )
+        .order_by(MeasurementModel.timestamp)
+        .all()
+    )
+
+    for result in results:
+        lat_lon_collection_all.append(tuple([result.lat, result.lon]))
+
+    for i in range(len(lat_lon_collection_all)):
+        if i % 10 == 0:
+            lat_lon_collection_minified.append(lat_lon_collection_all[i])
+
+    return lat_lon_collection_minified
