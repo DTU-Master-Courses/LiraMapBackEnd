@@ -21,7 +21,6 @@ class AccXyz(BaseModel):
     acc_xyz_y: float
     acc_xyz_x: float
 
-
     # ec2x_data_usage
     # obd_acc_long
     # obd_acc_trans
@@ -86,7 +85,6 @@ class Something1(BaseModel):
     # @t: str
     # @rec: datetime
 
-
     # event_system_network_wwan0 is the same
     # event_system_sleep_timer_event_driven
     # event_system_sleep_timer_inactivity_after_sleep
@@ -97,6 +95,8 @@ class Something1(BaseModel):
     # event_vehicle_motor
     # event_vehicle_position
     # event_system_device_ec2x_gnss
+
+
 class Something2(BaseModel):
     id: str
     start_time_utc: datetime
@@ -190,9 +190,9 @@ class OdbRpm(BaseModel):
     # @rec: datetime
     obd_rpm_value: float
 
-
     # obd_whl_prs_rl
     # odb_whl_prs_fl
+
 
 class OdbWhlPrsFl(BaseModel):
     id: str
@@ -264,4 +264,3 @@ class TrackPos(BaseModel):
     track_pos_alt: float
     track_pos_sog: float
     track_pos_loc: TrackPosLoc
-
