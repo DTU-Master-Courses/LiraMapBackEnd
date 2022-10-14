@@ -1,0 +1,34 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title LiRA Map Architecture
+Enterprise_Boundary(b0, "LiRA Map External Access") {
+
+    Person(liraUser, "LiRA Map User")
+
+    System(liraFrontEnd, "LiRA Map Front-End", "Allows users to view information and interact with LiRA Map.")
+
+    System_Boundary(middleware, "LiRA Map Internal") {
+        System_Boundary(middlewareBound, "FastAPI") {
+            System(fastApi, "FastAPI", "Handles user focused interactions with the Databases and other external sources.")
+        }
+
+
+    System_Boundary(b2, "LiRA Map DBs") {  
+        SystemDb(altDb, "Altitude DB", "Contains Altitude data for LiRA UI heatmap.")  
+        SystemDb(notProdDb, "LiRA DB Not Prod", "Smaller amount of data so we can improve UX with querying and filtering data in LiRA Map.")        
+    } 
+    }
+}
+
+Rel(liraUser, liraFrontEnd, "Uses", "HTTP")
+
+Rel(liraFrontEnd, fastApi, "Requests")
+Rel(fastApi, liraFrontEnd, "Responds")
+
+Rel(fastApi, altDb, "Transacts", "Postgres")
+Rel(fastApi, notProdDb, "Transacts", "Postgres")
+Rel(altDb, fastApi, "Results")
+Rel(notProdDb, fastApi, "Results")
+
+@enduml

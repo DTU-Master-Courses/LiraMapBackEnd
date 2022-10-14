@@ -1,10 +1,7 @@
 from datetime import datetime
 import json
 from math import sqrt, pow, acos, pi
-from random import betavariate
-from re import T
-from turtle import distance
-from typing import List
+
 from unittest import result
 # from sqlalchemy.orm import Session
 
@@ -22,10 +19,6 @@ from lira_backend_api.core.models import (
 )
 #TODO move schema processing to the endpoint
 from lira_backend_api.core.schemas import (
-    Acceleration,
-    ContentAcceleration,
-    ContentDirection,
-    TripTest, 
     TripsReturn, 
     boundary,
 )
@@ -246,9 +239,11 @@ async def get_ride(trip_id: str, tag: str, db: Connection):
                 )
 
         except Exception as e:
+            # TODO: Hook this up to the logger we need to use!!!
             print(e)
             value = None
 
+    # TODO: This needs to be made more clear on which pair is starting point, and which is end
     minX = min(tripList, key=lambda x: x["metadata"])
     maxX = max(tripList, key=lambda x: x["metadata"])
     minY = min(values)
@@ -309,8 +304,8 @@ async def get_current_acceleration(trip_id: str,db: Connection):
                         "x": x,
                         "y": y,
                         "z": z,
-                        "length": length,
-                        "direction": direction,
+                        "lon": longitude,
+                        "lat": latitude,
                         "created_date": created_date,
                     })
         else:
@@ -324,15 +319,7 @@ async def get_current_acceleration(trip_id: str,db: Connection):
                     "created_date": None,
                 }
             )
-
-    content_acceleration = ContentAcceleration(x=[x for key,x in acc_vector if key == 'x'],
-    y=[x for key,x in acc_vector if key == 'y'],
-    z=[x for key,x in acc_vector if key == 'z'],
-    length=[x for key,x in acc_vector if key == 'length'],
-    direction=[x for x in direction],
-    created_date=[x for key,x in acc_vector if key == 'created_date'])
-    
-    result = Acceleration(acceleration=[x for x in acc_vector])
+            
     return result
 
 

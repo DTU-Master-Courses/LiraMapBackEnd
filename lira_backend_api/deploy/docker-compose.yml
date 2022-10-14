@@ -19,34 +19,34 @@ services:
     networks:
     - default
     - traefik-shared
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      LIRA_BACKEND_API_HOST: 0.0.0.0
-      LIRA_BACKEND_API_DB_HOST: lira_backend_api-db
-      LIRA_BACKEND_API_DB_PORT: 5432
-      LIRA_BACKEND_API_DB_USER: lira_backend_api
-      LIRA_BACKEND_API_DB_PASS: lira_backend_api
-      LIRA_BACKEND_API_DB_BASE: lira_backend_api
+    # depends_on:
+    #   db:
+    #     condition: service_healthy
+    # environment:
+    #   LIRA_BACKEND_API_HOST: 0.0.0.0
+    #   LIRA_BACKEND_API_DB_HOST: lira_backend_api-db
+    #   LIRA_BACKEND_API_DB_PORT: 5432
+    #   LIRA_BACKEND_API_DB_USER: lira_backend_api
+    #   LIRA_BACKEND_API_DB_PASS: lira_backend_api
+    #   LIRA_BACKEND_API_DB_BASE: lira_backend_api
     ports:
       - "8000:8000"
 
-  db:
-    image: postgres:13.6-bullseye
-    hostname: lira_backend_api-db
-    environment:
-      POSTGRES_PASSWORD: "lira_backend_api"
-      POSTGRES_USER: "lira_backend_api"
-      POSTGRES_DB: "lira_backend_api"
-    volumes:
-    - lira_backend_api-db-data:/var/lib/postgresql/data
-    restart: always
-    healthcheck:
-      test: pg_isready -U lira_backend_api
-      interval: 2s
-      timeout: 3s
-      retries: 40
+  # db:
+  #   image: postgres:13.6-bullseye
+  #   hostname: lira_backend_api-db
+  #   environment:
+  #     POSTGRES_PASSWORD: "lira_backend_api"
+  #     POSTGRES_USER: "lira_backend_api"
+  #     POSTGRES_DB: "lira_backend_api"
+  #   volumes:
+  #   - lira_backend_api-db-data:/var/lib/postgresql/data
+  #   restart: always
+  #   healthcheck:
+  #     test: pg_isready -U lira_backend_api
+  #     interval: 2s
+  #     timeout: 3s
+  #     retries: 40
 
 
 

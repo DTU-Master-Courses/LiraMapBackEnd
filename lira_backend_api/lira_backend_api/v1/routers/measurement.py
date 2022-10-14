@@ -1,5 +1,5 @@
-import re
 from uuid import UUID
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 # from sqlalchemy.orm import Session
 from databases.core import Connection
@@ -17,11 +17,22 @@ from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
     get_measurementmodel,
     get_ride,
-    get_current_acceleration
+    get_current_acceleration,
+    measurement_types,
 )
 from lira_backend_api.database.db import get_connection
 
 router = APIRouter(prefix="/measurement")
+
+
+@router.get("/types", response_model=List[MeasurementTypes])
+def get_measurement_types(db: Session = Depends(get_db)):
+    results = measurement_types(db)
+
+    if results is None:
+        raise HTTPException(status_code=500, detail="Something went wrong")
+
+    return results
 
 
 @router.get("/type/{measurement_type_id}", response_model=MeasurementTypes)

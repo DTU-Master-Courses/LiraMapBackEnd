@@ -8,6 +8,8 @@ from datetime import datetime
 from sqlalchemy import BigInteger
 from collections import namedtuple
 
+
+
 @dataclass
 class MeasurementTypes():
     id: UUID
@@ -38,6 +40,8 @@ class MeasurementModel():
     #class Config:
         #orm_mode = True
         #allow_population_by_field_name = True
+
+
 
 @dataclass
 class Device():
@@ -96,6 +100,7 @@ class TripTest(BaseModel):
     class Config:
         orm_mode = True
 
+
 @dataclass
 class DRDMeasurement():
 
@@ -148,20 +153,13 @@ class MapReference(BaseModel):
     class Config:
         orm_mode = True
 
-class ContentDirection(BaseModel):
-    alpha: Union[float,None] #Angle of xyz-vector with respect to x-axis
-    beta: Union[float,None] #Angle of xyz-vector with respect to y-axis
-    gamma: Union[float,None] #Angle of xyz-vector with respect to z-axis
-
-    class Config:
-        orm_mode = True
 
 class ContentAcceleration(BaseModel):
-    x: Union[float,None]
-    y: Union[float,None]
-    z: Union[float,None]
-    length: Union[float,None]
-    direction: List[ContentDirection]
+    x: Union[float, None]
+    y: Union[float, None]
+    z: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
@@ -170,6 +168,13 @@ class ContentAcceleration(BaseModel):
 
 class Acceleration(BaseModel):
     acceleration: List[ContentAcceleration]
-    
+
+    class Config:
+        orm_mode = True
+
+class MeasurementLatLon(BaseModel):
+    lat: Union[float, None]
+    lon: Union[float, None]
+
     class Config:
         orm_mode = True
