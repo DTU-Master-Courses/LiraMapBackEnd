@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,  HTTPException
 from sqlalchemy.orm import Session
 
 from lira_backend_api.core.schemas import MapReference
@@ -11,5 +11,8 @@ router = APIRouter(prefix="/mapreference")
 @router.get("/id/{mapreference_id}", response_model=MapReference)
 def get_mapreference_id(mapreference_id: str, db: Session = Depends(get_db)):
     result = get_mapreference(mapreference_id, db)
+    
+    if result is None:
+           raise HTTPException(status_code=404, detail="mapreference not found")
 
     return result
