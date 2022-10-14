@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from lira_backend_api.core.schemas import SourceType
@@ -11,5 +11,7 @@ router = APIRouter(prefix="/sourcetype")
 @router.get("/id/{trip_id}", response_model=SourceType)
 def get_single_source(source_id: str, db: Session = Depends(get_db)):
     result = get_sourcetype(source_id, db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="source not found")
 
     return result
