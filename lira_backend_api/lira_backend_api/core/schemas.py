@@ -157,9 +157,7 @@ class Acceleration(BaseModel):
 
 
 class ContentDirection(BaseModel):
-    alpha: Union[float, None]
-    beta: Union[float, None]
-    #gamma: Union[float, None]
+    bearing: Union[float, None]
 
     class Config:
         orm_mode = True

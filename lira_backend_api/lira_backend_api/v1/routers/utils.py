@@ -11,7 +11,7 @@ from lira_backend_api.core.models import (
     MapReference,
 )
 from lira_backend_api.core.schemas import Acceleration, Direction, boundary
-from math import pow, sqrt, acos, pi
+from math import atan2, sin, cos, pi
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):
@@ -200,7 +200,7 @@ def get_acceleration_list(trip_id: str, db: Session):
             MeasurementModel.lat != None,
         )
         .order_by(MeasurementModel.created_date)
-        .limit(1000)
+        .limit(100000)
         .all()
     )
     for value in res:
@@ -256,25 +256,26 @@ def get_direction(trip_id : str, db: Session):
                 lat = i["lat"]
                 lon = i["lon"]
             else:
-                d_lat = i["lat"] - lat
                 d_lon = i["lon"] - lon
-                print("d_lat = ", d_lat)
-                print("d_lon = ", d_lon)
-                length = sqrt(pow(d_lat,2) + pow(d_lon,2))
-                print("length = ", length)
-                alpha = acos(d_lat/length) * 180/pi 
-                beta = acos(d_lon/length) * 180/pi
-                print("alpha = ", alpha)
-                print("beta = ", beta)
+                X = cos(i["lat"]) * sin(d_lon)
+                Y = (cos(lat) * sin(i["lat"])) - (sin(lat) * cos(i["lat"]) * cos(d_lon))
+                lat = i["lat"]
+                lon = i["lon"]
+                bearing = atan2(X, Y) * 180/pi
+                if bearing < 0:
+                    bearing += 360
+                elif bearing > 360:
+                    bearing %= 360
+                else:
+                    pass
                 direction.append(
                     {
-                        "alpha": alpha,
-                        "beta": beta,
+                        "bearing": bearing
                     }
                 )    
+        print(direction)
         #print("Index = ", index, "Key = ", key, "Value = ", value)
         return {"direction": direction}
-
 def get_segments(trip_id: str, db: Session):
     # results = db.query(MapReference).where(MeasurementModel.fk_trip == trip_id).join(MapReference, MapReference.fk_measurement_id == MeasurementModel.id).limit(100).all()
 
