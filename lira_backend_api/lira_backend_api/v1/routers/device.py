@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 # from sqlalchemy.orm import Session
 
 from databases.core import Connection
@@ -11,7 +11,10 @@ router = APIRouter(prefix="/device")
 
 
 @router.get("/{device_id}", response_model=Device)
-def get_device_id(device_id: str, db: Connection = Depends(get_connection)):
-    result = get_deviceid(device_id, db)
-
-    return result
+async def get_device_id(device_id: str, db: Connection = Depends(get_connection)):
+    result = await get_deviceid(device_id, db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="device not found")
+    else:
+        return Device(id=result.id, created_date=result.created_date, 
+        updated_date=result.created_date, fk_sourcetype=result.fk_sourcetype)

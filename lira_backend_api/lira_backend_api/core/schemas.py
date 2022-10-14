@@ -39,11 +39,12 @@ class MeasurementModel():
         #orm_mode = True
         #allow_population_by_field_name = True
 
-class Device(BaseModel):
-    id: str
+@dataclass
+class Device():
+    id: UUID
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
-    fk_sourcetype: Union[str, None]
+    fk_sourcetype: Union[UUID, None]
 
     class Config:
         orm_mode = True
@@ -74,9 +75,9 @@ class Trip():
     #     orm_mode = True
     #allow_population_by_field_name = True
 
-
-class SourceType(BaseModel):
-    id: str
+@dataclass
+class SourceType():
+    id: UUID
     source_name: Union[str, None]
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
@@ -152,6 +153,9 @@ class ContentDirection(BaseModel):
     beta: Union[float,None] #Angle of xyz-vector with respect to y-axis
     gamma: Union[float,None] #Angle of xyz-vector with respect to z-axis
 
+    class Config:
+        orm_mode = True
+
 class ContentAcceleration(BaseModel):
     x: Union[float,None]
     y: Union[float,None]
@@ -162,6 +166,7 @@ class ContentAcceleration(BaseModel):
 
     class Config:
         orm_mode = True
+
 
 class Acceleration(BaseModel):
     acceleration: List[ContentAcceleration]

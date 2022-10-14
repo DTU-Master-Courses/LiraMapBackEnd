@@ -1,8 +1,9 @@
 import re
+from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 # from sqlalchemy.orm import Session
 from databases.core import Connection
-from lira_backend_api.v1.routers.utils import get_current_acceleration
+#from lira_backend_api.v1.routers.utils import get_current_acceleration
 from sqlalchemy.orm import Session
 
 
@@ -16,6 +17,7 @@ from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
     get_measurementmodel,
     get_ride,
+    get_current_acceleration
 )
 from lira_backend_api.database.db import get_connection
 
@@ -49,8 +51,8 @@ async def get_single_ride(trip_id: str, tag: str, db: Connection = Depends(get_c
         return result
 
 @router.get("/acceleration/{trip_id}", response_model=Acceleration)
-def get_acceleration_trip(trip_id, db: Connection = Depends(get_connection)):
-    results = get_current_acceleration(str(trip_id), db)
+async def get_acceleration_trip(trip_id: UUID, db: Connection = Depends(get_connection)):
+    results = await get_current_acceleration(str(trip_id), db)
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain acceleration data")
     else:

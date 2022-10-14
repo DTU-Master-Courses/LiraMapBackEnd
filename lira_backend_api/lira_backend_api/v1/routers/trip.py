@@ -35,8 +35,8 @@ def get_all_trips(db: Connection = Depends(get_connection)):
 
 
 @router.get("/acceleration/{trip_id}", response_model=Acceleration)
-def get_acceleration_trip(trip_id, db: Connection = Depends(get_connection)):
-    results = get_current_acceleration(str(trip_id), db)
+async def get_acceleration_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_current_acceleration(str(trip_id), db)
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain acceleration data")
     else:

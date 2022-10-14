@@ -22,6 +22,9 @@ from lira_backend_api.core.models import (
 )
 #TODO move schema processing to the endpoint
 from lira_backend_api.core.schemas import (
+    Acceleration,
+    ContentAcceleration,
+    ContentDirection,
     TripTest, 
     TripsReturn, 
     boundary,
@@ -120,6 +123,7 @@ async def get_trip(trip_id: str, db: Connection):
     result = await db.fetch_one(query)
     if result is None:
         return None
+    
     result = Trip(id=result._mapping["TripId"],
     task_id=result._mapping["TaskId"],
     start_time_utc=result._mapping["StartTimeUtc"],
@@ -141,12 +145,36 @@ async def get_trip(trip_id: str, db: Connection):
     return result
 
 
-def get_deviceid(device_id: str, db: Connection):
-    return db.query(Device).filter(Device.id == device_id).first()
+async def get_deviceid(device_id: str, db: Connection):
+    query = select(Device).where(Device.id == device_id)
+    result = await db.fetch_one(query)
+    
+    if result == None:
+        return None
+    
+    result = Device(id=result._mapping["DeviceId"],
+    created_date=result._mapping["Created_Date"],
+    updated_date=result._mapping["Updated_Date"],
+    fk_sourcetype=result._mapping["FK_SourceType"]
+    )
+
+    return result
 
 
-def get_sourcetype(source_id: str, db: Connection):
-    return db.query(SourceType).filter(SourceType.id == source_id).first()
+async def get_sourcetype(source_id: str, db: Connection):
+    query = select(SourceType).filter(SourceType.id == source_id)
+    result = await db.fetch_one(query)
+
+    if result is None:
+        return None
+    
+    result = SourceType(id=result._mapping["SourceTypeId"],
+    source_name=result._mapping["SourceName"],
+    created_date=result._mapping["Created_Date"],
+    updated_date=result._mapping["Updated_Date"]
+    )
+
+    return result
 
 
 def convert_date(json_created_date: any):
@@ -227,7 +255,7 @@ async def get_ride(trip_id: str, tag: str, db: Connection):
     maxY = max(values)
 
     result = TripsReturn(path=[x for x in tripList], 
-    bounds=boundary(minX=minX, maxX=maxY, minY=minY, maxY=maxY),
+    bounds=boundary(minX=minX, maxX=maxX, minY=minY, maxY=maxY),
     start_city=start_city_json, end_city=end_city_json )
 
     return result
@@ -249,14 +277,11 @@ def get_trips(db: Connection):
     )
     return rides
 
-def get_current_acceleration(trip_id: str,db: Connection):
+async def get_current_acceleration(trip_id: str,db: Connection):
     acc_vector = list()
-    res = db.query(
-                MeasurementModel.message 
-                ).where(
-                    MeasurementModel.fk_trip == trip_id,
-                    MeasurementModel.tag == 'acc.xyz'
-                ).order_by(MeasurementModel.created_date).limit(100).all()
+    query = select(MeasurementModel.message).where(MeasurementModel.fk_trip == trip_id,
+    MeasurementModel.tag == 'acc.xyz').order_by(MeasurementModel.created_date).limit(100)
+    res = await db.fetch_all(query)
     for i in res:
         jsonobj = json.loads(i[0])
         if jsonobj.get("acc.xyz.x") and jsonobj.get("acc.xyz.y") and jsonobj.get("acc.xyz.z")  is not None:
@@ -299,7 +324,16 @@ def get_current_acceleration(trip_id: str,db: Connection):
                     "created_date": None,
                 }
             )
-    return {"acceleration": acc_vector}
+
+    content_acceleration = ContentAcceleration(x=[x for key,x in acc_vector if key == 'x'],
+    y=[x for key,x in acc_vector if key == 'y'],
+    z=[x for key,x in acc_vector if key == 'z'],
+    length=[x for key,x in acc_vector if key == 'length'],
+    direction=[x for x in direction],
+    created_date=[x for key,x in acc_vector if key == 'created_date'])
+    
+    result = Acceleration(acceleration=[x for x in acc_vector])
+    return result
 
 
     
