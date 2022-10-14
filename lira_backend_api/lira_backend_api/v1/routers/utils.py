@@ -158,13 +158,13 @@ def measurement_types(db: Session):
     return results
 
 
-def clear_acceleration(list):
-    list[0].clear()
-    list[1].clear()
-    list[2].clear()
-    list[3].clear()
-    list[4].clear()
-    list[5].pop()  # Single item stored, namely the datetime
+def average_values(list):
+    x = sum(list[0]) / len(list[0])
+    y = sum(list[1]) / len(list[1])
+    z = sum(list[2]) / len(list[2])
+    latitude = sum(list[3]) / len(list[3])
+    longitude = sum(list[4]) / len(list[4])
+    return x, y, z, latitude, longitude
 
 
 def append_acceleration(list, x, y, z, latitude, longitude):
@@ -173,6 +173,15 @@ def append_acceleration(list, x, y, z, latitude, longitude):
     list[2].append(z)
     list[3].append(latitude)
     list[4].append(longitude)
+
+
+def clear_acceleration(list):
+    list[0].clear()
+    list[1].clear()
+    list[2].clear()
+    list[3].clear()
+    list[4].clear()
+    list[5].pop()  # Single item stored, namely the datetime
 
 
 def get_current_acceleration(trip_id: str, db: Session):
@@ -205,7 +214,7 @@ def get_current_acceleration(trip_id: str, db: Session):
             x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
             y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
             z = jsonobj.get(
-                "acc.xyz.z"
+                  "acc.xyz.z"
             )  # Eg. in which direction does the reference frame of x, y & z point.
             # Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts")
@@ -215,28 +224,14 @@ def get_current_acceleration(trip_id: str, db: Session):
                 average_acceleration_100Hz[5].append(created_date)
             # This statement is called when a dataset with a different date is encountered.
             elif average_acceleration_100Hz[5][0] != created_date:
-                x = sum(average_acceleration_100Hz[0]) / len(
-                    average_acceleration_100Hz[0]
-                )
-                y = sum(average_acceleration_100Hz[1]) / len(
-                    average_acceleration_100Hz[1]
-                )
-                z = sum(average_acceleration_100Hz[2]) / len(
-                    average_acceleration_100Hz[2]
-                )
-                latitude = sum(average_acceleration_100Hz[3]) / len(
-                    average_acceleration_100Hz[3]
-                )
-                longitude = sum(average_acceleration_100Hz[4]) / len(
-                    average_acceleration_100Hz[4]
-                )
+                x, y, z, latitude, longitude = average_values(average_acceleration_100Hz)
                 acceleration.append(
                     {
                         "x": x,
                         "y": y,
                         "z": z,
-                        "lon": longitude,
                         "lat": latitude,
+                        "lon": longitude,
                         "created_date": created_date,
                     }
                 )

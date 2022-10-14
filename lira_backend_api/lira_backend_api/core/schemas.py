@@ -141,8 +141,8 @@ class ContentAcceleration(BaseModel):
     x: Union[float, None]
     y: Union[float, None]
     z: Union[float, None]
-    lon: Union[float, None]
     lat: Union[float, None]
+    lon: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
