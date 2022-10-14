@@ -156,6 +156,22 @@ class Acceleration(BaseModel):
         orm_mode = True
 
 
+class ContentDirection(BaseModel):
+    alpha: Union[float, None]
+    beta: Union[float, None]
+    #gamma: Union[float, None]
+
+    class Config:
+        orm_mode = True
+
+
+class Direction(BaseModel):
+    direction: List[ContentDirection]
+
+    class Config:
+        orm_mode = True
+
+
 class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]

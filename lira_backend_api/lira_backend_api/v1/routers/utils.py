@@ -10,7 +10,8 @@ from lira_backend_api.core.models import (
     SourceType,
     MapReference,
 )
-from lira_backend_api.core.schemas import boundary
+from lira_backend_api.core.schemas import Acceleration, Direction, boundary
+from math import pow, sqrt, acos, pi
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):
@@ -184,12 +185,12 @@ def clear_acceleration(list):
     list[5].pop()  # Single item stored, namely the datetime
 
 
-def get_current_acceleration(trip_id: str, db: Session):
+def get_acceleration_list(trip_id: str, db: Session):
     acceleration = list()
-    average_acceleration_100Hz = list()
+    average_acceleration = list()
     created_date = None
     for _ in range(6):
-        average_acceleration_100Hz.append(list())
+        average_acceleration.append(list())
     # Query to acquire messages from Measurements table
     res = (
         db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
@@ -218,11 +219,11 @@ def get_current_acceleration(trip_id: str, db: Session):
             json_created_date = jsonobj.get("@ts")
             created_date = convert_date(json_created_date)
             # Only need the date once.
-            if average_acceleration_100Hz[5] == []:
-                average_acceleration_100Hz[5].append(created_date)
+            if average_acceleration[5] == []:
+                average_acceleration[5].append(created_date)
             # This statement is called when a dataset with a different date is encountered.
-            elif average_acceleration_100Hz[5][0] != created_date:
-                x, y, z, latitude, longitude = average_values(average_acceleration_100Hz)
+            elif average_acceleration[5][0] != created_date:
+                x, y, z, latitude, longitude = average_values(average_acceleration)
                 acceleration.append(
                     {
                         "x": x,
@@ -233,13 +234,46 @@ def get_current_acceleration(trip_id: str, db: Session):
                         "created_date": created_date,
                     }
                 )
-                clear_acceleration(average_acceleration_100Hz)
+                clear_acceleration(average_acceleration)
             append_acceleration(
-                average_acceleration_100Hz, x, y, z, latitude, longitude
+                average_acceleration, x, y, z, latitude, longitude
             )
-
+    #print("Acceleratyion = ", acceleration)
     return {"acceleration": acceleration}
 
+
+def get_direction(trip_id : str, db: Session):
+    direction = list()
+    lat = None
+    lon = None
+    acceleration = get_acceleration_list(trip_id, db)
+    #print(acceleration)
+    for index, (key, value) in enumerate(acceleration.items()):
+        print("ENUMERATE")
+        for i in value:
+            print("i = ", i)
+            if lon == None and lat == None:
+                lat = i["lat"]
+                lon = i["lon"]
+            else:
+                d_lat = i["lat"] - lat
+                d_lon = i["lon"] - lon
+                print("d_lat = ", d_lat)
+                print("d_lon = ", d_lon)
+                length = sqrt(pow(d_lat,2) + pow(d_lon,2))
+                print("length = ", length)
+                alpha = acos(d_lat/length) * 180/pi 
+                beta = acos(d_lon/length) * 180/pi
+                print("alpha = ", alpha)
+                print("beta = ", beta)
+                direction.append(
+                    {
+                        "alpha": alpha,
+                        "beta": beta,
+                    }
+                )    
+        #print("Index = ", index, "Key = ", key, "Value = ", value)
+        return {"direction": direction}
 
 def get_segments(trip_id: str, db: Session):
     # results = db.query(MapReference).where(MeasurementModel.fk_trip == trip_id).join(MapReference, MapReference.fk_measurement_id == MeasurementModel.id).limit(100).all()

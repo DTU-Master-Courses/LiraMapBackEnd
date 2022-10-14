@@ -10,12 +10,14 @@ from lira_backend_api.core.schemas import (
     Trip,
     Acceleration,
     MeasurementLatLon,
+    Direction,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
-    get_current_acceleration,
+    get_acceleration_list,
     get_segments,
+    get_direction,
 )
 from lira_backend_api.database.db import get_db
 
@@ -44,10 +46,24 @@ def get_all_trips(db: Session = Depends(get_db)):
 
 @router.get("/acceleration/{trip_id}", response_model=Acceleration)
 def get_acceleration_trip(trip_id, db: Session = Depends(get_db)):
-    results = get_current_acceleration(str(trip_id), db)
+    results = get_acceleration_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
+        )
+    else:
+        return results
+
+@router.get("/direction/{trip_id}", response_model=Direction)
+def get_direction_trip(trip_id, db: Session = Depends(get_db)):
+    results = get_direction(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain data"
+        )
+    elif len(results["direction"]) <= 1:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain enough data"
         )
     else:
         return results
