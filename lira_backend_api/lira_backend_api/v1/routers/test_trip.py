@@ -31,11 +31,12 @@ def test_get_all_trips():
     # we have set limit to 150 rows
     assert  (len(res.json())) == 150
     
-# def test_get_acceleration_trip():
-#     res = client.get("/acceleration/6193620e-4b97-4a9b-bca5-e0b73d216de6")     
-#     assert res.status_code == 404
-#     print  (res.json())
-    # assert res.json()[0] == '000'
+def test_get_acceleration_trip():
+    res = client.get("/trips/acceleration/351c02c6-733e-4a4b-a0c1-e6cad55b931f")     
+    assert res.status_code == 200
+    print  (res.json()['acceleration'][0])
+    assert res.json()['acceleration'][0]== {'x': -0.15444444444444447, 'y': -0.2422222222222222, 'z': 1.0022222222222223, 'lon': 12.530856499999997, 'lat': 55.72094272222222, 'created_date': '2020-07-09T19:53:33'}
+   
     
     
 def test_get_inexistent_acceleration_trip():
@@ -50,11 +51,14 @@ def test_get_inexistent_acceleration_trip():
 #     assert res.status_code == 200
     
 def test_get_inexistent_trip_segments():
-    res = client.get("/segments/6193620e-4b97-4a9b-bca5-e0b73d216de6") 
+    res = client.get("/trips/segments/7e746b5e-0d7b-4c1b-9564-72f61fa858e6") 
     
     print  (res.json())
-    assert res.status_code == 404
-    assert res.json() ==  {'detail': 'Not Found'} 
+    
+    if  (res.json() == [] and res.status_code == 200):
+        result = {'detail': 'Not Found'} 
+    assert result ==  {'detail': 'Not Found'} 
+    
 
    
    
