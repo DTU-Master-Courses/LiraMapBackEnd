@@ -213,9 +213,7 @@ def get_current_acceleration(trip_id: str, db: Session):
         ):
             x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
             y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-            z = jsonobj.get(
-                  "acc.xyz.z"
-            )  # Eg. in which direction does the reference frame of x, y & z point.
+            z = jsonobj.get("acc.xyz.z")  
             # Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts")
             created_date = convert_date(json_created_date)
@@ -239,9 +237,6 @@ def get_current_acceleration(trip_id: str, db: Session):
             append_acceleration(
                 average_acceleration_100Hz, x, y, z, latitude, longitude
             )
-        else:
-            # print("at least one of acc.xyz is zero")
-            continue
 
     return {"acceleration": acceleration}
 
