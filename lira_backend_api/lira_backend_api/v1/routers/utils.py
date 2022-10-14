@@ -255,6 +255,7 @@ def get_direction(trip_id : str, db: Session):
             if lon == None and lat == None:
                 lat = i["lat"]
                 lon = i["lon"]
+                created_date = i["created_date"]
             else:
                 d_lon = i["lon"] - lon
                 X = cos(i["lat"]) * sin(d_lon)
@@ -270,9 +271,11 @@ def get_direction(trip_id : str, db: Session):
                     pass
                 direction.append(
                     {
-                        "bearing": bearing
+                        "bearing": bearing,
+                        "created_date": created_date,
                     }
                 )    
+                created_date = i["created_date"]
         print(direction)
         #print("Index = ", index, "Key = ", key, "Value = ", value)
         return {"direction": direction}

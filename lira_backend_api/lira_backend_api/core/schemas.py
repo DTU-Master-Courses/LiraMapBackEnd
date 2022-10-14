@@ -158,6 +158,7 @@ class Acceleration(BaseModel):
 
 class ContentDirection(BaseModel):
     bearing: Union[float, None]
+    created_date: Union[datetime, None]
 
     class Config:
         orm_mode = True
