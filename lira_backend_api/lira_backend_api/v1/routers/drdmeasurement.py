@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from lira_backend_api.core.schemas import DRDMeasurement
@@ -11,5 +11,8 @@ router = APIRouter(prefix="/drdmeasurement")
 @router.get("/id/{drdmeasurement_id}", response_model=DRDMeasurement)
 def get_DRDmeasurement_model(drdmeasurement_id: str, db: Session = Depends(get_db)):
     result = get_drdmeasurement(drdmeasurement_id, db)
+    if result is None:
+        raise HTTPException(status_code=404, detail="drdmeasurement not found")
+
 
     return result
