@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 # from sqlalchemy.orm import Session
 
 from databases.core import Connection
@@ -10,10 +11,15 @@ from lira_backend_api.database.db import get_connection
 router = APIRouter(prefix="/drdmeasurement")
 
 
+# KT: Migrated over
 @router.get("/id/{drdmeasurement_id}", response_model=DRDMeasurement)
-async def get_DRDmeasurement_model(drdmeasurement_id: str, db: Connection = Depends(get_connection)):
+async def get_DRDmeasurement_model(
+    drdmeasurement_id: str, db: Connection = Depends(get_connection)
+):
     result = await get_drdmeasurement(drdmeasurement_id, db)
 
-    return DRDMeasurement(id=result.id, distance=result.distance, tag=result.tag, lat=result.lat,
-    lon=result.lon, message=result.message, is_computed=result.is_computed, fk_trip=result.fk_trip, 
-    fk_measurement_type=result.fk_measurement_type, created_date=result.created_date, updated_date=result.updated_date)
+    result_dict = dict(result._mapping.items())
+
+    # This could result in a serialization error for testing; we might want to put this into a helper function,
+    # or something since we've got several models and schemas to work with
+    return DRDMeasurement(*result_dict.values())

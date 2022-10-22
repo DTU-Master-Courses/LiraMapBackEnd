@@ -34,6 +34,7 @@ async def get_connection() -> Connection:
     async with lira_database.connection() as connection:
         yield connection
 
+
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 # POSTGRES_DATABASE_URL = str(settings.db_url)
 

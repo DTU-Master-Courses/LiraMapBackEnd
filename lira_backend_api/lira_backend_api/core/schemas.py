@@ -9,22 +9,15 @@ from sqlalchemy import BigInteger
 from collections import namedtuple
 
 
-
-@dataclass
-class MeasurementTypes():
+@dataclass(frozen=True)
+class MeasurementTypes:
     id: UUID
-    # type: str
     created_date: datetime
-    # MeasurementTypeId: UUID = Field(alias="id")
     type: str
-    # created_date: datetime
-    # Created_Date: datetime = Field(alias="created_date")
-    # class Config:
-        # allow_population_by_field_name = True
-        # orm_mode = True
 
-@dataclass
-class MeasurementModel():
+
+@dataclass(frozen=True)
+class MeasurementModel:
     id: UUID
     timestamp: datetime
     tag: Union[str, None]
@@ -37,14 +30,9 @@ class MeasurementModel():
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
 
-    #class Config:
-        #orm_mode = True
-        #allow_population_by_field_name = True
 
-
-
-@dataclass
-class Device():
+@dataclass(frozen=True)
+class Device:
     id: UUID
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
@@ -53,34 +41,29 @@ class Device():
     class Config:
         orm_mode = True
 
-@dataclass
-class Trip():
+
+@dataclass(frozen=True)
+class Trip:
     id: UUID
     task_id: int
-    start_time_utc: Union[datetime,None]
-    end_time_utc: Union[datetime,None]
-    start_position_lat: Union[str,None]
-    start_position_lng: Union[str,None]
-    start_position_display: Union[str,None]
-    end_position_lat: Union[str,None]
-    end_position_lng: Union[str,None]
-    end_position_display: Union[str,None]
-    duration: Union[datetime,None]
-    distance_km: Union[float,None]
-    fk_device: Union[UUID,None]
-    created_date: Union[datetime,None]
-    updated_date: Union[datetime,None]
-    fully_imported: Union[bool,None]
-    #fully_route_annotated: Union[bool,None]
-    #description: Union[str,None]
-    #change_log: Union[str,None]
+    start_time_utc: Union[datetime, None]
+    end_time_utc: Union[datetime, None]
+    start_position_lat: Union[str, None]
+    start_position_lng: Union[str, None]
+    start_position_display: Union[str, None]
+    end_position_lat: Union[str, None]
+    end_position_lng: Union[str, None]
+    end_position_display: Union[str, None]
+    duration: Union[datetime, None]
+    distance_km: Union[float, None]
+    fk_device: Union[UUID, None]
+    created_date: Union[datetime, None]
+    updated_date: Union[datetime, None]
+    fully_imported: Union[bool, None]
 
-    # class Config:
-    #     orm_mode = True
-    #allow_population_by_field_name = True
 
-@dataclass
-class SourceType():
+@dataclass(frozen=True)
+class SourceType:
     id: UUID
     source_name: Union[str, None]
     created_date: Union[datetime, None]
@@ -90,6 +73,7 @@ class SourceType():
         orm_mode = True
 
 
+@dataclass(frozen=True)
 class TripTest(BaseModel):
     trip_id: Union[str, None]
     lat: Union[float, None]
@@ -101,20 +85,21 @@ class TripTest(BaseModel):
         orm_mode = True
 
 
-@dataclass
-class DRDMeasurement():
+@dataclass(frozen=True)
+class DRDMeasurement:
 
     id: UUID
     distance: str
     tag: Union[str, None]
-    lat: Union[float, None]
-    lon: Union[float, None]
-    message: Union[str, None]
     is_computed: Union[bool, None]
     fk_trip: Union[UUID, None]
     fk_measurement_type: Union[UUID, None]
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
+    lat: Union[float, None]
+    lon: Union[float, None]
+    message: Union[str, None]
+    
 
     class Config:
         orm_mode = True
@@ -123,6 +108,7 @@ class DRDMeasurement():
 boundary = namedtuple("Boundary", ["minX", "maxX", "minY", "maxY"])
 
 
+@dataclass(frozen=True)
 class TripsReturn(BaseModel):
     path: List[TripTest]
     bounds: boundary
@@ -132,28 +118,31 @@ class TripsReturn(BaseModel):
     class Config:
         orm_mode = True
 
-@dataclass
+
+@dataclass(frozen=True)
 class MapReference(BaseModel):
 
-    id: str
-    lat_MapMatched: Union[float,None]
-    lon_MapMatched: Union[float,None]
-    way_point_name: Union[str,None]
-    leg_summary_map_matched: Union[str,None]
-    leg_distance_map_matched: Union[float,None]
-    node_id_map_matched: Union[str,None]
-    offset: Union[str,None]
-    lane: Union[str,None]
-    direction: Union[str,None]
-    possible_matching_routes: Union[str,None]
-    way_point: Union[str,None]
-    fk_measurement_id: Union[str,None]
-    fk_osmwaypointid: Union[int,None]
+    id: UUID
+    lat_MapMatched: Union[float, None]
+    lon_MapMatched: Union[float, None]
+    way_point_name: Union[str, None]
+    leg_summary_map_matched: Union[str, None]
+    leg_distance_map_matched: Union[float, None]
+    node_id_map_matched: Union[str, None]
+    possible_matching_routes: Union[str, None]
+    way_point: Union[str, None]
+    fk_measurement_id: Union[UUID, None]
+    fk_osmwaypointid: Union[int, None]
+    offset: Union[str, None]
+    lane: Union[str, None]
+    direction: Union[str, None]
+    
 
     class Config:
         orm_mode = True
 
 
+@dataclass(frozen=True)
 class ContentAcceleration(BaseModel):
     x: Union[float, None]
     y: Union[float, None]
@@ -166,12 +155,16 @@ class ContentAcceleration(BaseModel):
         orm_mode = True
 
 
+# TODO: REMOVE ME
+@dataclass(frozen=True)
 class Acceleration(BaseModel):
     acceleration: List[ContentAcceleration]
 
     class Config:
         orm_mode = True
 
+
+@dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]

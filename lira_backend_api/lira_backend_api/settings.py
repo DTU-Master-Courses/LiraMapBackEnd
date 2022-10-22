@@ -82,7 +82,7 @@ class Settings(BaseSettings):
                 port=self.altitude_db_port,
                 user=self.altitude_db_user,
                 password=self.altitude_db_pass,
-                path=f"/{self.altitude_db_base}"
+                path=f"/{self.altitude_db_base}",
             )
         else:
             return
