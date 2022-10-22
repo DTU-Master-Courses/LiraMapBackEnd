@@ -99,7 +99,6 @@ class DRDMeasurement:
     lat: Union[float, None]
     lon: Union[float, None]
     message: Union[str, None]
-    
 
     class Config:
         orm_mode = True
@@ -136,7 +135,6 @@ class MapReference(BaseModel):
     offset: Union[str, None]
     lane: Union[str, None]
     direction: Union[str, None]
-    
 
     class Config:
         orm_mode = True

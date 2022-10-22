@@ -22,11 +22,13 @@ from lira_backend_api.core.schemas import (
     boundary,
 )
 
+
 async def measurement_types(db: Connection):
     query = select(MeasurementTypes).order_by(MeasurementTypes.type)
     results = await db.fetch_all(query)
 
     return results
+
 
 # TODO add function return types to all functions
 async def get_measurementtype(measurement_type_id: str, db: Connection):

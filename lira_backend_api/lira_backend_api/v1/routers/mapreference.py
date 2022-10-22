@@ -24,4 +24,3 @@ async def get_mapreference_id(
     # This could result in a serialization error for testing; we might want to put this into a helper function,
     # or something since we've got several models and schemas to work with
     return MapReference(*result_dict.values())
-

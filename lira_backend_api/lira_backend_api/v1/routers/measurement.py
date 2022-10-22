@@ -16,7 +16,7 @@ from lira_backend_api.v1.routers.utils import (
     get_measurementmodel,
     get_ride,
     get_current_acceleration,
-    measurement_types
+    measurement_types,
 )
 from lira_backend_api.database.db import get_connection
 
@@ -62,7 +62,6 @@ async def get_measurement_model(
     result_dict = dict(result._mapping.items())
 
     return MeasurementModel(*result_dict.values())
-
 
 
 # KT: Exception to the usual paradigm we want to follow.
