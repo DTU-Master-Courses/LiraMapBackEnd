@@ -11,7 +11,7 @@ from lira_backend_api.core.models import (
     MapReference,
 )
 from lira_backend_api.core.schemas import Acceleration, Direction, boundary
-from math import atan2, sin, cos, pi
+from math import atan2, sin, cos, pi, pow, sqrt
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):
@@ -200,10 +200,10 @@ def get_acceleration_list(trip_id: str, db: Session):
             MeasurementModel.lat != None,
         )
         .order_by(MeasurementModel.created_date)
-        .limit(100000)
+        .limit(10000)
         .all()
     )
-    for value in res:
+    for idx, value in enumerate(res):
         latitude = value[1]
         longitude = value[2]
         jsonobj = json.loads(value[0])
@@ -214,7 +214,7 @@ def get_acceleration_list(trip_id: str, db: Session):
         ):
             x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
             y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-            z = jsonobj.get("acc.xyz.z")  
+            z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is heavily influenced by the gravitational pull
             # Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts")
             created_date = convert_date(json_created_date)
@@ -224,6 +224,21 @@ def get_acceleration_list(trip_id: str, db: Session):
             # This statement is called when a dataset with a different date is encountered.
             elif average_acceleration[5][0] != created_date:
                 x, y, z, latitude, longitude = average_values(average_acceleration)
+                magnitude = sqrt(pow(x,2) + pow(y,2))
+                #if res[idx + 1]:
+                next_ =  res[idx + 1]
+                latitude_next = next_[1]
+                longitude_next = next_[2]
+                d_lon = longitude_next - longitude
+                X = cos(longitude_next) * sin(d_lon)
+                Y = (cos(latitude_next) * sin(latitude_next)) - (sin(latitude_next) * cos(latitude) * cos(d_lon))
+                #X = cos(latitude_next) * sin(d_lon)
+                #Y = (cos(latitude_next) * sin(latitude_next)) - (sin(longitude) * cos(latitude_next) * cos(d_lon))
+                bearing = atan2(X, Y) * 180/pi
+                if bearing < 0:
+                    bearing += 360
+                elif bearing > 360:
+                    bearing %= 360
                 acceleration.append(
                     {
                         "x": x,
@@ -231,6 +246,8 @@ def get_acceleration_list(trip_id: str, db: Session):
                         "z": z,
                         "lat": latitude,
                         "lon": longitude,
+                        "magnitude": magnitude, #Based on x and y
+                        "bearing": bearing,
                         "created_date": created_date,
                     }
                 )
@@ -255,6 +272,8 @@ def get_direction(trip_id : str, db: Session):
             if lon == None and lat == None:
                 lat = i["lat"]
                 lon = i["lon"]
+                print("lat = ", lat,"lon = ", lon)
+                magnitude = sqrt(pow(i["x"],2) + pow(i["y"],2))
                 created_date = i["created_date"]
             else:
                 d_lon = i["lon"] - lon
@@ -272,13 +291,17 @@ def get_direction(trip_id : str, db: Session):
                 direction.append(
                     {
                         "bearing": bearing,
+                        "magnitude": magnitude,
                         "created_date": created_date,
                     }
                 )    
+                magnitude = sqrt(pow(i["x"],2) + pow(i["y"],2))
                 created_date = i["created_date"]
         print(direction)
         #print("Index = ", index, "Key = ", key, "Value = ", value)
         return {"direction": direction}
+
+
 def get_segments(trip_id: str, db: Session):
     # results = db.query(MapReference).where(MeasurementModel.fk_trip == trip_id).join(MapReference, MapReference.fk_measurement_id == MeasurementModel.id).limit(100).all()
 

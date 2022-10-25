@@ -143,6 +143,8 @@ class ContentAcceleration(BaseModel):
     z: Union[float, None]
     lat: Union[float, None]
     lon: Union[float, None]
+    magnitude: Union[float, None]
+    bearing: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
@@ -158,6 +160,7 @@ class Acceleration(BaseModel):
 
 class ContentDirection(BaseModel):
     bearing: Union[float, None]
+    magnitude: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
