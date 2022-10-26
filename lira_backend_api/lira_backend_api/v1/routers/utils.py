@@ -184,6 +184,39 @@ def clear_average_acceleration(list):
     list[4].clear()
     list[5].pop()  # Single item stored, namely the datetime
 
+def magnitudeCalc(x, y):
+    #Magnitude / Notice, only based on x & y
+    magnitude = sqrt(pow(x,2) + pow(y,2)) 
+    #At the first iteration there is no comparison lat and lon
+    #Bearing and distance are not calculated
+    return magnitude
+
+def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
+    #Calculating bearing
+    d_lon = abs(longitude - longitude_previous)
+    X = cos(longitude) * sin(d_lon)
+    Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
+    #atan to convert X, Y to radians. Then use pi to convert to degrees.
+    bearing = atan2(X, Y) * 180/pi
+    if bearing < 0:
+        bearing += 360
+    elif bearing > 360:
+        bearing %= 360
+    print("bearing = ", bearing)
+    return bearing
+
+def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
+    #Approximation of distance calculated by using lat and lon
+    earth_radius = 6371000 #meter
+    #Haversine formula
+    print("latitude = ", latitude, "previous Latitude = ", latitude_previous,"longitude = ", longitude, "previous longitude = ", longitude_previous)
+    a = pow(sin(abs(latitude - latitude_previous)/2),2) + cos(latitude_previous) * cos(latitude) * pow(sin(abs(longitude-longitude_previous)/2),2)
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    print("c * earth_radius = ", c * earth_radius)
+    distance = abs(c * earth_radius)
+    print("##Distance = ", distance, "\n")
+    return distance
+
 
 def get_acceleration_list(trip_id: str, db: Session):
     acceleration = list()
@@ -208,7 +241,7 @@ def get_acceleration_list(trip_id: str, db: Session):
         .limit(10000)
         .all()
     )
-    for idx, value in enumerate(res):
+    for value in res:
         latitude = value[1]
         longitude = value[2]
         jsonobj = json.loads(value[0])
@@ -227,30 +260,12 @@ def get_acceleration_list(trip_id: str, db: Session):
             if average_acceleration[5] == []:
                 average_acceleration[5].append(created_date)
             # This statement is called when a dataset with a different date is encountered.
+            # This starts the process of calculating and storing values and clearing average_acceleration
             elif average_acceleration[5][0] != created_date:
                 x, y, z, latitude, longitude = average_values(average_acceleration)
-                #Magnitude / Notice, only based on x & y
-                magnitude = sqrt(pow(x,2) + pow(y,2)) 
-                #At the first iteration there is no comparison lat and lon
                 if 0 < len(acceleration):
-                    #Approximation of distance calculated by using lat and lon
-                    earth_radius = 6371000 #meter
-                    #Haversine formula
-                    a = pow(sin(abs(latitude - latitude_previous)/2),2) + cos(latitude_previous) * cos(latitude) * pow(sin(abs(longitude-longitude_previous)/2),2)
-                    c = 2 * atan2(sqrt(a), sqrt(1-a))
-                    print("c * earth_radius = ", c * earth_radius)
-                    distance += abs(c * earth_radius)
-                    print("##Distance = ", distance, "\n")
-                    #Calculating bearing
-                    d_lon = abs(longitude - longitude_previous)
-                    X = cos(longitude) * sin(d_lon)
-                    Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
-                    #atan to convert X, Y to radians. Then use pi to convert to degrees.
-                    bearing = atan2(X, Y) * 180/pi
-                    if bearing < 0:
-                        bearing += 360
-                    elif bearing > 360:
-                        bearing %= 360
+                    bearing = bearingCalc(latitude, latitude_previous, longitude, longitude_previous)
+                    distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
                 acceleration.append(
                     {
                         "x": x,
@@ -258,7 +273,7 @@ def get_acceleration_list(trip_id: str, db: Session):
                         "z": z,
                         "lat": latitude,
                         "lon": longitude,
-                        "magnitude": magnitude,
+                        "magnitude": magnitudeCalc(x, y),
                         "bearing": bearing,
                         "distance": distance,
                         "created_date": created_date,
