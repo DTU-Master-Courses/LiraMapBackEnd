@@ -11,6 +11,7 @@ from lira_backend_api.core.schemas import (
     Acceleration,
     MeasurementLatLon,
     Direction,
+    Power,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -18,6 +19,7 @@ from lira_backend_api.v1.routers.utils import (
     get_acceleration_list,
     get_segments,
     get_direction,
+    get_power,
 )
 from lira_backend_api.database.db import get_db
 
@@ -64,6 +66,16 @@ def get_direction_trip(trip_id, db: Session = Depends(get_db)):
     elif len(results["direction"]) <= 1:
         raise HTTPException(
             status_code=404, detail="Trip does not contain enough data"
+        )
+    else:
+        return results
+
+@router.get("/power/{trip_id}", response_model=List[Power])
+def get_power_trip(trip_id, db: Session = Depends(get_db)):
+    results = get_power(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain data"
         )
     else:
         return results

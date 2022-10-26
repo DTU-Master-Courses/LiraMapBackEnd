@@ -11,7 +11,7 @@ from lira_backend_api.core.models import (
     MapReference,
 )
 from lira_backend_api.core.schemas import Acceleration, Direction, boundary
-from math import atan2, sin, cos, pi, pow, sqrt
+from math import atan2, acos, sin, cos, pi, pow, sqrt
 
 
 def get_measurementtype(measurement_type_id: str, db: Session):
@@ -176,7 +176,7 @@ def append_acceleration(list, x, y, z, latitude, longitude):
     list[4].append(longitude)
 
 
-def clear_acceleration(list):
+def clear_average_acceleration(list):
     list[0].clear()
     list[1].clear()
     list[2].clear()
@@ -189,6 +189,11 @@ def get_acceleration_list(trip_id: str, db: Session):
     acceleration = list()
     average_acceleration = list()
     created_date = None
+    distance = 0
+    latitude_previous = 0
+    longitude_previous = 0
+    bearing = 0
+    #Create list filled with empty lists
     for _ in range(6):
         average_acceleration.append(list())
     # Query to acquire messages from Measurements table
@@ -214,7 +219,7 @@ def get_acceleration_list(trip_id: str, db: Session):
         ):
             x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
             y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-            z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is heavily influenced by the gravitational pull
+            z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is influenced by the gravitational pull
             # Assuming created date is at least not None.
             json_created_date = jsonobj.get("@ts")
             created_date = convert_date(json_created_date)
@@ -224,21 +229,28 @@ def get_acceleration_list(trip_id: str, db: Session):
             # This statement is called when a dataset with a different date is encountered.
             elif average_acceleration[5][0] != created_date:
                 x, y, z, latitude, longitude = average_values(average_acceleration)
-                magnitude = sqrt(pow(x,2) + pow(y,2))
-                #if res[idx + 1]:
-                next_ =  res[idx + 1]
-                latitude_next = next_[1]
-                longitude_next = next_[2]
-                d_lon = longitude_next - longitude
-                X = cos(longitude_next) * sin(d_lon)
-                Y = (cos(latitude_next) * sin(latitude_next)) - (sin(latitude_next) * cos(latitude) * cos(d_lon))
-                #X = cos(latitude_next) * sin(d_lon)
-                #Y = (cos(latitude_next) * sin(latitude_next)) - (sin(longitude) * cos(latitude_next) * cos(d_lon))
-                bearing = atan2(X, Y) * 180/pi
-                if bearing < 0:
-                    bearing += 360
-                elif bearing > 360:
-                    bearing %= 360
+                #Magnitude / Notice, only based on x & y
+                magnitude = sqrt(pow(x,2) + pow(y,2)) 
+                #At the first iteration there is no comparison lat and lon
+                if 0 < len(acceleration):
+                    #Approximation of distance calculated by using lat and lon
+                    earth_radius = 6371000 #meter
+                    #Haversine formula
+                    a = pow(sin(abs(latitude - latitude_previous)/2),2) + cos(latitude_previous) * cos(latitude) * pow(sin(abs(longitude-longitude_previous)/2),2)
+                    c = 2 * atan2(sqrt(a), sqrt(1-a))
+                    print("c * earth_radius = ", c * earth_radius)
+                    distance += abs(c * earth_radius)
+                    print("##Distance = ", distance, "\n")
+                    #Calculating bearing
+                    d_lon = abs(longitude - longitude_previous)
+                    X = cos(longitude) * sin(d_lon)
+                    Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
+                    #atan to convert X, Y to radians. Then use pi to convert to degrees.
+                    bearing = atan2(X, Y) * 180/pi
+                    if bearing < 0:
+                        bearing += 360
+                    elif bearing > 360:
+                        bearing %= 360
                 acceleration.append(
                     {
                         "x": x,
@@ -246,19 +258,34 @@ def get_acceleration_list(trip_id: str, db: Session):
                         "z": z,
                         "lat": latitude,
                         "lon": longitude,
-                        "magnitude": magnitude, #Based on x and y
+                        "magnitude": magnitude,
                         "bearing": bearing,
+                        "distance": distance,
                         "created_date": created_date,
                     }
                 )
-                clear_acceleration(average_acceleration)
+                #Used to calculate the change in bearing & distance from point to point
+                latitude_previous = latitude
+                longitude_previous = longitude
+                clear_average_acceleration(average_acceleration)
             append_acceleration(
                 average_acceleration, x, y, z, latitude, longitude
             )
-    #print("Acceleratyion = ", acceleration)
     return {"acceleration": acceleration}
 
 
+def get_power(trip_id: str, db: Session):
+    car_mass = 1584
+    power = list()
+    p = 0
+    power.append({"power:":p})
+    acceleration = get_acceleration_list(trip_id, db)
+    for value in acceleration:
+        print(value)
+    return {"power": power}
+
+
+#This endpoint is redundant
 def get_direction(trip_id : str, db: Session):
     direction = list()
     lat = None

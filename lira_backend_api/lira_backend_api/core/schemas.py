@@ -145,6 +145,7 @@ class ContentAcceleration(BaseModel):
     lon: Union[float, None]
     magnitude: Union[float, None]
     bearing: Union[float, None]
+    distance: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
@@ -169,6 +170,19 @@ class ContentDirection(BaseModel):
 
 class Direction(BaseModel):
     direction: List[ContentDirection]
+
+    class Config:
+        orm_mode = True
+
+
+class ContentPower(BaseModel):
+    power: Union[float, None]
+
+    class Config:
+        orm_mode = True
+
+class Power(BaseModel):
+    power: List[ContentPower]
 
     class Config:
         orm_mode = True
