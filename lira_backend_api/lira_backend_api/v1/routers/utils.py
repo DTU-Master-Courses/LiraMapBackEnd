@@ -184,48 +184,50 @@ def clear_average_acceleration(list):
     list[4].clear()
     list[5].pop()  # Single item stored, namely the datetime
 
+
 def magnitudeCalc(x, y):
-    #Magnitude / Notice, only based on x & y
+    #Notice, only based on x & y
     magnitude = sqrt(pow(x,2) + pow(y,2)) 
-    #At the first iteration there is no comparison lat and lon
-    #Bearing and distance are not calculated
     return magnitude
 
+
 def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
-    #Calculating bearing
     d_lon = abs(longitude - longitude_previous)
     X = cos(longitude) * sin(d_lon)
     Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
     #atan to convert X, Y to radians. Then use pi to convert to degrees.
-    bearing = atan2(X, Y) * 180/pi
-    if bearing < 0:
-        bearing += 360
-    elif bearing > 360:
-        bearing %= 360
-    print("bearing = ", bearing)
-    return bearing
+    return (atan2(X, Y) * 180/pi + 360) % 360
+
 
 def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     #Approximation of distance calculated by using lat and lon
-    earth_radius = 6371000 #meter
+    earth_radius = 6371e3 #meter
+    lat_radians = latitude * (pi / 180)
+    lat_prev_radians = latitude_previous * (pi / 180)
+    d_lat = (latitude - latitude_previous) * (pi / 180)
+    d_lon = (longitude - longitude_previous) * (pi / 180)
     #Haversine formula
     print("latitude = ", latitude, "previous Latitude = ", latitude_previous,"longitude = ", longitude, "previous longitude = ", longitude_previous)
-    a = pow(sin(abs(latitude - latitude_previous)/2),2) + cos(latitude_previous) * cos(latitude) * pow(sin(abs(longitude-longitude_previous)/2),2)
+    a = sin(d_lat/2) * sin(d_lat/2) + cos(lat_prev_radians) * cos(lat_radians) * sin(d_lon/2) * sin(d_lon/2)
     c = 2 * atan2(sqrt(a), sqrt(1-a))
     print("c * earth_radius = ", c * earth_radius)
-    distance = abs(c * earth_radius)
+    distance = c * earth_radius
     print("##Distance = ", distance, "\n")
     return distance
+
+
+def average_speed():
+    pass
 
 
 def get_acceleration_list(trip_id: str, db: Session):
     acceleration = list()
     average_acceleration = list()
     created_date = None
+    latitude_previous = None
+    longitude_previous = None
+    bearing = None
     distance = 0
-    latitude_previous = 0
-    longitude_previous = 0
-    bearing = 0
     #Create list filled with empty lists
     for _ in range(6):
         average_acceleration.append(list())
@@ -263,7 +265,10 @@ def get_acceleration_list(trip_id: str, db: Session):
             # This starts the process of calculating and storing values and clearing average_acceleration
             elif average_acceleration[5][0] != created_date:
                 x, y, z, latitude, longitude = average_values(average_acceleration)
-                if 0 < len(acceleration):
+                #True when there is a previous dataset to compare
+                if latitude_previous:
+                    #At the first iteration there is no comparison lat and lon
+                    #Bearing and distance are not calculated
                     bearing = bearingCalc(latitude, latitude_previous, longitude, longitude_previous)
                     distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
                 acceleration.append(
