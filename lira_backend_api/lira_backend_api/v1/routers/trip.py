@@ -8,17 +8,15 @@ from lira_backend_api.core.schemas import (
     MapReference,
     MeasurementLatLon,
     Trip,
-    Acceleration,
+    Variables,
     MeasurementLatLon,
-    Direction,
     Power,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
-    get_acceleration_list,
+    get_variable_list,
     get_segments,
-    get_direction,
     get_power,
 )
 from lira_backend_api.database.db import get_db
@@ -46,9 +44,9 @@ def get_all_trips(db: Session = Depends(get_db)):
     return results
 
 
-@router.get("/acceleration/{trip_id}", response_model=Acceleration)
-def get_acceleration_trip(trip_id, db: Session = Depends(get_db)):
-    results = get_acceleration_list(str(trip_id), db)
+@router.get("/list_of_variables/{trip_id}", response_model=Variables)
+def get_variables(trip_id, db: Session = Depends(get_db)):
+    results = get_variable_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
@@ -56,21 +54,8 @@ def get_acceleration_trip(trip_id, db: Session = Depends(get_db)):
     else:
         return results
 
-@router.get("/direction/{trip_id}", response_model=Direction)
-def get_direction_trip(trip_id, db: Session = Depends(get_db)):
-    results = get_direction(str(trip_id), db)
-    if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain data"
-        )
-    elif len(results["direction"]) <= 1:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain enough data"
-        )
-    else:
-        return results
 
-@router.get("/power/{trip_id}", response_model=List[Power])
+@router.get("/power/{trip_id}", response_model=Power)
 def get_power_trip(trip_id, db: Session = Depends(get_db)):
     results = get_power(str(trip_id), db)
     if results is None:
@@ -87,7 +72,7 @@ def get_trip_segments(trip_id, db: Session = Depends(get_db)):
     results = get_segments(str(trip_id), db)
     if results is None:
         raise HTTPException(
-            status_code=404, detail="Trip does not contain acceleration data"
+            status_code=404, detail="Trip does not contain required data"
         )
 
     results_list = list()
