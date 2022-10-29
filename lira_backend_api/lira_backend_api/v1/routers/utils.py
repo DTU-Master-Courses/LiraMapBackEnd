@@ -1,7 +1,9 @@
 from datetime import datetime
 import json
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import null, or_, and_
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.types import Unicode
 from lira_backend_api.core.models import (
     DRDMeasurement,
     MeasurementTypes,
@@ -294,6 +296,41 @@ def get_variable_list(trip_id: str, db: Session):
             )
     return {"variables": variable_list}
 
+def get_speed_list(trip_id: str, db: Session):
+    l = list()
+    res = (
+        db.query(MeasurementModel.message)
+        .where(
+            MeasurementModel.fk_trip == trip_id,
+            MeasurementModel.lon != None,
+            MeasurementModel.lat != None,
+       # ).filter(and_(or_(MeasurementModel.tag == 'obd.spd_veh',MeasurementModel.tag == 'obd.spd'),MeasurementModel.message['obd.spd_veh.value'] != 0))
+        ).filter(or_(MeasurementModel.tag == 'obd.spd_veh',MeasurementModel.tag == 'obd.spd'))
+        #.order_by(MeasurementModel.created_date)
+        .offset(3000)
+        .limit(2000)
+        .all()
+    )
+    for value in res: 
+        jsonobj = json.loads(value[0])
+        if jsonobj.get("obd.spd_veh.value") != 0 and jsonobj.get("obd.spd_veh.value") is not None :
+            json_ts = jsonobj.get("@ts")
+            json_vid = jsonobj.get("@vic")
+            json_uid = jsonobj.get("@uid")
+            json_rec = jsonobj.get("@rec")
+            json_speed = jsonobj.get("obd.spd_veh.value")
+            l.append(
+                        {
+                            "ts": json_ts,
+                            "vid": json_vid,
+                            "uid": json_uid,
+                            "rec": json_rec,
+                            "speed": json_speed,
+                        }
+                    ) 
+    return {"speed_list": l}
+        
+        
 
 #Not working as inteded yet
 def get_power(trip_id: str, db: Session):

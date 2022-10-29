@@ -1,8 +1,12 @@
+import json
 from typing import Any, List, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from collections import namedtuple
+
+#from sqlalchemy import JSON
+
 
 
 class MeasurementTypes(BaseModel):
@@ -152,6 +156,22 @@ class ContentVariables(BaseModel):
 
 class Variables(BaseModel):
     variables: List[ContentVariables]
+
+    class Config:
+        orm_mode = True
+
+class SpeedVariables(BaseModel):
+    ts: Union[datetime, None]
+    vid: Union[int, None]
+    uid: Union[str, None]
+    rec: Union[datetime, None]
+    speed: Union[float, None]
+    
+    class Config:
+        orm_mode = True
+
+class SpeedList(BaseModel):
+    speed_list: List[SpeedVariables]
 
     class Config:
         orm_mode = True
