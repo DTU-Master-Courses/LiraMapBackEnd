@@ -308,7 +308,7 @@ def get_speed_list(trip_id: str, db: Session):
         ).filter(or_(MeasurementModel.tag == 'obd.spd_veh',MeasurementModel.tag == 'obd.spd'))
         #.order_by(MeasurementModel.created_date)
         .offset(3000)
-        .limit(2000)
+        .limit(3000)
         .all()
     )
     for value in res: 
@@ -328,6 +328,7 @@ def get_speed_list(trip_id: str, db: Session):
                             "speed": json_speed,
                         }
                     ) 
+    print("speed count = ",len(l)) 
     return {"speed_list": l}
         
         
