@@ -10,14 +10,14 @@ from lira_backend_api.core.schemas import (
     Trip,
     Variables,
     MeasurementLatLon,
-    Power,
+    Energy,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
     get_variable_list,
     get_segments,
-    get_power,
+    get_energy,
 )
 from lira_backend_api.database.db import get_db
 
@@ -55,9 +55,9 @@ def get_variables(trip_id, db: Session = Depends(get_db)):
         return results
 
 
-@router.get("/power/{trip_id}", response_model=Power)
-def get_power_trip(trip_id, db: Session = Depends(get_db)):
-    results = get_power(str(trip_id), db)
+@router.get("/energy/{trip_id}", response_model=Energy)
+def get_energy_trip(trip_id, db: Session = Depends(get_db)):
+    results = get_energy(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain data"

@@ -86,7 +86,6 @@ def get_ride(trip_id: str, tag: str, db: Session):
         .limit(500)
         .all()
     )
-    # print(res)
     res1 = json.loads(res[0][0])
     val = res1.get(f"{tag}.value")
     if val is None:
@@ -189,9 +188,11 @@ def clear_average_variable_list(list):
     list[6].pop()  # Single item stored, namely the datetime
 
 
-def magnitudeCalc(x, y):
-    #Notice, only based on x & y
-    magnitude = sqrt(pow(x,2) + pow(y,2)) 
+def magnitudeCalc(x, y, z):
+    #Notice, subtracting gravitational pull from z
+    #z - 1
+    #Disregarding z entirely for now
+    magnitude = sqrt(pow(x,2) + pow(y,2))# + pow(z,2)) 
     return magnitude
 
 
@@ -199,13 +200,13 @@ def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
     d_lon = abs(longitude - longitude_previous)
     X = cos(longitude) * sin(d_lon)
     Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
-    #atan to convert X, Y to radians. Then use pi to convert to degrees.
+    #atan2 to convert X, Y to radians. Then use pi to convert to degrees.
     return (atan2(X, Y) * 180/pi + 360) % 360
 
 #Not needed if we can get velocity from database. 
 def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     #Approximation of distance calculated by using lat and lon
-    earth_radius = 6371e3 #meter
+    earth_radius = 6378.137e3 #meter
     lat_radians = latitude * (pi / 180)
     lat_prev_radians = latitude_previous * (pi / 180)
     d_lat = (latitude - latitude_previous) * (pi / 180)
@@ -216,18 +217,12 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     distance = c * earth_radius
     return distance
 
-def get_velocity(jsonobj):
-    velocity = 0
-    if jsonobj.get("obd.spd_veh.value") is not None:
-        velocity = jsonobj.get("obd.spd_veh.value")
-        print("Velocity = ", velocity)
-    return velocity
-
 
 def get_variable_list(trip_id: str, db: Session):
     variable_list, average_variable_list = list(), list()
-    created_date, latitude_previous, longitude_previous, bearing, velocity = None, None, None, None, None
+    created_date, latitude_previous, longitude_previous, bearing = None, None, None, None
     distance = 0
+    velocity = 0
     #Create list filled with empty lists
     for _ in range(7):
         average_variable_list.append(list())
@@ -238,15 +233,20 @@ def get_variable_list(trip_id: str, db: Session):
             MeasurementModel.fk_trip == trip_id,
             MeasurementModel.lon != None,
             MeasurementModel.lat != None,
-        ).filter(or_(MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
+        ).filter(or_(MeasurementModel.tag == 'obd.spd', MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
         .order_by(MeasurementModel.created_date)
-        .limit(10000)
+        .limit(100000)
         .all()
     )
     for value in res:
         latitude, longitude = value[1], value[2]
         jsonobj = json.loads(value[0])
-        velocity = get_velocity(jsonobj)
+        if jsonobj.get("obd.spd_veh.value") is not None:
+            velocity = jsonobj.get("obd.spd_veh.value")
+        #print("veh = ", velocity)
+        if jsonobj.get("obd.spd.value") is not None:
+            velocity = jsonobj.get("obd.spd.value")
+        #print("no veh", velocity)
         if (
             jsonobj.get("acc.xyz.x") is not None
             and jsonobj.get("acc.xyz.y") is not None
@@ -278,7 +278,7 @@ def get_variable_list(trip_id: str, db: Session):
                         "z": z,
                         "lat": latitude,
                         "lon": longitude,
-                        "magnitude": magnitudeCalc(x, y),
+                        "magnitude": magnitudeCalc(x, y, z),
                         "velocity": velocity,
                         "bearing": bearing,
                         "distance": distance,
@@ -295,26 +295,30 @@ def get_variable_list(trip_id: str, db: Session):
     return {"variables": variable_list}
 
 
-#Not working as inteded yet
-def get_power(trip_id: str, db: Session):
-    power = list()
+#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see its intended output
+def get_energy(trip_id: str, db: Session):
+    energy = list()
     car_mass = 1584
+    E = 0
     dictionary = get_variable_list(trip_id, db)
     for index, (key, value) in enumerate(dictionary.items()):
-        print("ENUMERATE")
         for i in value:
             magnitude = i["magnitude"]
-            print('magnitude = ', magnitude)
             velocity = i["velocity"]
-            print('velocity = ', velocity)
-            acceleration = magnitude * 9,80665
+            acceleration = magnitude * 9.806
             inertial_force = car_mass * acceleration
-            force = inertial_force # + aerodynamic force + hill climbing force + rolling resistance force
-            #print("force = ", force)
-            #P = force * (velocity / 3.6)
-            power.append(force) #Note, appending force, since velocity is not working yet. Should append P.
-    print("power = ",len(power), power) 
-    return {"power": power}
+            # aerodynamic_force = 
+            # hill_climbing_force = 
+            # rolling_resistance_force = 
+            force = inertial_force # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
+            P = force * (velocity / 3.6)
+            E += P
+            energy.append({
+                "power": P,
+                "energy": E,
+                "created_date": i["created_date"],
+                })
+    return {"energy": energy}
 
 
 def get_segments(trip_id: str, db: Session):
