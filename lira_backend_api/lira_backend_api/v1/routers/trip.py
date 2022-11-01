@@ -11,7 +11,9 @@ from lira_backend_api.core.schemas import (
     Variables,
     MeasurementLatLon,
     Power,
-    SpeedList
+    SpeedList,
+    SpeedVariables,
+    SpeedVariablesAgg
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -19,7 +21,8 @@ from lira_backend_api.v1.routers.utils import (
     get_variable_list,
     get_segments,
     get_power,
-    get_speed_list
+    get_speed_list,
+    get_speed_list_agg
 )
 from lira_backend_api.database.db import get_db
 
@@ -56,7 +59,7 @@ def get_variables(trip_id, db: Session = Depends(get_db)):
     else:
         return results
 
-@router.get("/list_of_speed/{trip_id}", response_model=SpeedList)
+@router.get("/list_of_speed/{trip_id}", response_model=List[SpeedVariables])
 def get_speed(trip_id, db: Session = Depends(get_db)):
     results = get_speed_list(str(trip_id), db)
     if results is None:
@@ -66,6 +69,15 @@ def get_speed(trip_id, db: Session = Depends(get_db)):
     else:
         return results
 
+@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
+def get_speed(trip_id, db: Session = Depends(get_db)):
+    results = get_speed_list_agg(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain acceleration data"
+        )
+    else:
+        return results
 
 @router.get("/power/{trip_id}", response_model=Power)
 def get_power_trip(trip_id, db: Session = Depends(get_db)):

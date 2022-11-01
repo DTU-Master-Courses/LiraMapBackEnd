@@ -1,7 +1,7 @@
 import json
 from typing import Any, List, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
 from collections import namedtuple
 
@@ -166,16 +166,28 @@ class SpeedVariables(BaseModel):
     uid: Union[str, None]
     rec: Union[datetime, None]
     speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
     
     class Config:
         orm_mode = True
-
+               
 class SpeedList(BaseModel):
     speed_list: List[SpeedVariables]
 
     class Config:
         orm_mode = True
 
+class SpeedVariablesAgg(BaseModel):
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    vid: Union[int, None]
+    speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    
+    class Config:
+        orm_mode = True
 
 class ContentPower(BaseModel):
     power: Union[float, None]
