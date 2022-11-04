@@ -1,10 +1,7 @@
 from typing import Any, List, Union
 
-from uuid import UUID
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from datetime import datetime
-from sqlalchemy import BigInteger
 from collections import namedtuple
 
 
@@ -137,36 +134,40 @@ class MapReference(BaseModel):
         orm_mode = True
 
 
-class ContentAcceleration(BaseModel):
+class ContentVariables(BaseModel):
     x: Union[float, None]
     y: Union[float, None]
     z: Union[float, None]
     lat: Union[float, None]
     lon: Union[float, None]
+    magnitude: Union[float, None]
+    speed: Union[float, None]
+    distance: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
         orm_mode = True
 
 
-class Acceleration(BaseModel):
-    acceleration: List[ContentAcceleration]
+class Variables(BaseModel):
+    variables: List[ContentVariables]
 
     class Config:
         orm_mode = True
 
 
-class ContentDirection(BaseModel):
-    alpha: Union[float, None]
-    beta: Union[float, None]
-    #gamma: Union[float, None]
+class ContentEnergy(BaseModel):
+    power: Union[float, None]
+    energy: Union[float, None]
+    bearing: Union[float, None]
+    created_date: Union[datetime, None]
 
     class Config:
         orm_mode = True
 
 
-class Direction(BaseModel):
-    direction: List[ContentDirection]
+class Energy(BaseModel):
+    energy: List[ContentEnergy]
 
     class Config:
         orm_mode = True
