@@ -2,6 +2,7 @@ import enum
 import os
 from pathlib import Path
 from tempfile import gettempdir
+from typing import Union
 
 from dotenv import load_dotenv
 from pydantic import BaseSettings
@@ -51,22 +52,40 @@ class Settings(BaseSettings):
     db_base: str = os.getenv("DB_BASE", "lira_backend_api")
     db_echo: bool = False
 
-    @property
-    def db_url(self) -> URL:
+    # This comes from Azure environment
+    altitude_db_host: str = os.getenv("ALTITUDE_DB_HOST", "localhost")
+    altitude_db_port: int = int(os.getenv("ALTITUDE_DB_PORT", 5432))
+    altitude_db_user: str = os.getenv("ALTITUDE_DB_USER", "lira_backend_api")
+    altitude_db_pass: str = os.getenv("ALTITUDE_DB_PASS", "lira_backend_api")
+    altitude_db_base: str = os.getenv("ALTITUDE_DB_BASE", "lira_backend_api")
+
+    # @property
+    def db_url(self, db_name: str) -> Union[URL, None]:
         """
         Assemble database URL from settings.
 
         :return: database URL.
         """
-        return URL.build(
-            scheme="postgresql",
-            host=self.db_host,
-            port=self.db_port,
-            user=self.db_user,
-            password=self.db_pass,
-            path=f"/{self.db_base}",
-            # scheme="postgresql+asyncpg",
-        )
+        if db_name == "lira_db":
+            return URL.build(
+                scheme="postgresql+asyncpg",
+                host=self.db_host,
+                port=self.db_port,
+                user=self.db_user,
+                password=self.db_pass,
+                path=f"/{self.db_base}",
+            )
+        elif db_name == "altitude_db":
+            return URL.build(
+                scheme="postgresql+asyncpg",
+                host=self.altitude_db_host,
+                port=self.altitude_db_port,
+                user=self.altitude_db_user,
+                password=self.altitude_db_pass,
+                path=f"/{self.altitude_db_base}",
+            )
+        else:
+            return
 
     class Config:
         env_file = ".env"
