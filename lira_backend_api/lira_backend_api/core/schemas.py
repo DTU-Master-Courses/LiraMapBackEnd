@@ -141,8 +141,7 @@ class ContentVariables(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]
     magnitude: Union[float, None]
-    velocity: Union[float, None]
-    bearing: Union[float, None]
+    speed: Union[float, None]
     distance: Union[float, None]
     created_date: Union[datetime, None]
 
@@ -160,6 +159,7 @@ class Variables(BaseModel):
 class ContentEnergy(BaseModel):
     power: Union[float, None]
     energy: Union[float, None]
+    bearing: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
