@@ -9,11 +9,13 @@ from sqlalchemy import BigInteger
 from collections import namedtuple
 
 
+
 @dataclass(frozen=True)
 class MeasurementTypes:
     id: UUID
     created_date: datetime
     type: str
+
 
 
 @dataclass(frozen=True)
@@ -161,6 +163,55 @@ class Acceleration(BaseModel):
     class Config:
         orm_mode = True
 
+
+@dataclass(frozen=True)
+class MeasurementLatLon(BaseModel):
+    lat: Union[float, None]
+    lon: Union[float, None]
+
+    class Config:
+        orm_mode = True
+
+
+@dataclass(frozen=True)
+class ContentVariables(BaseModel):
+    x: Union[float, None]
+    y: Union[float, None]
+    z: Union[float, None]
+    lat: Union[float, None]
+    lon: Union[float, None]
+    magnitude: Union[float, None]
+    speed: Union[float, None]
+    distance: Union[float, None]
+    created_date: Union[datetime, None]
+
+    class Config:
+        orm_mode = True
+
+
+@dataclass(frozen=True)
+class Variables(BaseModel):
+    variables: List[ContentVariables]
+
+    class Config:
+        orm_mode = True
+
+@dataclass(frozen=True)
+class ContentEnergy(BaseModel):
+    power: Union[float, None]
+    energy: Union[float, None]
+    bearing: Union[float, None]
+    created_date: Union[datetime, None]
+
+    class Config:
+        orm_mode = True
+
+@dataclass(frozen=True)
+class Energy(BaseModel):
+    energy: List[ContentEnergy]
+
+    class Config:
+        orm_mode = True
 
 @dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):

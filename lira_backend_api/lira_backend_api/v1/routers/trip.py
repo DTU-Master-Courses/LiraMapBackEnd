@@ -10,14 +10,16 @@ from lira_backend_api.core.schemas import (
     MapReference,
     MeasurementLatLon,
     Trip,
-    Acceleration,
+    Variables,
     MeasurementLatLon,
+    Energy,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
-    get_current_acceleration,
+    get_variable_list,
     get_segments,
+    get_energy,
 )
 
 router = APIRouter(prefix="/trips")
@@ -54,16 +56,39 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     return results_mod
 
 
-# TODO: This will result in a Front-End breaking change to the API
-@router.get("/acceleration/{trip_id}", response_model=List[ContentAcceleration])
-async def get_acceleration_trip(trip_id, db: Connection = Depends(get_connection)):
-    results = await get_current_acceleration(str(trip_id), db)
+@router.get("/list_of_variables/{trip_id}", response_model=Variables)
+async def get_variables(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_variable_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
         )
     results_modified = list()
 
+    #TODO Fix me
+    return None
+
+@router.get("/energy/{trip_id}", response_model=Energy)
+async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_energy(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain data"
+        )
+    else:
+        return results
+
+
+# TODO: The following function is an awful hack, but don't have time to properly implement for Release 1, circle back to Release 2
+@router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
+def get_trip_segments(trip_id, db: Session = Depends(get_db)):
+    results = get_segments(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain required data"
+        )
+
+    results_list = list()
     for result in results:
         results_modified.append(ContentAcceleration(*result.values()))
 

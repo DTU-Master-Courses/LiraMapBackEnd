@@ -27,10 +27,10 @@ class MeasurementModel(Base):
     is_computed = Column("isComputed", BOOLEAN, nullable=False)
     fk_trip = Column(
         "FK_Trip", UUID, ForeignKey("Trips.TripId"), nullable=False
-    )  # , ForeignKey("MeasurementTypes.id") , ForeignKey("Trips.TripId")
+    ) 
     fk_measurement_type = Column(
         "FK_MeasurementType", UUID, nullable=False
-    )  # , ForeignKey("MeasurementTypes.id")
+    ) 
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=True)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
