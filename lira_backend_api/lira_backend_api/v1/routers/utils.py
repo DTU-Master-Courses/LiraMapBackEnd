@@ -313,12 +313,12 @@ def get_energy(trip_id: str, db: Session):
     dictionary = get_variable_list(trip_id, db)
     values = dictionary["variables"]
     for i in values:
-        #print('\n' + "i = ", i)
         acceleration_mag = i["magnitude"]
         speed = i["speed"]
-        #vector
+        #Need to implement the angle 
+        #between the acceleration wrt the vehicles direction
         acceleration = [i["x"], i["y"]]
-        #Bearing 
+        #Bearing is the direction of the vehicle
         if (values.index(i))+1 != len(values):
             next_ = values[values.index(i)+1]
             bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
@@ -336,7 +336,7 @@ def get_energy(trip_id: str, db: Session):
         # rolling_resistance_force = 
         force = inertial_force # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
         print("force = ", force)
-        velocity_ms = [i/3.6 for i in velocity]
+        velocity_ms = [i / 3.6 for i in velocity]
         print("velocity_ms = ", velocity_ms)
         #Scalar product of force and velocity
         velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
