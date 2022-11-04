@@ -215,7 +215,8 @@ def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
     #atan2 to convert X, Y to radians. Then use pi to convert to degrees. 
     return (atan2(X, Y))# * 180/pi + 360) % 360
 
-#Not needed if we can get speed from database. 
+
+#Not needed if we can get 'obd.spd' from database. 
 def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     #Approximation of distance calculated by using lat and lon
     earth_radius = 6378.137e3 #meter
@@ -313,7 +314,7 @@ def get_energy(trip_id: str, db: Session):
     values = dictionary["variables"]
     for i in values:
         #print('\n' + "i = ", i)
-        magnitude = i["magnitude"]
+        acceleration_mag = i["magnitude"]
         speed = i["speed"]
         #vector
         acceleration = [i["x"], i["y"]]
@@ -321,14 +322,13 @@ def get_energy(trip_id: str, db: Session):
         if (values.index(i))+1 != len(values):
             next_ = values[values.index(i)+1]
             bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
-        #bearing = i["bearing"]
         Xvel = cos(bearing) * speed #* cos(Z-Bearing)
         Yvel = sin(bearing) * speed #* cos(Z-Bearing)
-        # Zvel = sin(Z-Bearing)
+        #Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
         print("change_in_velocity = ", change_in_velocity)
         velocity = [Xvel, Yvel]
-        #needs to be vector
+        #Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
         print("inertial_force = ", inertial_force)
         # aerodynamic_force = 
