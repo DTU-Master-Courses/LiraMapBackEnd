@@ -145,8 +145,7 @@ class ContentVariables(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]
     magnitude: Union[float, None]
-    velocity: Union[float, None]
-    bearing: Union[float, None]
+    speed: Union[float, None]
     distance: Union[float, None]
     created_date: Union[datetime, None]
 
@@ -189,15 +188,18 @@ class SpeedVariablesAgg(BaseModel):
     class Config:
         orm_mode = True
 
-class ContentPower(BaseModel):
+class ContentEnergy(BaseModel):
     power: Union[float, None]
+    energy: Union[float, None]
+    bearing: Union[float, None]
+    created_date: Union[datetime, None]
 
     class Config:
         orm_mode = True
 
 
-class Power(BaseModel):
-    power: List[ContentPower]
+class Energy(BaseModel):
+    energy: List[ContentEnergy]
 
     class Config:
         orm_mode = True

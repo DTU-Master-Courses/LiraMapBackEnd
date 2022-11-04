@@ -14,6 +14,7 @@ from lira_backend_api.core.schemas import (
     SpeedList,
     SpeedVariables,
     SpeedVariablesAgg
+    Energy,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -23,6 +24,7 @@ from lira_backend_api.v1.routers.utils import (
     get_power,
     get_speed_list,
     get_speed_list_agg
+    get_energy,
 )
 from lira_backend_api.database.db import get_db
 
@@ -79,9 +81,9 @@ def get_speed(trip_id, db: Session = Depends(get_db)):
     else:
         return results
 
-@router.get("/power/{trip_id}", response_model=Power)
-def get_power_trip(trip_id, db: Session = Depends(get_db)):
-    results = get_power(str(trip_id), db)
+@router.get("/energy/{trip_id}", response_model=Energy)
+def get_energy_trip(trip_id, db: Session = Depends(get_db)):
+    results = get_energy(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain data"
