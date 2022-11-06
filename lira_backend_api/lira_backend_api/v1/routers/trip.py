@@ -12,21 +12,23 @@ from lira_backend_api.core.schemas import (
     Trip,
     Variables,
     MeasurementLatLon,
-    Power,
+    # Power,
     SpeedList,
     SpeedVariables,
-    SpeedVariablesAgg
+    SpeedVariablesAgg,
     Energy,
+    ClimbingForce
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
     get_variable_list,
     get_segments,
-    get_power,
+    # get_power,
     get_speed_list,
-    get_speed_list_agg
+    get_speed_list_agg,
     get_energy,
+    get_climbingforce
 )
 
 router = APIRouter(prefix="/trips")
@@ -73,21 +75,30 @@ async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results_modified = list()
 
 @router.get("/list_of_speed/{trip_id}", response_model=List[SpeedVariables])
-def get_speed(trip_id, db: Session = Depends(get_db)):
-    results = get_speed_list(str(trip_id), db)
+async def get_speed(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_speed_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
-            status_code=404, detail="Trip does not contain acceleration data"
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
+async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_speed_list_agg(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
         )
     else:
         return results
-
-@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
-def get_speed(trip_id, db: Session = Depends(get_db)):
-    results = get_speed_list_agg(str(trip_id), db)
+    
+@router.get("/climbingforce/{trip_id}", response_model=List[ClimbingForce])
+async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_climbingforce(str(trip_id), db)
     if results is None:
         raise HTTPException(
-            status_code=404, detail="Trip does not contain acceleration data"
+            status_code=404, detail="Trip does not contain speed data"
         )
     else:
         return results
@@ -106,19 +117,20 @@ async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
 
 
 # TODO: The following function is an awful hack, but don't have time to properly implement for Release 1, circle back to Release 2
-@router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
-def get_trip_segments(trip_id, db: Session = Depends(get_db)):
-    results = get_segments(str(trip_id), db)
-    if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain required data"
-        )
+# @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
 
-    results_list = list()
-    for result in results:
-        results_modified.append(ContentAcceleration(*result.values()))
+# def get_trip_segments(trip_id, db: Session = Depends(get_db)):
+#     results = get_segments(str(trip_id), db)
+#     if results is None:
+#         raise HTTPException(
+#             status_code=404, detail="Trip does not contain required data"
+#         )
 
-    return results_modified
+#     results_list = list()
+#     for result in results:
+#         results_modified.append(ContentAcceleration(*result.values()))
+
+#     return results_modified
 
 
 # KT: This is migrated over

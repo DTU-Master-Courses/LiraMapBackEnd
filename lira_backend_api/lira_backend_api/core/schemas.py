@@ -228,6 +228,19 @@ class SpeedVariablesAgg(BaseModel):
     
     class Config:
         orm_mode = True
+class ClimbingForce(BaseModel):
+    vid: Union[int, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    climbingforce: Union[float, None]
+    
+    class Config:
+        orm_mode = True
 
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):

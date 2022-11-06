@@ -389,44 +389,23 @@ async def get_variable_list(trip_id: str, db: Session):
             )
     return {"variables": variable_list}
 
-def get_speed_list(trip_id: str, db: Session):
-    l = list()
-    res = db.execute(" select * from public.func_SpeedList( '"+trip_id+"') ")
-    print("result = ",res) 
-    for value in res:
-        l.append(
-                        {
-                            "ts": value.ts,
-                            "vid": value.vid,
-                            "uid": value.uid,
-                            "rec": value.rec,
-                            "speed": value.speed,
-                            "lon": value.lon,
-                            "lat": value.lat,
-                            
-                        }
-                    ) 
-    print("speed count = ",len(l)) 
-    return l
+async def get_speed_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
 
-def get_speed_list_agg(trip_id: str, db: Session):
-    l = list()
-    res = db.execute(" select * from public.func_SpeedList_agg( '"+trip_id+"') ")
-    print("result = ",res) 
-    for value in res:
-        l.append(
-                        {
-                            "ts_date": value.ts_date,
-                            "ts_time": value.ts_time,
-                            "vid": value.vid,
-                            "speed": value.speed,
-                            "lon": value.lon,
-                            "lat": value.lat,
-                            
-                        }
-                    ) 
-    print("speed count = ",len(l)) 
-    return l        
+async def get_speed_list_agg(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+  
+async def get_climbingforce(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
         
 
 #TODO This function is currently broken on async
