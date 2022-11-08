@@ -27,10 +27,10 @@ class MeasurementModel(Base):
     is_computed = Column("isComputed", BOOLEAN, nullable=False)
     fk_trip = Column(
         "FK_Trip", UUID, ForeignKey("Trips.TripId"), nullable=False
-    )  # , ForeignKey("MeasurementTypes.id") , ForeignKey("Trips.TripId")
+    ) 
     fk_measurement_type = Column(
         "FK_MeasurementType", UUID, nullable=False
-    )  # , ForeignKey("MeasurementTypes.id")
+    ) 
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=True)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
@@ -65,10 +65,15 @@ class Trip(Base):
     end_position_display = Column("EndPositionDisplay", Text)
     duration = Column("Duration", DateTime(timezone=True))
     distance_km = Column("DistanceKm", DOUBLE_PRECISION)
-    fk_device = Column("FK_Device", UUID, nullable=False)
+    fk_device = Column(
+        "FK_Device", UUID, ForeignKey("Devices.DeviceId"), nullable=False
+    )
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=False)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
     fully_imported = Column("Fully_Imported", BOOLEAN, nullable=False)
+    # fully_route_annotated = Column("Fully_RouteAnnotated", BOOLEAN, nullable=True)
+    # description = Column("Description", Text, nullable=True)
+    # change_log = Column("ChangeLog", Text, nullable=True)
 
     class Config:
         orm_mode = True
