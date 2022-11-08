@@ -327,7 +327,7 @@ async def get_variable_list(trip_id: str, db: Session):
     for _ in range(7):
         average_variable_list.append(list())
     # Query to acquire messages from Measurements table
-    res = (
+    query = (
         db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
         .where(
             MeasurementModel.fk_trip == trip_id,
@@ -338,7 +338,9 @@ async def get_variable_list(trip_id: str, db: Session):
         .limit(100000)
         .all()
     )
-    for value in res:
+    result = await db.fetch_all(query)
+
+    for value in result:
         latitude, longitude = value[1], value[2]
         jsonobj = json.loads(value[0])
         if jsonobj.get("obd.spd_veh.value") is not None:
@@ -410,13 +412,13 @@ async def get_climbingforce(trip_id: str, db: Connection):
 
 #TODO This function is currently broken on async
 #Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
-def get_energy(trip_id: str, db: Session):
+async def get_energy(trip_id: str, db: Session):
     energy = list()
     car_mass = 1584
     E = 0.0
     bearing = 0
     velocity = [0, 0]
-    dictionary = get_variable_list(trip_id, db)
+    dictionary = await get_variable_list(trip_id, db)
     values = dictionary["variables"]
     for i in values:
         acceleration_mag = i["magnitude"]
