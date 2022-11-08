@@ -317,7 +317,7 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     return c * earth_radius
 
 #TODO this function is currently broken on async 
-async def get_variable_list(trip_id: str, db: Session):
+async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
     created_date, latitude_previous, longitude_previous = None, None, None
@@ -328,18 +328,18 @@ async def get_variable_list(trip_id: str, db: Session):
         average_variable_list.append(list())
     # Query to acquire messages from Measurements table
     query = (
-        db.query(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
+        select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
         .where(
             MeasurementModel.fk_trip == trip_id,
             MeasurementModel.lon != None,
             MeasurementModel.lat != None,
         ).filter(or_(MeasurementModel.tag == 'obd.spd', MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
         .order_by(MeasurementModel.created_date)
-        .limit(100000)
-        .all()
+        .limit(10)
+        
     )
     result = await db.fetch_all(query)
-
+    
     for value in result:
         latitude, longitude = value[1], value[2]
         jsonobj = json.loads(value[0])
