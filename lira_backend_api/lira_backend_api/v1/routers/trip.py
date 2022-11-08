@@ -81,8 +81,8 @@ async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
 
 # TODO: The following function is an awful hack, but don't have time to properly implement for Release 1, circle back to Release 2
 @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
-def get_trip_segments(trip_id, db: Session = Depends(get_db)):
-    results = get_segments(str(trip_id), db)
+async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_segments(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain required data"
@@ -90,9 +90,9 @@ def get_trip_segments(trip_id, db: Session = Depends(get_db)):
 
     results_list = list()
     for result in results:
-        results_modified.append(ContentAcceleration(*result.values()))
+        results_list.append(ContentAcceleration(*result.values()))
 
-    return results_modified
+    return results_list
 
 
 # KT: This is migrated over
