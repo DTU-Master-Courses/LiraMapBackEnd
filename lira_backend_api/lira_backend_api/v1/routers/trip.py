@@ -14,14 +14,15 @@ from lira_backend_api.core.schemas import (
     MeasurementLatLon,
     Energy,
     ContentVariables,
-    Acceleration
+    Acceleration,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
     get_trips,
     get_variable_list,
     get_segments,
-    get_energy, get_acceleration_hack,
+    get_energy,
+    get_acceleration_hack,
 )
 
 router = APIRouter(prefix="/trips")
@@ -65,11 +66,11 @@ async def get_variables(trip_id, db: Connection = Depends(get_connection)):
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
         )
-    #results_modified = list()
+    # results_modified = list()
     variables_list = list()
     variables_converted_list = list()
-    #for result in results:
-    variables = results.get('variables')
+    # for result in results:
+    variables = results.get("variables")
 
     for i in range(len(variables)):
         if i % 50 == 0:
@@ -82,13 +83,12 @@ async def get_variables(trip_id, db: Connection = Depends(get_connection)):
 
     return variables_response
 
+
 @router.get("/energy/{trip_id}", response_model=Energy)
 async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
     results = await get_energy(str(trip_id), db)
     if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain data"
-        )
+        raise HTTPException(status_code=404, detail="Trip does not contain data")
     else:
         return results
 
