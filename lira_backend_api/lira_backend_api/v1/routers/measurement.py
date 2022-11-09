@@ -73,4 +73,3 @@ async def get_single_ride(
         raise HTTPException(status_code=404, detail="Tag does not contain values")
 
     return result
-
