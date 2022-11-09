@@ -7,7 +7,9 @@ from sqlalchemy.sql import select
 
 from databases.core import Connection
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import null, or_, and_
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.types import Unicode, JSON
 from lira_backend_api.core.models import (
     DRDMeasurement,
     MeasurementTypes,
@@ -330,10 +332,9 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
-
-# TODO this function is currently broken on async
+#TODO this function is currently broken on async 
 async def get_variable_list(trip_id: str, db: Connection):
-    # Saving these values in a database for all trips would save a lot of computation time
+    #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
     created_date, latitude_previous, longitude_previous = None, None, None
     distance = 0
@@ -357,66 +358,52 @@ async def get_variable_list(trip_id: str, db: Connection):
             )
         )
         .order_by(MeasurementModel.created_date)
+        .limit(10)
+        
     )
     result = await db.fetch_all(query)
-
-    try:
-        for value in result:
-            latitude, longitude = value[1], value[2]
-            jsonobj = json.loads(value[0])
-            if jsonobj.get("obd.spd_veh.value") is not None:
-                speed = jsonobj.get("obd.spd_veh.value")
-            if jsonobj.get("obd.spd.value") is not None:
-                speed = jsonobj.get("obd.spd.value")
-            if (
-                jsonobj.get("acc.xyz.x")
-                and jsonobj.get("acc.xyz.y")
-                and jsonobj.get("acc.xyz.z") is not None
-            ):
-                x = jsonobj.get(
-                    "acc.xyz.x"
-                )  # xyz-vector based on data from the database.
-                y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-                z = jsonobj.get(
-                    "acc.xyz.z"
-                )  # The acceleration in the z direction is influenced by the gravitational pull
-                # Assuming created date is at least not None.
-                json_created_date = jsonobj.get("@ts")
-                created_date = convert_date_test(json_created_date)
-                # Only need the date once.
-                if average_variable_list[6] == []:
-                    average_variable_list[6].append(created_date)
-                # This statement is called when a dataset with a different date is encountered.
-                # This starts the process of calculating and storing values and clearing variable_list
-                elif average_variable_list[6][0] != created_date:
-                    x, y, z, latitude, longitude, speed = average_values(
-                        average_variable_list
-                    )
-                    # True when there is a previous dataset to compare
-                    if latitude_previous:
-                        # At the first iteration there is no comparison lat and lon
-                        distance += distanceCalc(
-                            latitude, latitude_previous, longitude, longitude_previous
-                        )
-                    variable_list.append(
-                        {
-                            "x": x,
-                            "y": y,
-                            "z": z,
-                            "lat": latitude,
-                            "lon": longitude,
-                            "magnitude": magnitudeCalc(x, y),
-                            "speed": speed,
-                            "distance": distance,
-                            "created_date": created_date,
-                        }
-                    )
-                    # Used to calculate the change in distance from point to point
-                    latitude_previous = latitude
-                    longitude_previous = longitude
-                    clear_average_variable_list(average_variable_list)
-                append_variable_list(
-                    average_variable_list, x, y, z, latitude, longitude, speed
+    
+    for value in result:
+        latitude, longitude = value[1], value[2]
+        jsonobj = json.loads(value[0])
+        if jsonobj.get("obd.spd_veh.value") is not None:
+            speed = jsonobj.get("obd.spd_veh.value")
+        if jsonobj.get("obd.spd.value") is not None:
+            speed = jsonobj.get("obd.spd.value")
+        if (
+            jsonobj.get("acc.xyz.x")
+            and jsonobj.get("acc.xyz.y")
+            and jsonobj.get("acc.xyz.z") is not None
+        ):
+            x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
+            y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
+            z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is influenced by the gravitational pull
+            # Assuming created date is at least not None.
+            json_created_date = jsonobj.get("@ts")
+            created_date = convert_date(json_created_date)
+            # Only need the date once.
+            if average_variable_list[6] == []:
+                average_variable_list[6].append(created_date)
+            # This statement is called when a dataset with a different date is encountered.
+            # This starts the process of calculating and storing values and clearing variable_list
+            elif average_variable_list[6][0] != created_date:
+                x, y, z, latitude, longitude, speed = average_values(average_variable_list)
+                #True when there is a previous dataset to compare
+                if latitude_previous:
+                    #At the first iteration there is no comparison lat and lon
+                    distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
+                variable_list.append(
+                    {
+                        "x": x,
+                        "y": y,
+                        "z": z,
+                        "lat": latitude,
+                        "lon": longitude,
+                        "magnitude": magnitudeCalc(x, y),
+                        "speed": speed,
+                        "distance": distance,
+                        "created_date": created_date,
+                    }
                 )
     except ValueError as e:
         print(e)
@@ -425,10 +412,28 @@ async def get_variable_list(trip_id: str, db: Connection):
 
     return {"variables": variable_list}
 
+async def get_speed_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
 
-# TODO This function is currently broken on async
-# Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
-async def get_energy(trip_id: str, db: Connection):
+async def get_speed_list_agg(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+  
+async def get_climbingforce(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+        
+
+#TODO This function is currently broken on async
+#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+async def get_energy(trip_id: str, db: Session):
     energy = list()
     car_mass = 1584
     E = 0.0
