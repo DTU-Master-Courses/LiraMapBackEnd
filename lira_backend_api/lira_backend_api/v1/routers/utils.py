@@ -1,6 +1,8 @@
 from datetime import datetime
 import json
 from math import atan2, acos, sin, cos, pi, pow, sqrt
+
+import dateutil.parser
 from sqlalchemy.sql import select
 
 from databases.core import Connection
@@ -139,11 +141,13 @@ def convert_date(json_created_date: any):
     date_as_iso = datetime.fromisoformat(str_format_date)
     return date_as_iso
 
-#throws a value error 
+#throws a value error
 def convert_date_test(json_created_date: any):
     str_format_date = json_created_date[:-6]
     #str_format_date = str_format_date.split(".")[0]
-    date_as_iso = datetime.fromisoformat(str_format_date)
+    # This is the part that throws the value error for invalid datetime
+    # This is to test; there is a BIG fucking caveat with this in the docs, but not made apparent
+    date_as_iso = dateutil.parser.isoparse(str_format_date)
     return date_as_iso
 
 
@@ -285,7 +289,7 @@ def magnitudeCalc(x, y):
     #Notice, subtracting gravitational pull from z
     #z - 1
     #Disregarding z entirely for now
-    return  sqrt(pow(x,2) + pow(y,2))# + pow(z,2)) 
+    return  sqrt(pow(x,2) + pow(y,2))# + pow(z,2))
 
 
 def dot(K, L):
@@ -304,11 +308,11 @@ def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
     d_lon = abs(longitude - longitude_previous)
     X = cos(longitude) * sin(d_lon)
     Y = (cos(latitude) * sin(latitude)) - (sin(latitude) * cos(latitude_previous) * cos(d_lon))
-    #atan2 to convert X, Y to radians. Then use pi to convert to degrees. 
+    #atan2 to convert X, Y to radians. Then use pi to convert to degrees.
     return (atan2(X, Y))# * 180/pi + 360) % 360
 
 
-#Not needed if we can get 'obd.spd' from database. 
+#Not needed if we can get 'obd.spd' from database.
 def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     #Approximation of distance calculated by using lat and lon
     earth_radius = 6378.137e3 #meter
@@ -321,8 +325,154 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1-a))
     return c * earth_radius
 
-#TODO this function is currently broken on async 
-async def get_variable_list(trip_id: str, db: Session):
+#TODO this function is currently broken on async
+async def get_variable_list(trip_id: str, db: Connection):
+    #Saving these values in a database for all trips would save a lot of computation time
+    variable_list, average_variable_list = list(), list()
+    created_date, latitude_previous, longitude_previous = None, None, None
+    distance = 0
+    speed = 0
+    #Create list filled with empty lists
+    for _ in range(7):
+        average_variable_list.append(list())
+    # Query to acquire messages from Measurements table
+    query = (
+        select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
+        .where(
+            MeasurementModel.fk_trip == trip_id,
+            MeasurementModel.lon != None,
+            MeasurementModel.lat != None,
+        ).filter(or_(MeasurementModel.tag == 'obd.spd', MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
+        .order_by(MeasurementModel.created_date)
+    )
+    result = await db.fetch_all(query)
+
+    try:
+        for value in result:
+            latitude, longitude = value[1], value[2]
+            jsonobj = json.loads(value[0])
+            if jsonobj.get("obd.spd_veh.value") is not None:
+                speed = jsonobj.get("obd.spd_veh.value")
+            if jsonobj.get("obd.spd.value") is not None:
+                speed = jsonobj.get("obd.spd.value")
+            if (
+                jsonobj.get("acc.xyz.x")
+                and jsonobj.get("acc.xyz.y")
+                and jsonobj.get("acc.xyz.z") is not None
+            ):
+                x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
+                y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
+                z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is influenced by the gravitational pull
+                # Assuming created date is at least not None.
+                json_created_date = jsonobj.get("@ts")
+                created_date = convert_date_test(json_created_date)
+                # Only need the date once.
+                if average_variable_list[6] == []:
+                    average_variable_list[6].append(created_date)
+                # This statement is called when a dataset with a different date is encountered.
+                # This starts the process of calculating and storing values and clearing variable_list
+                elif average_variable_list[6][0] != created_date:
+                    x, y, z, latitude, longitude, speed = average_values(average_variable_list)
+                    #True when there is a previous dataset to compare
+                    if latitude_previous:
+                        #At the first iteration there is no comparison lat and lon
+                        distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
+                    variable_list.append(
+                        {
+                            "x": x,
+                            "y": y,
+                            "z": z,
+                            "lat": latitude,
+                            "lon": longitude,
+                            "magnitude": magnitudeCalc(x, y),
+                            "speed": speed,
+                            "distance": distance,
+                            "created_date": created_date,
+                        }
+                    )
+                    #Used to calculate the change in distance from point to point
+                    latitude_previous = latitude
+                    longitude_previous = longitude
+                    clear_average_variable_list(average_variable_list)
+                append_variable_list(
+                    average_variable_list, x, y, z, latitude, longitude, speed
+                )
+    except ValueError as e:
+        print(e)
+        print(json_created_date)
+    #this is a hack for bad data
+
+    return {"variables": variable_list}
+
+#TODO This function is currently broken on async
+#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+async def get_energy(trip_id: str, db: Connection):
+    energy = list()
+    car_mass = 1584
+    E = 0.0
+    bearing = 0
+    velocity = [0, 0]
+    dictionary = await get_variable_list(trip_id, db)
+    values = dictionary["variables"]
+    for i in values:
+        acceleration_mag = i["magnitude"]
+        speed = i["speed"]
+        #Need to implement the angle
+        #between the acceleration wrt the vehicles direction
+        acceleration = [i["x"], i["y"]]
+        #Bearing is the direction of the vehicle
+        if (values.index(i))+1 != len(values):
+            next_ = values[values.index(i)+1]
+            bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
+        Xvel = cos(bearing) * speed #* cos(Z-Bearing)
+        Yvel = sin(bearing) * speed #* cos(Z-Bearing)
+        #Zvel = sin(Z-Bearing)
+        change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
+        print("change_in_velocity = ", change_in_velocity)
+        velocity = [Xvel, Yvel]
+        #Force Vector
+        inertial_force = [i * car_mass for i in change_in_velocity]
+        print("inertial_force = ", inertial_force)
+        # aerodynamic_force =
+        # hill_climbing_force =
+        # rolling_resistance_force =
+        force = inertial_force # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
+        print("force = ", force)
+        velocity_ms = [i / 3.6 for i in velocity]
+        print("velocity_ms = ", velocity_ms)
+        #Scalar product of force and velocity
+        velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
+        force_mag = magnitudeCalc(force[0], force[1])
+        angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
+        #scalar product
+        P = velocity_mag * force_mag * cos(angle)
+        print("power = ", P)
+        E += P
+        energy.append({
+            "power": P,
+            "energy": E,
+            "bearing": bearing,
+            "created_date": i["created_date"],
+            })
+    return {"energy": energy}
+
+
+async def get_segments(trip_id: str, db: Connection):
+    query = (
+        select(MeasurementModel)
+        .where(
+            (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
+        )
+        .order_by(MeasurementModel.timestamp)
+    )
+
+    results = await db.fetch_all(query)
+
+    return results
+
+
+#TODO this function is currently broken on async
+async def get_acceleration_hack(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
     created_date, latitude_previous, longitude_previous = None, None, None
@@ -398,69 +548,3 @@ async def get_variable_list(trip_id: str, db: Session):
     #this is a hack for bad data
 
     return {"variables": variable_list}
-
-#TODO This function is currently broken on async
-#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
-async def get_energy(trip_id: str, db: Connection):
-    energy = list()
-    car_mass = 1584
-    E = 0.0
-    bearing = 0
-    velocity = [0, 0]
-    dictionary = await get_variable_list(trip_id, db)
-    values = dictionary["variables"]
-    for i in values:
-        acceleration_mag = i["magnitude"]
-        speed = i["speed"]
-        #Need to implement the angle 
-        #between the acceleration wrt the vehicles direction
-        acceleration = [i["x"], i["y"]]
-        #Bearing is the direction of the vehicle
-        if (values.index(i))+1 != len(values):
-            next_ = values[values.index(i)+1]
-            bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
-        Xvel = cos(bearing) * speed #* cos(Z-Bearing)
-        Yvel = sin(bearing) * speed #* cos(Z-Bearing)
-        #Zvel = sin(Z-Bearing)
-        change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
-        print("change_in_velocity = ", change_in_velocity)
-        velocity = [Xvel, Yvel]
-        #Force Vector
-        inertial_force = [i * car_mass for i in change_in_velocity]
-        print("inertial_force = ", inertial_force)
-        # aerodynamic_force = 
-        # hill_climbing_force = 
-        # rolling_resistance_force = 
-        force = inertial_force # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
-        print("force = ", force)
-        velocity_ms = [i / 3.6 for i in velocity]
-        print("velocity_ms = ", velocity_ms)
-        #Scalar product of force and velocity
-        velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
-        force_mag = magnitudeCalc(force[0], force[1])
-        angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
-        #scalar product
-        P = velocity_mag * force_mag * cos(angle)
-        print("power = ", P)
-        E += P
-        energy.append({
-            "power": P,
-            "energy": E,
-            "bearing": bearing,
-            "created_date": i["created_date"],
-            })
-    return {"energy": energy}
-
-
-async def get_segments(trip_id: str, db: Connection):
-    query = (
-        select(MeasurementModel)
-        .where(
-            (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
-        )
-        .order_by(MeasurementModel.timestamp)
-    )
-
-    results = await db.fetch_all(query)
-
-    return results
