@@ -74,21 +74,3 @@ async def get_single_ride(
 
     return result
 
-
-@router.get("/acceleration/{trip_id}", response_model=Acceleration)
-async def get_acceleration_trip(
-    trip_id: UUID, db: Connection = Depends(get_connection)
-):
-    results = await get_current_acceleration(str(trip_id), db)
-
-    if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain acceleration data"
-        )
-
-    results_modified = list()
-
-    for result in results:
-        results_modified.append(Acceleration(*result.values()))
-
-    return results_modified
