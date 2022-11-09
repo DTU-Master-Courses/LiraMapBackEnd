@@ -15,7 +15,6 @@ from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
     get_measurementmodel,
     get_ride,
-    get_current_acceleration,
     measurement_types,
 )
 from lira_backend_api.database.db import get_connection
