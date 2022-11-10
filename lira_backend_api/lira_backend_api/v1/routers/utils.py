@@ -371,6 +371,7 @@ async def get_variable_list(trip_id: str, db: Session):
             )
         )
         .order_by(MeasurementModel.created_date)
+        .limit(10000)
     )
     result = await db.fetch_all(query)
 
@@ -378,10 +379,10 @@ async def get_variable_list(trip_id: str, db: Session):
         for value in result:
             latitude, longitude = value[1], value[2]
             jsonobj = json.loads(value[0])
-            if jsonobj.get("obd.spd_veh.value") is not None:
-                speed = jsonobj.get("obd.spd_veh.value")
-            if jsonobj.get("obd.spd.value") is not None:
-                speed = jsonobj.get("obd.spd.value")
+            if jsonobj.get("obd.spd_veh.value") is not None and jsonobj.get("obd.spd_veh.value") != 0:
+                speed = jsonobj.get("obd.spd_veh.value")/3.6
+            if jsonobj.get("obd.spd.value") is not None and jsonobj.get("obd.spd.value") != 0:
+                speed = jsonobj.get("obd.spd.value")/3.6
             if (
                 jsonobj.get("acc.xyz.x")
                 and jsonobj.get("acc.xyz.y")
@@ -472,13 +473,14 @@ async def get_energy(trip_id: str, db: Connection):
         aerodynamic_force = aerodynamicCalc(i["speed"])
         # hill_climbing_force =
         rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
-        force = inertial_force + aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
+        force = inertial_force #+ aerodynamic_force + rolling_resistance_force #+ hill_climbing_force
         print("force = ", force)
-        velocity_ms = [i / 3.6 for i in velocity]
+        velocity_ms = [i  for i in velocity]
         print("velocity_ms = ", velocity_ms)
         # Scalar product of force and velocity
         velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
         force_mag = magnitudeCalc(force[0], force[1])
+        force_mag += aerodynamic_force + rolling_resistance_force
         angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
         # scalar product
         P = velocity_mag * force_mag * cos(angle)
