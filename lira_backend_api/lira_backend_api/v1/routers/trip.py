@@ -59,7 +59,7 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     return results_mod
 
 
-@router.get("/list_of_variables/{trip_id}", response_model=Variables)
+@router.get("/acceleration/{trip_id}", response_model=Variables)
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
     if results is None:
