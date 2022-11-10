@@ -9,13 +9,11 @@ from sqlalchemy import BigInteger
 from collections import namedtuple
 
 
-
 @dataclass(frozen=True)
 class MeasurementTypes:
     id: UUID
     created_date: datetime
     type: str
-
 
 
 @dataclass(frozen=True)
@@ -196,6 +194,7 @@ class Variables(BaseModel):
     class Config:
         orm_mode = True
 
+
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):
     power: Union[float, None]
@@ -206,12 +205,14 @@ class ContentEnergy(BaseModel):
     class Config:
         orm_mode = True
 
+
 @dataclass(frozen=True)
 class Energy(BaseModel):
     energy: List[ContentEnergy]
 
     class Config:
         orm_mode = True
+
 
 @dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):

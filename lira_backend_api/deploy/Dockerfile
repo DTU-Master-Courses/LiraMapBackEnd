@@ -3,6 +3,8 @@ FROM python:3.9.6-slim-buster
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc
 
+RUN pip install -U pip setuptools
+
 RUN pip install poetry==1.1.13
 
 # Configuring poetry
