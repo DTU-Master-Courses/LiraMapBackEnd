@@ -330,10 +330,24 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
+def aerodynamicCalc(speed):
+    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
+    #A in m^2 is the cross-sectional area of the car
+    rho = 1.225
+    A = 2.3316
+    cd = 0.29
+    return 0.5 * rho * A * cd * speed**2
 
-# TODO this function is currently broken on async
-async def get_variable_list(trip_id: str, db: Connection):
-    # Saving these values in a database for all trips would save a lot of computation time
+def tireRollResistCalc(speed, car_mass):
+    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    #gw in m/s2 is the gravitational acceleration
+    krt = 0.01 * (1+(speed * 3.6) / 100)
+    gw = 9.80665
+    return car_mass * gw * krt;
+
+#TODO this function is currently broken on async
+async def get_variable_list(trip_id: str, db: Session):
+    #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
     created_date, latitude_previous, longitude_previous = None, None, None
     distance = 0
@@ -455,10 +469,10 @@ async def get_energy(trip_id: str, db: Connection):
         # Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
         print("inertial_force = ", inertial_force)
-        # aerodynamic_force =
+        aerodynamic_force = aerodynamicCalc(i["speed"])
         # hill_climbing_force =
-        # rolling_resistance_force =
-        force = inertial_force  # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
+        rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
+        force = inertial_force + aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
         print("force = ", force)
         velocity_ms = [i / 3.6 for i in velocity]
         print("velocity_ms = ", velocity_ms)
@@ -510,8 +524,8 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
         select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
         .where(
             MeasurementModel.fk_trip == trip_id,
-            MeasurementModel.lon != None,
-            MeasurementModel.lat != None,
+            MeasurementModel.lon is not None,
+            MeasurementModel.lat is not None,
         )
         .filter(
             or_(
