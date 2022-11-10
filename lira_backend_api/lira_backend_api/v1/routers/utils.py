@@ -332,7 +332,24 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
+
+def aerodynamicCalc(speed):
+    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air 
+    #A in m^2 is the cross-sectional area of the car
+    rho = 1.225
+    A = 2.3316
+    cd = 0.29
+    return 0.5 * rho * A * cd * speed**2
+
+def tireRollResistCalc(speed, car_mass):
+    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    #gw in m/s2 is the gravitational acceleration
+    krt = 0.01 * (1+(speed * 3.6) / 100)
+    gw = 9.80665
+    return car_mass * gw * krt; 
+
 #TODO this function is currently broken on async 
+try:
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
@@ -592,3 +609,69 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
     # this is a hack for bad data
 
     return {"variables": variable_list}
+
+#TODO This function is currently broken on async
+#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+async def get_energy(trip_id: str, db: Connection):
+    energy = list()
+    car_mass = 1584
+    E = 0.0
+    bearing = 0
+    velocity = [0, 0]
+    dictionary = await get_variable_list(trip_id, db)
+    values = dictionary["variables"]
+    for i in values:
+        acceleration_mag = i["magnitude"]
+        speed = i["speed"]
+        #Need to implement the angle 
+        #between the acceleration wrt the vehicles direction
+        acceleration = [i["x"], i["y"]]
+        #Bearing is the direction of the vehicle
+        if (values.index(i))+1 != len(values):
+            next_ = values[values.index(i)+1]
+            bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
+        Xvel = cos(bearing) * speed #* cos(Z-Bearing)
+        Yvel = sin(bearing) * speed #* cos(Z-Bearing)
+        #Zvel = sin(Z-Bearing)
+        change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
+        print("change_in_velocity = ", change_in_velocity)
+        velocity = [Xvel, Yvel]
+        #Force Vector
+        inertial_force = [i * car_mass for i in change_in_velocity]
+        print("inertial_force = ", inertial_force)
+        aerodynamic_force = aerodynamicCalc(i["speed"])
+        # hill_climbing_force = 
+        rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
+        force = inertial_force + aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
+        print("force = ", force)
+        velocity_ms = [i / 3.6 for i in velocity]
+        print("velocity_ms = ", velocity_ms)
+        #Scalar product of force and velocity
+        velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
+        force_mag = magnitudeCalc(force[0], force[1])
+        angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
+        #scalar product
+        P = velocity_mag * force_mag * cos(angle)
+        print("power = ", P)
+        E += P
+        energy.append({
+            "power": P,
+            "energy": E,
+            "bearing": bearing,
+            "created_date": i["created_date"],
+            })
+    return {"energy": energy}
+
+
+async def get_segments(trip_id: str, db: Connection):
+    query = (
+        select(MeasurementModel)
+        .where(
+            (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
+        )
+        .order_by(MeasurementModel.timestamp)
+    )
+
+    results = await db.fetch_all(query)
+
+    return results
