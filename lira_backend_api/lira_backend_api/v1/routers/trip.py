@@ -65,14 +65,29 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     return results_mod
 
 
-@router.get("/list_of_variables/{trip_id}", response_model=Variables)
+@router.get("/acceleration/{trip_id}", response_model=Variables)
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
         )
-    results_modified = list()
+    # results_modified = list()
+    variables_list = list()
+    variables_converted_list = list()
+    # for result in results:
+    variables = results.get("variables")
+
+    for i in range(len(variables)):
+        if i % 50 == 0:
+            variables_list.append(variables[i])
+
+    for variable in variables_list:
+        variables_converted_list.append(ContentVariables(*variable.values()))
+
+    variables_response = Variables(variables_converted_list)
+
+    return variables_response
 
 @router.get("/list_of_speed/{trip_id}", response_model=List[SpeedVariables])
 async def get_speed(trip_id, db:  Connection = Depends(get_connection)):
@@ -109,9 +124,7 @@ async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_conn
 async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
     results = await get_energy(str(trip_id), db)
     if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain data"
-        )
+        raise HTTPException(status_code=404, detail="Trip does not contain data")
     else:
         return results
 
@@ -139,22 +152,6 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
             status_code=404, detail="Trip does not contain required data"
         )
 
-    results_list = list()
-    for result in results:
-        results_list.append(ContentAcceleration(*result.values()))
-
-    return results_list
-
-
-# KT: This is migrated over
-@router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
-async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
-    results = await get_segments(str(trip_id), db)
-    if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain acceleration data"
-        )
-
     lat_lon_collection_all = list()
     results_list = list()
 
@@ -170,4 +167,32 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
                     lat_lon_collection_all[i][0], lat_lon_collection_all[i][1]
                 )
             )
+
+    return results_list
+
+
+@router.get("/segments/acceleration/{trip_id}", response_model=Acceleration)
+async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_acceleration_hack(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain required data"
+        )
+
+    acceleration_collection_all = list()
+    results_list = list()
+
+    for result in results:
+        acceleration_collection_all.append(
+            tuple([result._mapping.get("lat"), result._mapping.get("lon")])
+        )
+
+    for i in range(len(acceleration_collection_all)):
+        if i % 10 == 0:
+            results_list.append(
+                Acceleration(
+                    acceleration_collection_all[i][0], acceleration_collection_all[i][1]
+                )
+            )
+
     return results_list

@@ -25,12 +25,8 @@ class MeasurementModel(Base):
     lon = Column("lon", DOUBLE_PRECISION, nullable=True)
     message = Column("message", JSON, nullable=True)
     is_computed = Column("isComputed", BOOLEAN, nullable=False)
-    fk_trip = Column(
-        "FK_Trip", UUID, ForeignKey("Trips.TripId"), nullable=False
-    ) 
-    fk_measurement_type = Column(
-        "FK_MeasurementType", UUID, nullable=False
-    ) 
+    fk_trip = Column("FK_Trip", UUID, ForeignKey("Trips.TripId"), nullable=False)
+    fk_measurement_type = Column("FK_MeasurementType", UUID, nullable=False)
     created_date = Column("Created_Date", DateTime(timezone=True), nullable=True)
     updated_date = Column("Updated_Date", DateTime(timezone=True), nullable=False)
 
