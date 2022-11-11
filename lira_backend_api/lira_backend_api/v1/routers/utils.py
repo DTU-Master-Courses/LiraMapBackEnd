@@ -321,21 +321,20 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1-a))
     return c * earth_radius
 
-
-def aerodynamicCalc(speed):
-    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air 
+def aerodynamicCalc(velocity):
+    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
     #A in m^2 is the cross-sectional area of the car
     rho = 1.225
     A = 2.3316
     cd = 0.29
-    return 0.5 * rho * A * cd * speed**2
+    return [0.5 * rho * A * cd * i**2 for i in velocity]
 
-def tireRollResistCalc(speed, car_mass):
+def tireRollResistCalc(velocity, car_mass):
     #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
     #gw in m/s2 is the gravitational acceleration
-    krt = 0.01 * (1+(speed * 3.6) / 100)
+    krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
     gw = 9.80665
-    return car_mass * gw * krt; 
+    return [car_mass * gw * i for i in krt]
 
 #TODO this function is currently broken on async 
 async def get_variable_list(trip_id: str, db: Session):
@@ -439,7 +438,7 @@ async def get_energy(trip_id: str, db: Connection):
         Yvel = sin(bearing) * speed #* cos(Z-Bearing)
         #Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
-        print("change_in_velocity = ", change_in_velocity)
+        #print("change_in_velocity = ", change_in_velocity)
         velocity = [Xvel, Yvel]
         #Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
@@ -457,7 +456,6 @@ async def get_energy(trip_id: str, db: Connection):
         angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
         #scalar product
         P = velocity_mag * force_mag * cos(angle)
-        print("power = ", P)
         E += P
         energy.append({
             "power": P,
