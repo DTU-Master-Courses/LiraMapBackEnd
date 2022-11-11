@@ -355,7 +355,7 @@ async def get_variable_list(trip_id: str, db: Session):
             MeasurementModel.lon != None,
             MeasurementModel.lat != None,
         ).filter(or_(MeasurementModel.tag == 'obd.spd', MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
-        .order_by(MeasurementModel.created_date)
+        .order_by(MeasurementModel.created_date).limit(10000)
     )
     result = await db.fetch_all(query)
 
@@ -447,7 +447,7 @@ async def get_energy(trip_id: str, db: Connection):
         aerodynamic_force = aerodynamicCalc(i["speed"])
         # hill_climbing_force = 
         rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
-        force = inertial_force + aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
+        force = inertial_force #+ aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
         print("force = ", force)
         velocity_ms = [i / 3.6 for i in velocity]
         print("velocity_ms = ", velocity_ms)
