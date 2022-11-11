@@ -1,3 +1,4 @@
+import json
 from typing import Any, List, Union
 
 from uuid import UUID
@@ -7,6 +8,9 @@ from pydantic.dataclasses import dataclass
 from datetime import datetime
 from sqlalchemy import BigInteger
 from collections import namedtuple
+
+#from sqlalchemy import JSON
+
 
 
 @dataclass(frozen=True)
@@ -194,6 +198,47 @@ class Variables(BaseModel):
     class Config:
         orm_mode = True
 
+class SpeedVariables(BaseModel):
+    ts: Union[datetime, None]
+    vid: Union[int, None]
+    uid: Union[str, None]
+    rec: Union[datetime, None]
+    speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    
+    class Config:
+        orm_mode = True
+               
+class SpeedList(BaseModel):
+    speed_list: List[SpeedVariables]
+
+    class Config:
+        orm_mode = True
+
+class SpeedVariablesAgg(BaseModel):
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    vid: Union[int, None]
+    speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    
+    class Config:
+        orm_mode = True
+class ClimbingForce(BaseModel):
+    vid: Union[int, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    climbingforce: Union[float, None]
+    
+    class Config:
+        orm_mode = True
 
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):
