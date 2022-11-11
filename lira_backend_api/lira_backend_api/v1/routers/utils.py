@@ -336,14 +336,13 @@ def tireRollResistCalc(velocity, car_mass):
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
 
-#TODO this function is currently broken on async 
 async def get_variable_list(trip_id: str, db: Session):
     #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
     created_date, latitude_previous, longitude_previous = None, None, None
     distance = 0
     speed = 0
-    #Create list filled with empty lists
+    # Create list filled with empty lists
     for _ in range(7):
         average_variable_list.append(list())
     # Query to acquire messages from Measurements table
@@ -353,8 +352,16 @@ async def get_variable_list(trip_id: str, db: Session):
             MeasurementModel.fk_trip == trip_id,
             MeasurementModel.lon != None,
             MeasurementModel.lat != None,
-        ).filter(or_(MeasurementModel.tag == 'obd.spd', MeasurementModel.tag == 'obd.spd_veh', MeasurementModel.tag == 'acc.xyz'))
-        .order_by(MeasurementModel.created_date).limit(10000)
+        )
+        .filter(
+            or_(
+                MeasurementModel.tag == "obd.spd",
+                MeasurementModel.tag == "obd.spd_veh",
+                MeasurementModel.tag == "acc.xyz",
+            )
+        )
+        .limit(10000)
+        .order_by(MeasurementModel.created_date)
     )
     result = await db.fetch_all(query)
 
@@ -371,9 +378,13 @@ async def get_variable_list(trip_id: str, db: Session):
                 and jsonobj.get("acc.xyz.y")
                 and jsonobj.get("acc.xyz.z") is not None
             ):
-                x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
+                x = jsonobj.get(
+                    "acc.xyz.x"
+                )  # xyz-vector based on data from the database.
                 y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-                z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is influenced by the gravitational pull
+                z = jsonobj.get(
+                    "acc.xyz.z"
+                )  # The acceleration in the z direction is influenced by the gravitational pull
                 # Assuming created date is at least not None.
                 json_created_date = jsonobj.get("@ts")
                 created_date = convert_date_test(json_created_date)
@@ -383,11 +394,15 @@ async def get_variable_list(trip_id: str, db: Session):
                 # This statement is called when a dataset with a different date is encountered.
                 # This starts the process of calculating and storing values and clearing variable_list
                 elif average_variable_list[6][0] != created_date:
-                    x, y, z, latitude, longitude, speed = average_values(average_variable_list)
-                    #True when there is a previous dataset to compare
+                    x, y, z, latitude, longitude, speed = average_values(
+                        average_variable_list
+                    )
+                    # True when there is a previous dataset to compare
                     if latitude_previous:
-                        #At the first iteration there is no comparison lat and lon
-                        distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
+                        # At the first iteration there is no comparison lat and lon
+                        distance += distanceCalc(
+                            latitude, latitude_previous, longitude, longitude_previous
+                        )
                     variable_list.append(
                         {
                             "x": x,
@@ -401,21 +416,23 @@ async def get_variable_list(trip_id: str, db: Session):
                             "created_date": created_date,
                         }
                     )
-                    #Used to calculate the change in distance from point to point
+                    # Used to calculate the change in distance from point to point
                     latitude_previous = latitude
                     longitude_previous = longitude
                     clear_average_variable_list(average_variable_list)
                 append_variable_list(
                     average_variable_list, x, y, z, latitude, longitude, speed
                 )
-    except ValueError:
-        pass
-    #this is a hack for bad data
+    except ValueError as e:
+        print(e)
+        print(json_created_date)
+    # this is a hack for bad data
 
     return {"variables": variable_list}
 
-#TODO This function is currently broken on async
-#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+
+# TODO This function is currently broken on async
+# Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_energy(trip_id: str, db: Connection):
     energy = list()
     car_mass = 1584
@@ -427,42 +444,41 @@ async def get_energy(trip_id: str, db: Connection):
     for i in values:
         acceleration_mag = i["magnitude"]
         speed = i["speed"]
-        #Need to implement the angle 
-        #between the acceleration wrt the vehicles direction
+        # Need to implement the angle
+        # between the acceleration wrt the vehicles direction
         acceleration = [i["x"], i["y"]]
-        #Bearing is the direction of the vehicle
-        if (values.index(i))+1 != len(values):
-            next_ = values[values.index(i)+1]
+        # Bearing is the direction of the vehicle
+        if (values.index(i)) + 1 != len(values):
+            next_ = values[values.index(i) + 1]
             bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
-        Xvel = cos(bearing) * speed #* cos(Z-Bearing)
-        Yvel = sin(bearing) * speed #* cos(Z-Bearing)
-        #Zvel = sin(Z-Bearing)
+        Xvel = cos(bearing) * speed  # * cos(Z-Bearing)
+        Yvel = sin(bearing) * speed  # * cos(Z-Bearing)
+        # Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
         #print("change_in_velocity = ", change_in_velocity)
         velocity = [Xvel, Yvel]
-        #Force Vector
+        #velocity_ms = [i / 3.6 for i in velocity]
+        # Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
-        print("inertial_force = ", inertial_force)
-        aerodynamic_force = aerodynamicCalc(i["speed"])
-        # hill_climbing_force = 
-        rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
-        force = inertial_force #+ aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
-        print("force = ", force)
-        velocity_ms = [i / 3.6 for i in velocity]
-        print("velocity_ms = ", velocity_ms)
-        #Scalar product of force and velocity
-        velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
+        aerodynamic_force = aerodynamicCalc(velocity)
+        # hill_climbing_force =
+        rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
+        force = [inertial_force[i] + aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(inertial_force))]#+ hill_climbing_force
+        # Scalar product of force and velocity
+        velocity_mag = magnitudeCalc(velocity[0], velocity[1])
         force_mag = magnitudeCalc(force[0], force[1])
-        angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
-        #scalar product
+        angle = angleVectCalc(velocity, force, velocity_mag, force_mag)
+        # scalar product
         P = velocity_mag * force_mag * cos(angle)
         E += P
-        energy.append({
-            "power": P,
-            "energy": E,
-            "bearing": bearing,
-            "created_date": i["created_date"],
-            })
+        energy.append(
+            {
+                "power": P,
+                "energy": E,
+                "bearing": bearing,
+                "created_date": i["created_date"],
+            }
+        )
     return {"energy": energy}
 
 
