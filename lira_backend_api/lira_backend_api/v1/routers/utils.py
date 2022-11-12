@@ -626,3 +626,21 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
     # this is a hack for bad data
 
     return {"variables": variable_list}
+
+async def get_rpm_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+
+async def get_rpm_LR(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+
+async def get_trip_friction(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_friction.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res

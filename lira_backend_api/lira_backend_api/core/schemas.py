@@ -226,6 +226,7 @@ class SpeedVariablesAgg(BaseModel):
     
     class Config:
         orm_mode = True
+
 class ClimbingForce(BaseModel):
     vid: Union[int, None]
     ts_date: Union[str, None]
@@ -239,6 +240,35 @@ class ClimbingForce(BaseModel):
     
     class Config:
         orm_mode = True
+
+@dataclass(frozen=True)
+class ContentRPM(BaseModel):
+    tripid: Union[UUID, None]
+    created_date: Union[str, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    rpm_fl: Union[float, None]
+    rpm_rl: Union[float, None]
+    class Config:
+        orm_mode = True
+               
+class RPMList(BaseModel):
+    rpm_list: List[ContentRPM]
+    class Config:
+        orm_mode = True
+
+class RPMlistagg(BaseModel):
+    tripid: Union[UUID, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    rpm_fl: Union[float, None]
+    rpm_rl: Union[float, None]
+    
+    class Config:
+        orm_mode = True
+
 
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):
@@ -258,6 +288,21 @@ class Energy(BaseModel):
     class Config:
         orm_mode = True
 
+
+@dataclass(frozen=True)
+class Friction(BaseModel):
+    tripid: Union[UUID, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    rpm_fl: Union[float, None]
+    rpm_rl: Union[float, None]
+    v_func:  Union[float, None]
+    friction: Union[float, None]
+
+    class Config:
+        orm_mode = True
 
 @dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):
