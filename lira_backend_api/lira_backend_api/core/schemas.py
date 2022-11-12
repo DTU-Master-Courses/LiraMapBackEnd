@@ -175,33 +175,27 @@ class MeasurementLatLon(BaseModel):
 
 @dataclass(frozen=True)
 class ContentVariables(BaseModel):
-    x: Union[float, None]
-    y: Union[float, None]
-    z: Union[float, None]
-    lat: Union[float, None]
-    lon: Union[float, None]
-    magnitude: Union[float, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
     speed: Union[float, None]
-    distance: Union[float, None]
-    created_date: Union[datetime, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    magnitude: Union[float, None]
 
     class Config:
         orm_mode = True
 
-
-@dataclass(frozen=True)
-class Variables(BaseModel):
-    variables: List[ContentVariables]
-
-    class Config:
-        orm_mode = True
 
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):
     power: Union[float, None]
     energy: Union[float, None]
     bearing: Union[float, None]
-    created_date: Union[datetime, None]
+    distance: Union[float, None]
+    created_date: Union[str, None]
 
     class Config:
         orm_mode = True

@@ -336,99 +336,12 @@ def tireRollResistCalc(velocity, car_mass):
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
 
-async def get_variable_list(trip_id: str, db: Session):
+async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
-    variable_list, average_variable_list = list(), list()
-    created_date, latitude_previous, longitude_previous = None, None, None
-    distance = 0
-    speed = 0
-    # Create list filled with empty lists
-    for _ in range(7):
-        average_variable_list.append(list())
     # Query to acquire messages from Measurements table
-    query = (
-        select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
-        .where(
-            MeasurementModel.fk_trip == trip_id,
-            MeasurementModel.lon != None,
-            MeasurementModel.lat != None,
-        )
-        .filter(
-            or_(
-                MeasurementModel.tag == "obd.spd",
-                MeasurementModel.tag == "obd.spd_veh",
-                MeasurementModel.tag == "acc.xyz",
-            )
-        )
-        .limit(10000)
-        .order_by(MeasurementModel.created_date)
-    )
+    query = open('core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
     result = await db.fetch_all(query)
-
-    try:
-        for value in result:
-            latitude, longitude = value[1], value[2]
-            jsonobj = json.loads(value[0])
-            if jsonobj.get("obd.spd_veh.value") is not None:
-                speed = jsonobj.get("obd.spd_veh.value")
-            if jsonobj.get("obd.spd.value") is not None:
-                speed = jsonobj.get("obd.spd.value")
-            if (
-                jsonobj.get("acc.xyz.x")
-                and jsonobj.get("acc.xyz.y")
-                and jsonobj.get("acc.xyz.z") is not None
-            ):
-                x = jsonobj.get(
-                    "acc.xyz.x"
-                )  # xyz-vector based on data from the database.
-                y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-                z = jsonobj.get(
-                    "acc.xyz.z"
-                )  # The acceleration in the z direction is influenced by the gravitational pull
-                # Assuming created date is at least not None.
-                json_created_date = jsonobj.get("@ts")
-                created_date = convert_date_test(json_created_date)
-                # Only need the date once.
-                if average_variable_list[6] == []:
-                    average_variable_list[6].append(created_date)
-                # This statement is called when a dataset with a different date is encountered.
-                # This starts the process of calculating and storing values and clearing variable_list
-                elif average_variable_list[6][0] != created_date:
-                    x, y, z, latitude, longitude, speed = average_values(
-                        average_variable_list
-                    )
-                    # True when there is a previous dataset to compare
-                    if latitude_previous:
-                        # At the first iteration there is no comparison lat and lon
-                        distance += distanceCalc(
-                            latitude, latitude_previous, longitude, longitude_previous
-                        )
-                    variable_list.append(
-                        {
-                            "x": x,
-                            "y": y,
-                            "z": z,
-                            "lat": latitude,
-                            "lon": longitude,
-                            "magnitude": magnitudeCalc(x, y),
-                            "speed": speed,
-                            "distance": distance,
-                            "created_date": created_date,
-                        }
-                    )
-                    # Used to calculate the change in distance from point to point
-                    latitude_previous = latitude
-                    longitude_previous = longitude
-                    clear_average_variable_list(average_variable_list)
-                append_variable_list(
-                    average_variable_list, x, y, z, latitude, longitude, speed
-                )
-    except ValueError as e:
-        print(e)
-        print(json_created_date)
-    # this is a hack for bad data
-
-    return {"variables": variable_list}
+    return result
 
 
 # TODO This function is currently broken on async
@@ -440,19 +353,36 @@ async def get_energy(trip_id: str, db: Connection):
     bearing = 0
     velocity = [0, 0]
     dictionary = await get_variable_list(trip_id, db)
-    values = dictionary["variables"]
-    for i in values:
-        acceleration_mag = i["magnitude"]
-        speed = i["speed"]
+    #print("type = ",type(dictionary))
+    #my_list = json.loads(dictionary)
+    #with open(my_list, 'r', encoding='utf-8') as f:
+    #    my_data = json.load(f)
+    #    print(my_data)
+    #print("type = ", type(dictionary), 'len = ', len(dictionary))
+    #result = json.loads(dictionary[0][1])
+    #print(result)
+    #values = dictionary["variables"]
+    for rec in dictionary:
+        print(tuple(rec.values())) 
+        result = tuple(rec.values())
+        print(result)
+        acceleration_mag = result[8]
+        speed = result[5]
         # Need to implement the angle
         # between the acceleration wrt the vehicles direction
-        acceleration = [i["x"], i["y"]]
+        acceleration = [result[5], result[4]]
         # Bearing is the direction of the vehicle
-        if (values.index(i)) + 1 != len(values):
-            next_ = values[values.index(i) + 1]
-            bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
-        Xvel = cos(bearing) * speed  # * cos(Z-Bearing)
-        Yvel = sin(bearing) * speed  # * cos(Z-Bearing)
+        if (dictionary.index(rec)) + 1 != len(dictionary):
+            next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
+            bearing = bearingCalc(next_[6], result[6], next_[7], result[7])
+        if (dictionary.index(rec)) - 1 != 0:    
+            previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
+            distance = distanceCalc(result[6], previous_[6], result[7], previous_[7])
+        if speed == None:
+            speed = 0
+        print(speed)
+        Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
+        Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
         # Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
         #print("change_in_velocity = ", change_in_velocity)
@@ -471,12 +401,15 @@ async def get_energy(trip_id: str, db: Connection):
         # scalar product
         P = velocity_mag * force_mag * cos(angle)
         E += P
+        date = str(result[0] + ' ' + result[1])
+        print(date)
         energy.append(
             {
                 "power": P,
                 "energy": E,
                 "bearing": bearing,
-                "created_date": i["created_date"],
+                "distance": distance,
+                "created_date": date,
             }
         )
     return {"energy": energy}
