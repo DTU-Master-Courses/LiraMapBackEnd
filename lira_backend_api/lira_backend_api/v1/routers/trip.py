@@ -19,7 +19,11 @@ from lira_backend_api.core.schemas import (
     Energy,
     ContentVariables,
     Acceleration,
-    ClimbingForce
+    ClimbingForce,
+    RPMList,
+    ContentRPM,
+    RPMlistagg,
+    Friction
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -31,7 +35,10 @@ from lira_backend_api.v1.routers.utils import (
     get_speed_list_agg,
     get_energy,
     get_acceleration_hack,
-    get_climbingforce
+    get_climbingforce,
+    get_rpm_LR,
+    get_rpm_list,
+    get_trip_friction
 )
 
 router = APIRouter(prefix="/trips")
@@ -68,7 +75,7 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     return results_mod
 
 
-@router.get("/list_of_variables/{trip_id}", response_model=Variables)
+@router.get("/acceleration/{trip_id}", response_model=Variables)
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
     if results is None:
@@ -199,3 +206,30 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
             )
 
     return results_list
+
+
+@router.get("/list_of_all_rpm/{trip_id}", response_model=List[ContentRPM])
+async def get_all_rpm(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_rpm_list(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/list_of_rpm_aggr/{trip_id}", response_model=List[RPMlistagg])
+async def get_rpm_aggr(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_rpm_LR(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/firction/{trip_id}", response_model=List[Friction])
+async def get_firction_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_trip_friction(str(trip_id), db)
+    if results is None:
+        raise HTTPException(status_code=404, detail="Trip does not contain data")
+    else:
+        return results

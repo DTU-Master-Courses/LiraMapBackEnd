@@ -332,9 +332,8 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
-
 def aerodynamicCalc(speed):
-    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air 
+    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
     #A in m^2 is the cross-sectional area of the car
     rho = 1.225
     A = 2.3316
@@ -346,10 +345,9 @@ def tireRollResistCalc(speed, car_mass):
     #gw in m/s2 is the gravitational acceleration
     krt = 0.01 * (1+(speed * 3.6) / 100)
     gw = 9.80665
-    return car_mass * gw * krt; 
+    return car_mass * gw * krt;
 
-#TODO this function is currently broken on async 
-try:
+#TODO this function is currently broken on async
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
     variable_list, average_variable_list = list(), list()
@@ -375,52 +373,67 @@ async def get_variable_list(trip_id: str, db: Connection):
             )
         )
         .order_by(MeasurementModel.created_date)
-        .limit(10)
-        
+        .limit(10000)
     )
     result = await db.fetch_all(query)
-    
-    for value in result:
-        latitude, longitude = value[1], value[2]
-        jsonobj = json.loads(value[0])
-        if jsonobj.get("obd.spd_veh.value") is not None:
-            speed = jsonobj.get("obd.spd_veh.value")
-        if jsonobj.get("obd.spd.value") is not None:
-            speed = jsonobj.get("obd.spd.value")
-        if (
-            jsonobj.get("acc.xyz.x")
-            and jsonobj.get("acc.xyz.y")
-            and jsonobj.get("acc.xyz.z") is not None
-        ):
-            x = jsonobj.get("acc.xyz.x")  # xyz-vector based on data from the database.
-            y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-            z = jsonobj.get("acc.xyz.z")  # The acceleration in the z direction is influenced by the gravitational pull
-            # Assuming created date is at least not None.
-            json_created_date = jsonobj.get("@ts")
-            created_date = convert_date(json_created_date)
-            # Only need the date once.
-            if average_variable_list[6] == []:
-                average_variable_list[6].append(created_date)
-            # This statement is called when a dataset with a different date is encountered.
-            # This starts the process of calculating and storing values and clearing variable_list
-            elif average_variable_list[6][0] != created_date:
-                x, y, z, latitude, longitude, speed = average_values(average_variable_list)
-                #True when there is a previous dataset to compare
-                if latitude_previous:
-                    #At the first iteration there is no comparison lat and lon
-                    distance += distanceCalc(latitude, latitude_previous, longitude, longitude_previous)
-                variable_list.append(
-                    {
-                        "x": x,
-                        "y": y,
-                        "z": z,
-                        "lat": latitude,
-                        "lon": longitude,
-                        "magnitude": magnitudeCalc(x, y),
-                        "speed": speed,
-                        "distance": distance,
-                        "created_date": created_date,
-                    }
+
+    try:
+        for value in result:
+            latitude, longitude = value[1], value[2]
+            jsonobj = json.loads(value[0])
+            if jsonobj.get("obd.spd_veh.value") is not None and jsonobj.get("obd.spd_veh.value") != 0:
+                speed = jsonobj.get("obd.spd_veh.value")/3.6
+            if jsonobj.get("obd.spd.value") is not None and jsonobj.get("obd.spd.value") != 0:
+                speed = jsonobj.get("obd.spd.value")/3.6
+            if (
+                jsonobj.get("acc.xyz.x")
+                and jsonobj.get("acc.xyz.y")
+                and jsonobj.get("acc.xyz.z") is not None
+            ):
+                x = jsonobj.get(
+                    "acc.xyz.x"
+                )  # xyz-vector based on data from the database.
+                y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
+                z = jsonobj.get(
+                    "acc.xyz.z"
+                )  # The acceleration in the z direction is influenced by the gravitational pull
+                # Assuming created date is at least not None.
+                json_created_date = jsonobj.get("@ts")
+                created_date = convert_date_test(json_created_date)
+                # Only need the date once.
+                if average_variable_list[6] == []:
+                    average_variable_list[6].append(created_date)
+                # This statement is called when a dataset with a different date is encountered.
+                # This starts the process of calculating and storing values and clearing variable_list
+                elif average_variable_list[6][0] != created_date:
+                    x, y, z, latitude, longitude, speed = average_values(
+                        average_variable_list
+                    )
+                    # True when there is a previous dataset to compare
+                    if latitude_previous:
+                        # At the first iteration there is no comparison lat and lon
+                        distance += distanceCalc(
+                            latitude, latitude_previous, longitude, longitude_previous
+                        )
+                    variable_list.append(
+                        {
+                            "x": x,
+                            "y": y,
+                            "z": z,
+                            "lat": latitude,
+                            "lon": longitude,
+                            "magnitude": magnitudeCalc(x, y),
+                            "speed": speed,
+                            "distance": distance,
+                            "created_date": created_date,
+                        }
+                    )
+                    # Used to calculate the change in distance from point to point
+                    latitude_previous = latitude
+                    longitude_previous = longitude
+                    clear_average_variable_list(average_variable_list)
+                append_variable_list(
+                    average_variable_list, x, y, z, latitude, longitude, speed
                 )
     except ValueError as e:
         print(e)
@@ -429,6 +442,9 @@ async def get_variable_list(trip_id: str, db: Connection):
 
     return {"variables": variable_list}
 
+
+# TODO This function is currently broken on async
+# Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_speed_list(trip_id: str, db: Connection):
     query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
     res = await db.fetch_all(query)
@@ -450,7 +466,7 @@ async def get_climbingforce(trip_id: str, db: Connection):
 
 #TODO This function is currently broken on async
 #Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
-async def get_energy(trip_id: str, db: Session):
+async def get_energy(trip_id: str, db: Connection):
     energy = list()
     car_mass = 1584
     E = 0.0
@@ -477,16 +493,17 @@ async def get_energy(trip_id: str, db: Session):
         # Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
         print("inertial_force = ", inertial_force)
-        # aerodynamic_force =
+        aerodynamic_force = aerodynamicCalc(i["speed"])
         # hill_climbing_force =
-        # rolling_resistance_force =
-        force = inertial_force  # + aerodynamic_force + hill_climbing_force + rolling_resistance_force
+        rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
+        force = inertial_force #+ aerodynamic_force + rolling_resistance_force #+ hill_climbing_force
         print("force = ", force)
-        velocity_ms = [i / 3.6 for i in velocity]
+        velocity_ms = [i  for i in velocity]
         print("velocity_ms = ", velocity_ms)
         # Scalar product of force and velocity
         velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
         force_mag = magnitudeCalc(force[0], force[1])
+        force_mag += aerodynamic_force + rolling_resistance_force
         angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
         # scalar product
         P = velocity_mag * force_mag * cos(angle)
@@ -532,8 +549,8 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
         select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
         .where(
             MeasurementModel.fk_trip == trip_id,
-            MeasurementModel.lon != None,
-            MeasurementModel.lat != None,
+            MeasurementModel.lon is not None,
+            MeasurementModel.lat is not None,
         )
         .filter(
             or_(
@@ -610,68 +627,20 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
 
     return {"variables": variable_list}
 
-#TODO This function is currently broken on async
-#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
-async def get_energy(trip_id: str, db: Connection):
-    energy = list()
-    car_mass = 1584
-    E = 0.0
-    bearing = 0
-    velocity = [0, 0]
-    dictionary = await get_variable_list(trip_id, db)
-    values = dictionary["variables"]
-    for i in values:
-        acceleration_mag = i["magnitude"]
-        speed = i["speed"]
-        #Need to implement the angle 
-        #between the acceleration wrt the vehicles direction
-        acceleration = [i["x"], i["y"]]
-        #Bearing is the direction of the vehicle
-        if (values.index(i))+1 != len(values):
-            next_ = values[values.index(i)+1]
-            bearing = bearingCalc(next_["lat"], i["lat"], next_["lon"], i["lon"])
-        Xvel = cos(bearing) * speed #* cos(Z-Bearing)
-        Yvel = sin(bearing) * speed #* cos(Z-Bearing)
-        #Zvel = sin(Z-Bearing)
-        change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
-        print("change_in_velocity = ", change_in_velocity)
-        velocity = [Xvel, Yvel]
-        #Force Vector
-        inertial_force = [i * car_mass for i in change_in_velocity]
-        print("inertial_force = ", inertial_force)
-        aerodynamic_force = aerodynamicCalc(i["speed"])
-        # hill_climbing_force = 
-        rolling_resistance_force = tireRollResistCalc(i["speed"], car_mass)
-        force = inertial_force + aerodynamic_force + rolling_resistance_force#+ hill_climbing_force
-        print("force = ", force)
-        velocity_ms = [i / 3.6 for i in velocity]
-        print("velocity_ms = ", velocity_ms)
-        #Scalar product of force and velocity
-        velocity_mag = magnitudeCalc(velocity_ms[0], velocity_ms[1])
-        force_mag = magnitudeCalc(force[0], force[1])
-        angle = angleVectCalc(velocity_ms, force, velocity_mag, force_mag)
-        #scalar product
-        P = velocity_mag * force_mag * cos(angle)
-        print("power = ", P)
-        E += P
-        energy.append({
-            "power": P,
-            "energy": E,
-            "bearing": bearing,
-            "created_date": i["created_date"],
-            })
-    return {"energy": energy}
+async def get_rpm_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
 
+async def get_rpm_LR(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
 
-async def get_segments(trip_id: str, db: Connection):
-    query = (
-        select(MeasurementModel)
-        .where(
-            (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
-        )
-        .order_by(MeasurementModel.timestamp)
-    )
-
-    results = await db.fetch_all(query)
-
-    return results
+async def get_trip_friction(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_friction.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
