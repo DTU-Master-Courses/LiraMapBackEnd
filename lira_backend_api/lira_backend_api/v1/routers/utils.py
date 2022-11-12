@@ -356,7 +356,8 @@ async def get_energy(trip_id: str, db: Connection):
     for rec in dictionary:
         result = tuple(rec.values())
         acceleration_mag = result[8]
-        speed = result[5]
+        #Division by 3.6 to convert km/h to m/s
+        speed = result[5] / 3.6
         # Need to implement the angle
         # between the acceleration wrt the vehicles direction
         acceleration = [result[5], result[4]]
