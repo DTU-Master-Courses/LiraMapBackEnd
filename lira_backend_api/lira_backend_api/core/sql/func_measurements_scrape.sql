@@ -20,7 +20,6 @@ select
 	or 
 	cast(message::json->>'acc.xyz.x' as decimal(3,2)) > 0
 	)
-	limit 100000
 ),
 agg as(
 SELECT	
@@ -38,7 +37,6 @@ SELECT
 	group by 
 	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1), 
     SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)	
- 	--LIMIT 1000
 	)
 	
 	select 

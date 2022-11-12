@@ -338,7 +338,7 @@ def tireRollResistCalc(velocity, car_mass):
 
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
-    # Query to acquire messages from Measurements table
+    #Query to acquire messages from Measurements table
     query = open('core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
     result = await db.fetch_all(query)
     return result
@@ -353,19 +353,8 @@ async def get_energy(trip_id: str, db: Connection):
     bearing = 0
     velocity = [0, 0]
     dictionary = await get_variable_list(trip_id, db)
-    #print("type = ",type(dictionary))
-    #my_list = json.loads(dictionary)
-    #with open(my_list, 'r', encoding='utf-8') as f:
-    #    my_data = json.load(f)
-    #    print(my_data)
-    #print("type = ", type(dictionary), 'len = ', len(dictionary))
-    #result = json.loads(dictionary[0][1])
-    #print(result)
-    #values = dictionary["variables"]
     for rec in dictionary:
-        print(tuple(rec.values())) 
         result = tuple(rec.values())
-        print(result)
         acceleration_mag = result[8]
         speed = result[5]
         # Need to implement the angle
@@ -380,14 +369,11 @@ async def get_energy(trip_id: str, db: Connection):
             distance = distanceCalc(result[6], previous_[6], result[7], previous_[7])
         if speed == None:
             speed = 0
-        print(speed)
         Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
         Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
         # Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
-        #print("change_in_velocity = ", change_in_velocity)
         velocity = [Xvel, Yvel]
-        #velocity_ms = [i / 3.6 for i in velocity]
         # Force Vector
         inertial_force = [i * car_mass for i in change_in_velocity]
         aerodynamic_force = aerodynamicCalc(velocity)
