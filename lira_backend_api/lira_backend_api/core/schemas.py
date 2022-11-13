@@ -43,7 +43,7 @@ class Device:
 
 
 @dataclass(frozen=True)
-class Trip:
+class Trip():
     id: UUID
     task_id: int
     start_time_utc: Union[datetime, None]
@@ -60,6 +60,9 @@ class Trip:
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
     fully_imported: Union[bool, None]
+
+    class Config:
+        orm_mode = True
 
 
 @dataclass(frozen=True)

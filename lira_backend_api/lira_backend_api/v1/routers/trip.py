@@ -1,7 +1,10 @@
+import dataclasses
 from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_pagination import Page, LimitOffsetPage, Params, paginate
+from fastapi.encoders import jsonable_encoder
 
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
@@ -43,10 +46,9 @@ async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection
 
 
 # KT: Migrated to new approach
-@router.get("", response_model=List[Trip])
+@router.get("", response_model=Page[Trip])
 async def get_all_trips(db: Connection = Depends(get_connection)):
     results = await get_trips(db)
-
     if results is None:
         raise HTTPException(status_code=500, detail="Something unexpected happened")
 
@@ -55,8 +57,10 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     for row in results:
         row_dict = dict(row._mapping.items())
         results_mod.append(Trip(*row_dict.values()))
-
-    return results_mod
+    #trip_as_json = jsonable_encoder(results_mod)
+    my_results = paginate(results_mod)
+    trip_as_json = jsonable_encoder(my_results)
+    return trip_as_json
 
 
 @router.get("/acceleration/{trip_id}", response_model=Variables)

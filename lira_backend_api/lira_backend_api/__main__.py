@@ -12,6 +12,9 @@ from lira_backend_api.v1.routers import (
 from lira_backend_api.settings import settings
 from lira_backend_api.database.db import lira_database, setup_db
 
+from fastapi_pagination import Page, add_pagination
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 app = FastAPI()
 app.include_router(measurement.router)
 app.include_router(trip.router)
@@ -19,6 +22,8 @@ app.include_router(drdmeasurement.router)
 app.include_router(device.router)
 app.include_router(sourcetype.router)
 app.include_router(mapreference.router)
+add_pagination(app)
+
 
 # TODO: We need to change the origins of this for production
 app.add_middleware(

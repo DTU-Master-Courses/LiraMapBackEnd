@@ -248,10 +248,11 @@ async def get_trips(db: Connection):
         .filter(Trip.end_position_lat != None)
         .filter(Trip.end_position_lng != None)
         .order_by(Trip.task_id)
-        .limit(150)
     )
 
+    #results = await paginate(db.fetch_all(query))
     results = await db.fetch_all(query)
+
 
     return results
 
