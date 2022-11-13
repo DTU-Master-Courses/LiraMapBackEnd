@@ -13,6 +13,8 @@ from lira_backend_api.core.schemas import (
     Energy,
     ContentVariables,
     Acceleration,
+    SpeedVariablesAgg,
+    ClimbingForce,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -21,6 +23,8 @@ from lira_backend_api.v1.routers.utils import (
     get_segments,
     get_energy,
     get_acceleration_hack,
+    get_speed_list_agg,
+    get_climbingforce,
 )
 
 router = APIRouter(prefix="/trips")
@@ -55,6 +59,26 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
         results_mod.append(Trip(*row_dict.values()))
 
     return results_mod
+
+@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
+async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_speed_list_agg(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
+
+@router.get("/climbingforce/{trip_id}", response_model=List[ClimbingForce])
+async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_climbingforce(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
 
 #TODO: limit amount of data amount to frontend
 @router.get("/list_of_variables/{trip_id}", response_model=List[ContentVariables])

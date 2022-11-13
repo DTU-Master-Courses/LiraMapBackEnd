@@ -517,5 +517,16 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
     except ValueError:
         pass
     # this is a hack for bad data
-
     return {"variables": variable_list}
+
+async def get_speed_list_agg(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+  
+async def get_climbingforce(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res   
