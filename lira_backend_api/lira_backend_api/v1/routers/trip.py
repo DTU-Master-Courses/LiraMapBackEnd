@@ -6,11 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
 from lira_backend_api.core.schemas import (
-    ContentAcceleration,
     MapReference,
     MeasurementLatLon,
     Trip,
-    Variables,
     MeasurementLatLon,
     Energy,
     ContentVariables,
@@ -58,30 +56,16 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
 
     return results_mod
 
-
-@router.get("/acceleration/{trip_id}", response_model=Variables)
+#TODO: limit amount of data amount to frontend
+@router.get("/list_of_variables/{trip_id}", response_model=List[ContentVariables])
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
         )
-    # results_modified = list()
-    variables_list = list()
-    variables_converted_list = list()
-    # for result in results:
-    variables = results.get("variables")
-
-    for i in range(len(variables)):
-        if i % 50 == 0:
-            variables_list.append(variables[i])
-
-    for variable in variables_list:
-        variables_converted_list.append(ContentVariables(*variable.values()))
-
-    variables_response = Variables(variables_converted_list)
-
-    return variables_response
+    else:
+        return results
 
 
 @router.get("/energy/{trip_id}", response_model=Energy)
