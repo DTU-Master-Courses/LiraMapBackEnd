@@ -9,52 +9,6 @@ services:
     restart: always
     env_file:
     - .env
-    labels:
-      # Enables traefik for this container.
-    - traefik.enable=true
-    - traefik.http.routers.lira_backend_api.rule=Host(`${LIRA_BACKEND_API_TRAEFIK_HOST:-lira_backend_api.localhost}`)
-    - traefik.http.routers.lira_backend_api.entrypoints=http
-    - traefik.http.routers.lira_backend_api.service=lira_backend_api
-    - traefik.http.services.lira_backend_api.loadbalancer.server.port=${LIRA_BACKEND_API_PORT:-8000}
-    networks:
-    - default
-    - traefik-shared
-    # depends_on:
-    #   db:
-    #     condition: service_healthy
-    # environment:
-    #   LIRA_BACKEND_API_HOST: 0.0.0.0
-    #   LIRA_BACKEND_API_DB_HOST: lira_backend_api-db
-    #   LIRA_BACKEND_API_DB_PORT: 5432
-    #   LIRA_BACKEND_API_DB_USER: lira_backend_api
-    #   LIRA_BACKEND_API_DB_PASS: lira_backend_api
-    #   LIRA_BACKEND_API_DB_BASE: lira_backend_api
+    
     ports:
-      - "8000:8000"
-
-  # db:
-  #   image: postgres:13.6-bullseye
-  #   hostname: lira_backend_api-db
-  #   environment:
-  #     POSTGRES_PASSWORD: "lira_backend_api"
-  #     POSTGRES_USER: "lira_backend_api"
-  #     POSTGRES_DB: "lira_backend_api"
-  #   volumes:
-  #   - lira_backend_api-db-data:/var/lib/postgresql/data
-  #   restart: always
-  #   healthcheck:
-  #     test: pg_isready -U lira_backend_api
-  #     interval: 2s
-  #     timeout: 3s
-  #     retries: 40
-
-
-
-volumes:
-  lira_backend_api-db-data:
-    name: lira_backend_api-db-data
-
-networks:
-  # Network for traefik.
-  traefik-shared:
-    name: traefik-shared
+    - 8000:${API_PORT}
