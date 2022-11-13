@@ -50,16 +50,27 @@ class Trip:
     end_time_utc: Union[datetime, None]
     start_position_lat: Union[str, None]
     start_position_lng: Union[str, None]
-    start_position_display: Union[str, None]
+    start_position_city: Union[str, None]
+    start_position_house_number: Union[str, None]
+    start_position_county: Union[str, None]
+    start_position_state: Union[str, None]
+    start_position_postcode: Union[str, None]
     end_position_lat: Union[str, None]
     end_position_lng: Union[str, None]
-    end_position_display: Union[str, None]
+    end_position_city: Union[str, None]
+    end_position_house_number: Union[str, None]
+    end_position_county: Union[str, None]
+    end_position_state: Union[str, None]
+    end_position_postcode: Union[str, None]
     duration: Union[datetime, None]
     distance_km: Union[float, None]
-    fk_device: Union[UUID, None]
-    created_date: Union[datetime, None]
-    updated_date: Union[datetime, None]
-    fully_imported: Union[bool, None]
+    # fk_device: Union[UUID, None]
+    # created_date: Union[datetime, None]
+    # updated_date: Union[datetime, None]
+    # fully_imported: Union[bool, None]
+    
+    class Config:
+        orm_mode = True
 
 
 @dataclass(frozen=True)

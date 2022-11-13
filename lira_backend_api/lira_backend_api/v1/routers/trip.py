@@ -51,14 +51,8 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
 
     if results is None:
         raise HTTPException(status_code=500, detail="Something unexpected happened")
-
-    results_mod = list()
-
-    for row in results:
-        row_dict = dict(row._mapping.items())
-        results_mod.append(Trip(*row_dict.values()))
-
-    return results_mod
+    else:
+        return results
 
 @router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
 async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
