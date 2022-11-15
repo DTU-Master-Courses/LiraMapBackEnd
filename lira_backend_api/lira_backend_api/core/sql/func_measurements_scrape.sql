@@ -5,22 +5,29 @@ select
 	message
 	 FROM public."Measurements"
 	where 
-	"FK_Trip" = '2857262b-71db-49df-8db6-a042987bf0eb'
+	"FK_Trip" = '+trip_id+'
 	 and
-	("T" = 'obd.spd'
+	(
+	"T" = 'acc.xyz'
      or 
     "T" = 'obd.spd_veh'
-     or 
-	"T" = 'acc.xyz')
+     or
+	"T" = 'obd.acc_yaw'
+	 or 
+	"T" = 'obd.acc_long'
+	)
 	and 
 	(
-	(cast(message::json->>'obd.spd_veh.value' as decimal(6,3)) > 0
-	--or cast(message::json->>'obd.spd.value' as decimal(6,3)) > 0
-	)
+	cast(message::json->>'obd.spd_veh.value' as decimal(6,3)) > 0
 	or 
 	cast(message::json->>'acc.xyz.x' as decimal(3,2)) > 0
+	or
+	cast(message::json->>'obd.acc_yaw.value' as decimal(10,3)) > 0
+	or
+	cast(message::json->>'obd.acc_long.value' as decimal(10,3)) > 0
 	)
-	--LIMIT 1000
+	and 
+	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2) not like '%+%'
 ),
 agg as(
 SELECT	
@@ -29,8 +36,10 @@ SELECT
 	round(avg(cast(message::json->>'acc.xyz.z' as decimal(3,2))), 2) as az,
 	round(avg(cast(message::json->>'acc.xyz.y' as decimal(3,2))), 2) as ay,
 	round(avg(cast(message::json->>'acc.xyz.x' as decimal(3,2))), 2) as ax,
-    round(avg(cast(message::json->>'obd.spd_veh.value' as decimal(6,3))), 2) as speed,
-	--round(avg(cast(message::json->>'obd.spd.value' as decimal(6,3))), 2) as speed,
+	--Coalesce to return 0 when value equals NULL
+    COALESCE(round(avg(cast(message::json->>'obd.spd_veh.value' as decimal(6,3))), 2), 0 ) as speed,
+	round(avg(cast(message::json->>'obd.acc_long.value' as decimal(10,3))), 2) as acc_long,
+	round(avg(cast(message::json->>'obd.acc_yaw.value' as decimal(10,3))), 2) as acc_yaw,
     avg(lat) as lat, 
 	avg(lon) as lon
 	from useful
@@ -43,5 +52,4 @@ SELECT
 	select 
 	*,
 	sqrt(pow(ax,2) + pow(ay,2)) as magnitude
--- 	sqrt(power(ax,2) + power(ay,2) + power(az,2)) as slop
 	from agg

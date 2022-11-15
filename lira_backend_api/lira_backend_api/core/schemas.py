@@ -179,6 +179,8 @@ class ContentVariables(BaseModel):
     ay: Union[float, None]
     ax: Union[float, None]
     speed: Union[float, None]
+    acc_long: Union[float, None]
+    acc_yaw: Union[float, None]
     lon: Union[float, None]
     lat: Union[float, None]
     magnitude: Union[float, None]

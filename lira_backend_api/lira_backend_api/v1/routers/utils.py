@@ -324,11 +324,14 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     d_lat = (latitude - latitude_previous) * (pi / 180)
     d_lon = (longitude - longitude_previous) * (pi / 180)
     # Haversine formula
-    a = sin(d_lat / 2) * sin(d_lat / 2) + cos(lat_prev_radians) * cos(
-        lat_radians
-    ) * sin(d_lon / 2) * sin(d_lon / 2)
+    a = sin(d_lat / 2) * sin(d_lat / 2) + cos(lat_prev_radians) * cos(lat_radians) * sin(d_lon / 2) * sin(d_lon / 2)
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
+
+
+def inertialCalc(longitudinal_acceleration, car_mass):
+    return longitudinal_acceleration * car_mass
+
 
 def aerodynamicCalc(velocity):
     #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
@@ -344,6 +347,10 @@ def tireRollResistCalc(velocity, car_mass):
     krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
+
+def hillClimbingCalc(slope, car_mass):
+    gw = 9.80665
+    return car_mass * gw * slope
 
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
@@ -364,42 +371,45 @@ async def get_energy(trip_id: str, db: Connection):
     dictionary = await get_variable_list(trip_id, db)
     for rec in dictionary:
         result = tuple(rec.values())
-        if "+" in result[1]:
-            continue
+        #result index from 0 to 9 ts_date, ts_time, az, ay,
+        #ax, speed, acc_long, acc_yaw, lat, lon
         acceleration_mag = result[8]
-        speed = result[5]
+        speed = float(result[5]) / 3.6
+        #offset of 198 according to car data validation
+        #reolution changed from 1 to 0.05
+        #longitudinal acceleration - units of meters
+        acc_long = (float(result[6]) - 198) * 0.05 
+        #offset of 2047
+        acc_yaw = (float(result[7]) - 2047) #in degrees a second
         # Need to implement the angle
         # between the acceleration wrt the vehicles direction
         acceleration = [result[5], result[4]]
         # Bearing is the direction of the vehicle
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
-            bearing = bearingCalc(next_[6], result[6], next_[7], result[7])
+            bearing = bearingCalc(next_[8], result[8], next_[9], result[9])
         if (dictionary.index(rec)) - 1 != 0:    
             previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
-            distance = distanceCalc(result[6], previous_[6], result[7], previous_[7])
-        if speed == None:
-            speed = 0
+            distance = distanceCalc(result[8], previous_[8], result[9], previous_[9])
         #Division by 3.6 to convert km/h to m/s
-        speed = float(speed) / 3.6
         Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
         Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
         # Zvel = sin(Z-Bearing)
         change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
         velocity = [Xvel, Yvel]
         # Force Vector
-        inertial_force = [i * car_mass for i in change_in_velocity]
+        inertial_force = inertialCalc(acc_long, car_mass)
         aerodynamic_force = aerodynamicCalc(velocity)
-        # hill_climbing_force =
+        hill_climbing_force = hillClimbingCalc(acc_yaw, car_mass)
         rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
-        force = [inertial_force[i] + aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(inertial_force))]#+ hill_climbing_force
+        force = [aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(velocity))] 
         # Scalar product of force and velocity
         velocity_mag = magnitudeCalc(velocity[0], velocity[1])
-        force_mag = magnitudeCalc(force[0], force[1])
+        force_mag = magnitudeCalc(force[0], force[1])  + inertial_force +  hill_climbing_force
         angle = angleVectCalc(velocity, force, velocity_mag, force_mag)
         # scalar product
         P = velocity_mag * force_mag * cos(angle)
-        E += P
+        E += (1/3600) * distance * P
         date = str(result[0] + ' ' + result[1])
         energy.append(
             {
