@@ -64,10 +64,10 @@ class Trip:
     end_position_postcode: Union[str, None]
     duration: Union[datetime, None]
     distance_km: Union[float, None]
-    # fk_device: Union[UUID, None]
-    # created_date: Union[datetime, None]
-    # updated_date: Union[datetime, None]
-    # fully_imported: Union[bool, None]
+    fk_device: Union[UUID, None]
+    created_date: Union[datetime, None]
+    updated_date: Union[datetime, None]
+    fully_imported: Union[bool, None]
     
     class Config:
         orm_mode = True

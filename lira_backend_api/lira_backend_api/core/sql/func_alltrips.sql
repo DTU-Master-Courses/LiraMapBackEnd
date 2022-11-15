@@ -19,11 +19,11 @@ select
 	"EndPositionDisplay"::json->>'state' as end_position_state,
 	"EndPositionDisplay"::json->>'postcode' as end_position_postcode,
 	date_trunc('second', "Duration") AS duration,
-	round(cast("DistanceKm" as decimal(8,4)), 4) AS distance_km
-	-- "FK_Device" as fk_device,
-	-- "Created_Date" as created_date,
-	-- "Updated_Date" as updated_date,
-	-- "Fully_Imported" as fully_imported
+	round(cast("DistanceKm" as decimal(8,4)), 4) AS distance_km,
+	"FK_Device" as fk_device,
+	"Created_Date" as created_date,
+	"Updated_Date" as updated_date,
+	"Fully_Imported" as fully_imported
 	 FROM public."Trips"	
 	limit 490
 -- 	where 
