@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  api-prod:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: lira_backend_api:${LIRA_BACKEND_API_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    
+    ports:
+    - 8000:${API_PORT}
+  front-end-prod:
+    container_name: liramap-front-end-prod
+    image: liramap-front-end-prod
+    ports:
+      - 8080:8080
