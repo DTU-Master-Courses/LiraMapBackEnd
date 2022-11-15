@@ -9,6 +9,7 @@ from lira_backend_api.core.schemas import (
     MapReference,
     MeasurementLatLon,
     Trip,
+    AllTrip,
     MeasurementLatLon,
     Energy,
     ContentVariables,
@@ -45,7 +46,7 @@ async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection
 
 
 # KT: Migrated to new approach
-@router.get("", response_model=List[Trip])
+@router.get("", response_model=List[AllTrip])
 async def get_all_trips(db: Connection = Depends(get_connection)):
     results = await get_trips(db)
 

@@ -41,9 +41,28 @@ class Device:
     class Config:
         orm_mode = True
 
-
 @dataclass(frozen=True)
 class Trip:
+    id: UUID
+    task_id: int
+    start_time_utc: Union[datetime, None]
+    end_time_utc: Union[datetime, None]
+    start_position_lat: Union[str, None]
+    start_position_lng: Union[str, None]
+    start_position_display: Union[str, None]
+    end_position_lat: Union[str, None]
+    end_position_lng: Union[str, None]
+    end_position_display: Union[str, None]
+    duration: Union[datetime, None]
+    distance_km: Union[float, None]
+    fk_device: Union[UUID, None]
+    created_date: Union[datetime, None]
+    updated_date: Union[datetime, None]
+    fully_imported: Union[bool, None]
+
+
+@dataclass(frozen=True)
+class AllTrip:
     id: UUID
     task_id: int
     start_time_utc: Union[datetime, None]
