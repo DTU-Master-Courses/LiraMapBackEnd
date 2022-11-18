@@ -335,7 +335,7 @@ def tireRollResistCalc(velocity, car_mass):
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
     #Query to acquire messages from Measurements table
-    query = open('core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
+    query = open('lira_backend_api/core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
     result = await db.fetch_all(query)
     return result
 
