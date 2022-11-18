@@ -1,29 +1,29 @@
 with useful as(
-select 
+select
 	lat,
 	lon,
 	message
 	 FROM public."Measurements"
-	where 
-	"FK_Trip" = '2857262b-71db-49df-8db6-a042987bf0eb'
+	where
+	"FK_Trip" = '+trip_id+'
 	 and
 	("T" = 'obd.spd'
-     or 
+     or
     "T" = 'obd.spd_veh'
-     or 
+     or
 	"T" = 'acc.xyz')
-	and 
+	and
 	(
 	(cast(message::json->>'obd.spd_veh.value' as decimal(6,3)) > 0
 	--or cast(message::json->>'obd.spd.value' as decimal(6,3)) > 0
 	)
-	or 
+	or
 	cast(message::json->>'acc.xyz.x' as decimal(3,2)) > 0
 	)
 	--LIMIT 1000
 ),
 agg as(
-SELECT	
+SELECT
 	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1) as ts_date,
     SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)  as ts_time,
 	round(avg(cast(message::json->>'acc.xyz.z' as decimal(3,2))), 2) as az,
@@ -31,16 +31,16 @@ SELECT
 	round(avg(cast(message::json->>'acc.xyz.x' as decimal(3,2))), 2) as ax,
     round(avg(cast(message::json->>'obd.spd_veh.value' as decimal(6,3))), 2) as speed,
 	--round(avg(cast(message::json->>'obd.spd.value' as decimal(6,3))), 2) as speed,
-    avg(lat) as lat, 
+    avg(lat) as lat,
 	avg(lon) as lon
 	from useful
-	 	
-	group by 
-	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1), 
-    SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)	
+
+	group by
+	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1),
+    SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)
 	)
-	
-	select 
+
+	select
 	*,
 	sqrt(pow(ax,2) + pow(ay,2)) as magnitude
 -- 	sqrt(power(ax,2) + power(ay,2) + power(az,2)) as slop
