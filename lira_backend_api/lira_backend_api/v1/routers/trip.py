@@ -75,6 +75,7 @@ async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_conn
     else:
         return results
 
+#FIXME: rename endpoint for clarity ("list of variables" could be lots of things)
 #TODO: limit amount of data amount to frontend
 @router.get("/list_of_variables/{trip_id}", response_model=List[ContentVariables])
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):

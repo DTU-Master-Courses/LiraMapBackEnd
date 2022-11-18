@@ -24,8 +24,14 @@ You can read more about poetry here: https://python-poetry.org/
 
 You can start the project with docker using this command:
 
+run the following for docker-compose v1.x
 ```bash
 docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+```
+
+run the following for docker-compose v2.x
+```bash
+docker compose -f deploy/docker-compose.yml --project-directory . up --build
 ```
 
 If you want to develop in docker with autoreload add `-f deploy/docker-compose.dev.yml` to your docker command.
