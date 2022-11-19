@@ -32,14 +32,16 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    await lira_database.connect()
-    await setup_db()
+    if not lira_database.is_connected:
+        await lira_database.connect()
+        await setup_db()
     # TODO: We need to do the same for Altitude Database
 
 
 @app.on_event("shutdown")
 async def shutdown():
-    await lira_database.disconnect()
+    if lira_database.is_connected:
+        await lira_database.disconnect()
     # TODO: We need to do the same for Altitude Database
 
 
