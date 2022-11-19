@@ -5,7 +5,7 @@ client = TestClient(app)
 
 
 def test_get_single_trip():
-    res = client.get("/trips/003a157f-786a-4430-b6c7-c48f6f968364")
+    res = client.get("/trips/id/003a157f-786a-4430-b6c7-c48f6f968364")
     assert res.status_code == 200
     print  (res.json())
     print(res.status_code)
@@ -16,7 +16,7 @@ def test_get_single_trip():
 
 # given a false id, expecting a 404 error.    
 def test_get_inexistent_single_trip():
-    res = client.get("/trips/12345678-1234-5678-1234-567812345678")
+    res = client.get("/trips/id/12345678-1234-5678-1234-567812345678")
     assert res.status_code == 404
     print  (res.json())
     assert res.json() == {'detail': 'Trip not found'}
