@@ -7,7 +7,9 @@ from sqlalchemy.sql import select
 
 from databases.core import Connection
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import null, or_, and_
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.types import Unicode, JSON
 from lira_backend_api.core.models import (
     DRDMeasurement,
     MeasurementTypes,
@@ -342,6 +344,27 @@ async def get_variable_list(trip_id: str, db: Connection):
 
 # TODO This function is currently broken on async
 # Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+async def get_speed_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+
+async def get_speed_list_agg(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+  
+async def get_climbingforce(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res     
+        
+
+#TODO This function is currently broken on async
+#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_energy(trip_id: str, db: Connection):
     energy = list()
     car_mass = 1584
@@ -506,6 +529,24 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
     # this is a hack for bad data
     return {"variables": variable_list}
 
+async def get_rpm_list(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+
+async def get_rpm_LR(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_rpmlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+
+async def get_trip_friction(trip_id: str, db: Connection):
+    query = open('lira_backend_api/core/sql/func_friction.sql','r').read().replace('+trip_id+', trip_id)
+    res = await db.fetch_all(query)
+    print("result length = ",len(res))
+    return res
+    
 async def get_speed_list_agg(trip_id: str, db: Connection):
     query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
     res = await db.fetch_all(query)

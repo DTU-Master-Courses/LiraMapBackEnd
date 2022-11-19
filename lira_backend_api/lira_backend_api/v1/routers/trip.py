@@ -11,9 +11,17 @@ from lira_backend_api.core.schemas import (
     Trip,
     AllTrip,
     MeasurementLatLon,
+    # Power,
+    SpeedList,
+    SpeedVariables,
+    SpeedVariablesAgg,
     Energy,
     ContentVariables,
     Acceleration,
+    RPMList,
+    ContentRPM,
+    RPMlistagg,
+    Friction,
     SpeedVariablesAgg,
     ClimbingForce,
 )
@@ -22,8 +30,15 @@ from lira_backend_api.v1.routers.utils import (
     get_trips,
     get_variable_list,
     get_segments,
+    # get_power,
+    get_speed_list,
+    get_speed_list_agg,
     get_energy,
     get_acceleration_hack,
+    # get_climbingforce,
+    get_rpm_LR,
+    get_rpm_list,
+    get_trip_friction,
     get_speed_list_agg,
     get_climbingforce,
 )
@@ -87,6 +102,36 @@ async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     else:
         return results
 
+@router.get("/list_of_speed/{trip_id}", response_model=List[SpeedVariables])
+async def get_speed(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_speed_list(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
+async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_speed_list_agg(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
+    
+@router.get("/climbingforce/{trip_id}", response_model=List[ClimbingForce])
+async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_climbingforce(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
+
+
 
 @router.get("/energy/{trip_id}", response_model=Energy)
 async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
@@ -98,6 +143,20 @@ async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
 
 
 # TODO: The following function is an awful hack, but don't have time to properly implement for Release 1, circle back to Release 2
+# @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
+
+# def get_trip_segments(trip_id, db: Session = Depends(get_db)):
+#     results = get_segments(str(trip_id), db)
+#     if results is None:
+#         raise HTTPException(
+#             status_code=404, detail="Trip does not contain required data"
+#         )
+
+#     results_list = list()
+#     for result in results:
+#         results_modified.append(ContentAcceleration(*result.values()))
+
+#     return results_modified
 @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
 async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
     results = await get_segments(str(trip_id), db)
@@ -150,3 +209,30 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
             )
 
     return results_list
+
+
+@router.get("/list_of_all_rpm/{trip_id}", response_model=List[ContentRPM])
+async def get_all_rpm(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_rpm_list(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/list_of_rpm_aggr/{trip_id}", response_model=List[RPMlistagg])
+async def get_rpm_aggr(trip_id, db:  Connection = Depends(get_connection)):
+    results = await get_rpm_LR(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    return results
+
+@router.get("/firction/{trip_id}", response_model=List[Friction])
+async def get_firction_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_trip_friction(str(trip_id), db)
+    if results is None:
+        raise HTTPException(status_code=404, detail="Trip does not contain data")
+    else:
+        return results
