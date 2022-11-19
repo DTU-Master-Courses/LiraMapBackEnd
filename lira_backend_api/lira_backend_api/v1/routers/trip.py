@@ -6,11 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
 from lira_backend_api.core.schemas import (
-    ContentAcceleration,
     MapReference,
     MeasurementLatLon,
     Trip,
-    Variables,
+    AllTrip,
     MeasurementLatLon,
     # Power,
     SpeedList,
@@ -19,11 +18,12 @@ from lira_backend_api.core.schemas import (
     Energy,
     ContentVariables,
     Acceleration,
-    ClimbingForce,
     RPMList,
     ContentRPM,
     RPMlistagg,
-    Friction
+    Friction,
+    SpeedVariablesAgg,
+    ClimbingForce,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -35,10 +35,12 @@ from lira_backend_api.v1.routers.utils import (
     get_speed_list_agg,
     get_energy,
     get_acceleration_hack,
-    get_climbingforce,
+    # get_climbingforce,
     get_rpm_LR,
     get_rpm_list,
-    get_trip_friction
+    get_trip_friction,
+    get_speed_list_agg,
+    get_climbingforce,
 )
 
 router = APIRouter(prefix="/trips")
@@ -59,45 +61,46 @@ async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection
 
 
 # KT: Migrated to new approach
-@router.get("", response_model=List[Trip])
+@router.get("", response_model=List[AllTrip])
 async def get_all_trips(db: Connection = Depends(get_connection)):
     results = await get_trips(db)
 
     if results is None:
         raise HTTPException(status_code=500, detail="Something unexpected happened")
+    else:
+        return results
 
-    results_mod = list()
+@router.get("/list_of_speed_agg/{trip_id}", response_model=List[SpeedVariablesAgg])
+async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_speed_list_agg(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
 
-    for row in results:
-        row_dict = dict(row._mapping.items())
-        results_mod.append(Trip(*row_dict.values()))
+@router.get("/climbingforce/{trip_id}", response_model=List[ClimbingForce])
+async def get_sget_climbingforce_trip(trip_id, db: Connection = Depends(get_connection)):
+    results = await get_climbingforce(str(trip_id), db)
+    if results is None:
+        raise HTTPException(
+            status_code=404, detail="Trip does not contain speed data"
+        )
+    else:
+        return results
 
-    return results_mod
-
-
-@router.get("/acceleration/{trip_id}", response_model=Variables)
+#FIXME: rename endpoint for clarity ("list of variables" could be lots of things)
+#TODO: limit amount of data amount to frontend
+@router.get("/list_of_variables/{trip_id}", response_model=List[ContentVariables])
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
     if results is None:
         raise HTTPException(
             status_code=404, detail="Trip does not contain acceleration data"
         )
-    # results_modified = list()
-    variables_list = list()
-    variables_converted_list = list()
-    # for result in results:
-    variables = results.get("variables")
-
-    for i in range(len(variables)):
-        if i % 50 == 0:
-            variables_list.append(variables[i])
-
-    for variable in variables_list:
-        variables_converted_list.append(ContentVariables(*variable.values()))
-
-    variables_response = Variables(variables_converted_list)
-
-    return variables_response
+    else:
+        return results
 
 @router.get("/list_of_speed/{trip_id}", response_model=List[SpeedVariables])
 async def get_speed(trip_id, db:  Connection = Depends(get_connection)):

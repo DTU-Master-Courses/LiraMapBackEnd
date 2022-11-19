@@ -1,7 +1,7 @@
 version: '3.9'
 
 services:
-  api:
+  api-prod:
     build:
       context: .
       dockerfile: ./deploy/Dockerfile
@@ -12,3 +12,8 @@ services:
     
     ports:
     - 8000:${API_PORT}
+  front-end-prod:
+    container_name: liramap-front-end-prod
+    image: liramap-front-end-prod
+    ports:
+      - 8080:8080

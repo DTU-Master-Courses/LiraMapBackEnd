@@ -45,7 +45,6 @@ class Device:
     class Config:
         orm_mode = True
 
-
 @dataclass(frozen=True)
 class Trip:
     id: UUID
@@ -64,6 +63,37 @@ class Trip:
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
     fully_imported: Union[bool, None]
+
+
+@dataclass(frozen=True)
+class AllTrip:
+    id: UUID
+    task_id: int
+    start_time_utc: Union[datetime, None]
+    end_time_utc: Union[datetime, None]
+    start_position_lat: Union[str, None]
+    start_position_lng: Union[str, None]
+    start_position_city: Union[str, None]
+    start_position_house_number: Union[str, None]
+    start_position_county: Union[str, None]
+    start_position_state: Union[str, None]
+    start_position_postcode: Union[str, None]
+    end_position_lat: Union[str, None]
+    end_position_lng: Union[str, None]
+    end_position_city: Union[str, None]
+    end_position_house_number: Union[str, None]
+    end_position_county: Union[str, None]
+    end_position_state: Union[str, None]
+    end_position_postcode: Union[str, None]
+    duration: Union[datetime, None]
+    distance_km: Union[float, None]
+    fk_device: Union[UUID, None]
+    created_date: Union[datetime, None]
+    updated_date: Union[datetime, None]
+    fully_imported: Union[bool, None]
+    
+    class Config:
+        orm_mode = True
 
 
 @dataclass(frozen=True)
@@ -177,23 +207,15 @@ class MeasurementLatLon(BaseModel):
 
 @dataclass(frozen=True)
 class ContentVariables(BaseModel):
-    x: Union[float, None]
-    y: Union[float, None]
-    z: Union[float, None]
-    lat: Union[float, None]
-    lon: Union[float, None]
-    magnitude: Union[float, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
     speed: Union[float, None]
-    distance: Union[float, None]
-    created_date: Union[datetime, None]
-
-    class Config:
-        orm_mode = True
-
-
-@dataclass(frozen=True)
-class Variables(BaseModel):
-    variables: List[ContentVariables]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    magnitude: Union[float, None]
 
     class Config:
         orm_mode = True
@@ -309,5 +331,30 @@ class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]
 
+    class Config:
+        orm_mode = True
+
+
+class SpeedVariablesAgg(BaseModel):
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    vid: Union[int, None]
+    speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    
+    class Config:
+        orm_mode = True
+class ClimbingForce(BaseModel):
+    vid: Union[int, None]
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    climbingforce: Union[float, None]
+    
     class Config:
         orm_mode = True
