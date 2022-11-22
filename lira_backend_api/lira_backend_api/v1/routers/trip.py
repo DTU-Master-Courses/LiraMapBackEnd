@@ -34,7 +34,6 @@ from lira_backend_api.v1.routers.utils import (
     get_speed_list,
     get_speed_list_agg,
     get_energy,
-    get_acceleration_hack,
     # get_climbingforce,
     get_rpm_LR,
     get_rpm_list,
@@ -177,33 +176,6 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
             results_list.append(
                 MeasurementLatLon(
                     lat_lon_collection_all[i][0], lat_lon_collection_all[i][1]
-                )
-            )
-
-    return results_list
-
-
-@router.get("/segments/acceleration/{trip_id}", response_model=Acceleration)
-async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
-    results = await get_acceleration_hack(str(trip_id), db)
-    if results is None:
-        raise HTTPException(
-            status_code=404, detail="Trip does not contain required data"
-        )
-
-    acceleration_collection_all = list()
-    results_list = list()
-
-    for result in results:
-        acceleration_collection_all.append(
-            tuple([result._mapping.get("lat"), result._mapping.get("lon")])
-        )
-
-    for i in range(len(acceleration_collection_all)):
-        if i % 10 == 0:
-            results_list.append(
-                Acceleration(
-                    acceleration_collection_all[i][0], acceleration_collection_all[i][1]
                 )
             )
 
