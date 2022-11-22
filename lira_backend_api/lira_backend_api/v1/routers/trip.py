@@ -45,7 +45,6 @@ from lira_backend_api.v1.routers.utils import (
 router = APIRouter(prefix="/trips")
 
 
-# KT: Migrated to new approach.
 @router.get("/id/{trip_id}", response_model=Trip)
 async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection)):
     result = await get_trip(str(trip_id), db)
@@ -91,7 +90,6 @@ async def get_sget_climbingforce_trip(
 
 
 # FIXME: rename endpoint for clarity ("list of variables" could be lots of things)
-# TODO: limit amount of data amount to frontend
 @router.get("/list_of_variables/{trip_id}", response_model=List[ContentVariables])
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
     results = await get_variable_list(str(trip_id), db)
@@ -140,21 +138,6 @@ async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
         return results
 
 
-# TODO: The following function is an awful hack, but don't have time to properly implement for Release 1, circle back to Release 2
-# @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
-
-# def get_trip_segments(trip_id, db: Session = Depends(get_db)):
-#     results = get_segments(str(trip_id), db)
-#     if results is None:
-#         raise HTTPException(
-#             status_code=404, detail="Trip does not contain required data"
-#         )
-
-#     results_list = list()
-#     for result in results:
-#         results_modified.append(ContentAcceleration(*result.values()))
-
-#     return results_modified
 @router.get("/segments/{trip_id}", response_model=List[MeasurementLatLon])
 async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
     results = await get_segments(str(trip_id), db)

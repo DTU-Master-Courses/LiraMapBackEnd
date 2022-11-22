@@ -48,19 +48,6 @@ async def get_measurementtype(measurement_type_id: str, db: Connection):
     return result
 
 
-async def get_measurementmodel(measurement_model_id: str, db: Connection):
-
-    query = select(MeasurementModel).where(MeasurementModel.id == measurement_model_id)
-    result = await db.fetch_one(query)
-
-    return result
-    # return (
-    #     db.query(MeasurementModel)
-    #     .filter(MeasurementModel.id == measurement_model_id)
-    #     .first()
-    # )
-
-
 async def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
 
     query = select(DRDMeasurement).where(DRDMeasurement.id == drdmeasurement_id)
