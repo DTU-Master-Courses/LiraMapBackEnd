@@ -411,8 +411,9 @@ async def get_energy(trip_id: str, db: Connection):
         #resolution changed from 1 to 0.05
         #longitudinal acceleration - units of meters
         acc_long = (float(result[6]) - 198) * 0.05 if result[6] else 0 #m/s^2
-        acc_yaw = (float(result[7]) - 198) * 0.05 if result[7] else 0 #in degrees a second
         #Offset of 2047
+        acc_yaw = (float(result[7]) - 2047) if result[7] else 0 #in degrees a second
+        
         #Bearing is the direction of the vehicle
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
