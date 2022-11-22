@@ -294,6 +294,13 @@ def angleVectCalc(a, b, maga, magb):
     return acos((dot(a, b)) / (maga * magb))
 
 
+def scalarProductPower(velocity, force_vector):
+    velocity_mag = magnitudeCalc(velocity[0], velocity[1])
+    force_mag = magnitudeCalc(force_vector[0], force_vector[1]) 
+    angle = angleVectCalc(velocity, force_vector, velocity_mag, force_mag)
+    return velocity_mag * force_mag * cos(angle)
+
+
 def bearingCalc(latitude, latitude_previous, longitude, longitude_previous):
     d_lon = abs(longitude - longitude_previous)
     X = cos(longitude) * sin(d_lon)
@@ -319,6 +326,24 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
+
+def inertialCalc(longitudinal_acceleration, car_mass):
+    return longitudinal_acceleration * car_mass
+
+
+def tireRollResistCalc(velocity, car_mass):
+    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    #gw in m/s2 is the gravitational acceleration
+    krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
+    gw = 9.80665
+    return [car_mass * gw * i for i in krt]
+
+
+def hillClimbingCalc(slope, car_mass):
+    gw = 9.80665
+    return car_mass * gw * slope
+
+
 def aerodynamicCalc(velocity):
     #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
     #A in m^2 is the cross-sectional area of the car
@@ -327,12 +352,14 @@ def aerodynamicCalc(velocity):
     cd = 0.29
     return [0.5 * rho * A * cd * i**2 for i in velocity]
 
+
 def tireRollResistCalc(velocity, car_mass):
     #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
     #gw in m/s2 is the gravitational acceleration
     krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
+
 
 async def get_variable_list(trip_id: str, db: Connection):
     #Saving these values in a database for all trips would save a lot of computation time
@@ -350,12 +377,14 @@ async def get_speed_list(trip_id: str, db: Connection):
     print("result length = ",len(res))
     return res
 
+
 async def get_speed_list_agg(trip_id: str, db: Connection):
     query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
     res = await db.fetch_all(query)
     print("result length = ",len(res))
     return res     
   
+
 async def get_climbingforce(trip_id: str, db: Connection):
     query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
     res = await db.fetch_all(query)
@@ -363,53 +392,48 @@ async def get_climbingforce(trip_id: str, db: Connection):
     return res     
         
 
-#TODO This function is currently broken on async
-#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+# TODO This function is currently broken on async
+# Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_energy(trip_id: str, db: Connection):
     energy = list()
     car_mass = 1584
     E = 0.0
     bearing = 0
     velocity = [0, 0]
+    distance = 0 
     dictionary = await get_variable_list(trip_id, db)
     for rec in dictionary:
         result = tuple(rec.values())
-        if "+" in result[1]:
-            continue
-        acceleration_mag = result[8]
-        speed = result[5]
-        # Need to implement the angle
-        # between the acceleration wrt the vehicles direction
-        acceleration = [result[5], result[4]]
-        # Bearing is the direction of the vehicle
+        #result index from 0 to 9 ts_date, ts_time, az, ay,
+        #ax, speed, acc_long, acc_yaw, lat, lon
+        speed = float(result[5]) / 3.6
+        #offset of 198 according to car data validation
+        #resolution changed from 1 to 0.05
+        #longitudinal acceleration - units of meters
+        acc_long = (float(result[6]) - 198) * 0.05 if result[6] else 0 #m/s^2
+        acc_yaw = (float(result[7]) - 198) * 0.05 if result[7] else 0 #in degrees a second
+        #Offset of 2047
+        #Bearing is the direction of the vehicle
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
-            bearing = bearingCalc(next_[6], result[6], next_[7], result[7])
-        if (dictionary.index(rec)) - 1 != 0:    
+            bearing = bearingCalc(result[8], next_[8], result[9], next_[9])
+        if (dictionary.index(rec)) != 0:    
             previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
-            distance = distanceCalc(result[6], previous_[6], result[7], previous_[7])
-        if speed == None:
-            speed = 0
+            distance = distanceCalc(result[8], previous_[8], result[9], previous_[9])
         #Division by 3.6 to convert km/h to m/s
-        speed = float(speed) / 3.6
         Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
         Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
         # Zvel = sin(Z-Bearing)
-        change_in_velocity = [Xvel - velocity[0], Yvel - velocity[1]]
         velocity = [Xvel, Yvel]
-        # Force Vector
-        inertial_force = [i * car_mass for i in change_in_velocity]
+        # Force. Inertial force and hill climbing force are calculated as scalar values.
+        inertial_force = inertialCalc(acc_long, car_mass)
+        hill_climbing_force = hillClimbingCalc(acc_yaw, car_mass)
         aerodynamic_force = aerodynamicCalc(velocity)
-        # hill_climbing_force =
         rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
-        force = [inertial_force[i] + aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(inertial_force))]#+ hill_climbing_force
-        # Scalar product of force and velocity
-        velocity_mag = magnitudeCalc(velocity[0], velocity[1])
-        force_mag = magnitudeCalc(force[0], force[1])
-        angle = angleVectCalc(velocity, force, velocity_mag, force_mag)
-        # scalar product
-        P = velocity_mag * force_mag * cos(angle)
-        E += P
+        force_vector = [aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(velocity))] 
+        P = scalarProductPower(velocity, force_vector) + (inertial_force + hill_climbing_force) * magnitudeCalc(velocity[0], velocity[1])
+        force = magnitudeCalc(force_vector[0], force_vector[1]) + inertial_force + hill_climbing_force
+        E += (1/3600) * distance * force
         date = str(result[0] + ' ' + result[1])
         energy.append(
             {
@@ -417,6 +441,14 @@ async def get_energy(trip_id: str, db: Connection):
                 "energy": E,
                 "bearing": bearing,
                 "distance": distance,
+                "inertial_force": inertial_force,
+                "inertial_energy": (1/3600) * distance * inertial_force,
+                "hill_climbing_force": hill_climbing_force,
+                "hill_climbing_energy": (1/3600) * distance * hill_climbing_force,
+                "aerodynamic_force": magnitudeCalc(aerodynamic_force[0], aerodynamic_force[1]),
+                "aerodynamic_energy": (1/3600) * distance * magnitudeCalc(aerodynamic_force[0], aerodynamic_force[1]),
+                "rolling_resistance_force": magnitudeCalc(rolling_resistance_force[0], rolling_resistance_force[1]),
+                "rolling_resistance_energy": (1/3600) * distance * magnitudeCalc(rolling_resistance_force[0], rolling_resistance_force[1]),
                 "created_date": date,
             }
         )
