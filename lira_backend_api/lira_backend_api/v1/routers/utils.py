@@ -29,7 +29,7 @@ from lira_backend_api.core.schemas import (
 
 from lira_backend_api.settings import settings
 
-sql_files_path = Path.cwd().joinpath("core/sql/").resolve()
+sql_files_path = Path.cwd().joinpath("lira_backend_api/core/sql/").resolve()
 
 
 async def measurement_types(db: Connection):
