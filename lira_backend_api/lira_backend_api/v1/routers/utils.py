@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from math import atan2, acos, sin, cos, pi, pow, sqrt
+from pathlib import Path
 
 import dateutil.parser
 from sqlalchemy.sql import select
@@ -25,6 +26,10 @@ from lira_backend_api.core.schemas import (
     TripsReturn,
     boundary,
 )
+
+from lira_backend_api.settings import settings
+
+sql_files_path = Path.cwd().joinpath("core/sql/").resolve()
 
 
 async def measurement_types(db: Connection):
@@ -238,12 +243,15 @@ async def get_ride(trip_id: str, tag: str, db: Connection):
         end_city=end_city_json,
     )
 
-    return result 
+    return result
+
 
 async def get_trips(db: Connection):
-    query = open('lira_backend_api/core/sql/func_alltrips.sql','r').read()
+    # query = open('../lira_backend_api/core/sql/func_alltrips.sql','r').read()
+    query = open(sql_files_path.joinpath("func_alltrips.sql"), "r").read()
     res = await db.fetch_all(query)
-    return res 
+    return res
+
 
 def average_values(list):
     x = sum(list[0]) / len(list[0])
@@ -319,25 +327,33 @@ def distanceCalc(latitude, latitude_previous, longitude, longitude_previous):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return c * earth_radius
 
+
 def aerodynamicCalc(velocity):
-    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
-    #A in m^2 is the cross-sectional area of the car
+    # Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
+    # A in m^2 is the cross-sectional area of the car
     rho = 1.225
     A = 2.3316
     cd = 0.29
     return [0.5 * rho * A * cd * i**2 for i in velocity]
 
+
 def tireRollResistCalc(velocity, car_mass):
-    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
-    #gw in m/s2 is the gravitational acceleration
-    krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
+    # Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    # gw in m/s2 is the gravitational acceleration
+    krt = [0.01 * (1 + (i * 3.6) / 100) for i in velocity]
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
 
+
 async def get_variable_list(trip_id: str, db: Connection):
-    #Saving these values in a database for all trips would save a lot of computation time
-    #Query to acquire messages from Measurements table
-    query = open('lira_backend_api/core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
+    # Saving these values in a database for all trips would save a lot of computation time
+    # Query to acquire messages from Measurements table
+    # query = open('lira_backend_api/core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_measurements_scrape.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     result = await db.fetch_all(query)
     return result
 
@@ -345,26 +361,43 @@ async def get_variable_list(trip_id: str, db: Connection):
 # TODO This function is currently broken on async
 # Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_speed_list(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    # query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_speedlist.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
 
-async def get_speed_list_agg(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
-    res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-  
-async def get_climbingforce(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
-    res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-        
 
-#TODO This function is currently broken on async
-#Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
+async def get_speed_list_agg(trip_id: str, db: Connection):
+    # query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_speedlist.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
+    res = await db.fetch_all(query)
+    print("result length = ", len(res))
+    return res
+
+
+async def get_climbingforce(trip_id: str, db: Connection):
+    # query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_climbingforce.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
+    res = await db.fetch_all(query)
+    print("result length = ", len(res))
+    return res
+
+
+# TODO This function is currently broken on async
+# Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_energy(trip_id: str, db: Connection):
     energy = list()
     car_mass = 1584
@@ -385,12 +418,12 @@ async def get_energy(trip_id: str, db: Connection):
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
             bearing = bearingCalc(next_[6], result[6], next_[7], result[7])
-        if (dictionary.index(rec)) - 1 != 0:    
+        if (dictionary.index(rec)) - 1 != 0:
             previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
             distance = distanceCalc(result[6], previous_[6], result[7], previous_[7])
         if speed == None:
             speed = 0
-        #Division by 3.6 to convert km/h to m/s
+        # Division by 3.6 to convert km/h to m/s
         speed = float(speed) / 3.6
         Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
         Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
@@ -402,7 +435,10 @@ async def get_energy(trip_id: str, db: Connection):
         aerodynamic_force = aerodynamicCalc(velocity)
         # hill_climbing_force =
         rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
-        force = [inertial_force[i] + aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(inertial_force))]#+ hill_climbing_force
+        force = [
+            inertial_force[i] + aerodynamic_force[i] + rolling_resistance_force[i]
+            for i in range(len(inertial_force))
+        ]  # + hill_climbing_force
         # Scalar product of force and velocity
         velocity_mag = magnitudeCalc(velocity[0], velocity[1])
         force_mag = magnitudeCalc(force[0], force[1])
@@ -410,7 +446,7 @@ async def get_energy(trip_id: str, db: Connection):
         # scalar product
         P = velocity_mag * force_mag * cos(angle)
         E += P
-        date = str(result[0] + ' ' + result[1])
+        date = str(result[0] + " " + result[1])
         energy.append(
             {
                 "power": P,
@@ -529,32 +565,57 @@ async def get_acceleration_hack(trip_id: str, db: Connection):
     # this is a hack for bad data
     return {"variables": variable_list}
 
+
 async def get_rpm_list(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_rpmlist.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_rpmlist.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
+
 
 async def get_rpm_LR(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_rpmlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_rpmlist_agg.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
 
+
 async def get_trip_friction(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_friction.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_friction.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
-    
+
+
 async def get_speed_list_agg(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_speedlist_agg.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-  
+    print("result length = ", len(res))
+    return res
+
+
 async def get_climbingforce(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_climbingforce.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res   
+    print("result length = ", len(res))
+    return res
