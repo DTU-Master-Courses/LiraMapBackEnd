@@ -39,16 +39,15 @@ def test_get_all_trips():
     
 def test_get_acceleration_trip():
     async def run_test(client):
-        res = client.get("/trips/acceleration/351c02c6-733e-4a4b-a0c1-e6cad55b931f")     
+        res = client.get("/segmaents/acceleration/351c02c6-733e-4a4b-a0c1-e6cad55b931f")     
         assert res.status_code == 200
         print  (res.json()['acceleration'][0])
         assert res.json()['acceleration'][0]== {'x': -0.15444444444444447, 'y': -0.2422222222222222, 'z': 1.0022222222222223, 'lon': 12.530856499999997, 'lat': 55.72094272222222, 'created_date': '2020-07-09T19:53:33'}
     
     
-    
 def test_get_inexistent_acceleration_trip():
     async def run_test(client):
-        res = client.get("/acceleration/d5684a99-de96-4476-aacc-133e15786df3")     
+        res = client.get("/segmaents/acceleration/d5684a99-de96-4476-aacc-133e15786df3")     
         assert res.status_code == 404
         assert res.json() ==  {'detail': 'Not Found'} 
     
@@ -60,16 +59,20 @@ def test_get_inexistent_acceleration_trip():
     
 def test_get_inexistent_trip_segments():
     async def run_test(client):
-        res = client.get("/trips/segments/7e746b5e-0d7b-4c1b-9564-72f61fa858e6") 
-        
-        print  (res.json())
-        
+        res = client.get("/trips/segments/7e746b5e-0d7b-4c1b-9564-72f61fa858e6")      
+        print  (res.json())        
         if  (res.json() == [] and res.status_code == 200):
             result = {'detail': 'Not Found'} 
         assert result ==  {'detail': 'Not Found'} 
     
+def test_get_all_speed_agg():
+    async def run_test(client):
+        res = client.get("/trips/list_of_speed_agg/2857262b-71db-49df-8db6-a042987bf0eb")
+        # print  (res.json()[0])
+        # print  (res.json()[0].items())
+        print  (len(res.json()))
+        assert res.status_code == 200
+   
 
-   
-   
 
     
