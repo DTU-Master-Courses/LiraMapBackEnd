@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+  repository_dispatch:
+    types: [test_result]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: isbang/compose-action@v1.4.1
+      with:
+         compose-file: "./lira_backend_api/deploy/docker-compose.yml"   
+         up-flags: "--build"
+         compose-flags: "--project-directory"
