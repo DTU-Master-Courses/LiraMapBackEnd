@@ -10,6 +10,7 @@ from lira_backend_api.core.schemas import (
     MeasurementModel,
     TripsReturn,
     Acceleration,
+MeasurementTypesList
 )
 from lira_backend_api.v1.routers.utils import (
     get_measurementtype,
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/measurement")
 
 
 # KT: Should be migrated over
-@router.get("/types", response_model=List[MeasurementTypes])
+@router.get("/types", response_model=MeasurementTypesList)
 async def get_measurement_types(db: Connection = Depends(get_connection)):
     results = await measurement_types(db)
 
@@ -34,5 +35,4 @@ async def get_measurement_types(db: Connection = Depends(get_connection)):
         result_dict = dict(result._mapping.items())
         results_modified.append(MeasurementTypes(*result_dict.values()))
 
-    return results_modified
-
+    return { "measurement_types": results_modified }

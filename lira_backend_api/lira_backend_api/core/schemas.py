@@ -20,6 +20,11 @@ class MeasurementTypes:
 
 
 @dataclass(frozen=True)
+class MeasurementTypesList(BaseModel):
+    measurement_types: List[MeasurementTypes]
+
+
+@dataclass(frozen=True)
 class MeasurementModel:
     id: UUID
     timestamp: datetime
@@ -231,6 +236,11 @@ class ContentVariables(BaseModel):
         orm_mode = True
 
 
+@dataclass(frozen=True)
+class AccelerationList(BaseModel):
+    acceleration: List[ContentVariables]
+
+
 class SpeedVariables(BaseModel):
     ts: Union[datetime, None]
     vid: Union[int, None]
@@ -242,6 +252,11 @@ class SpeedVariables(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class SpeedVariablesList(BaseModel):
+    speed: List[SpeedVariables]
 
 
 class SpeedList(BaseModel):
@@ -261,6 +276,11 @@ class SpeedVariablesAgg(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class SpeedVariablesAggList(BaseModel):
+    speed_aggregation: List[SpeedVariablesAgg]
 
 
 class ClimbingForce(BaseModel):
@@ -290,6 +310,10 @@ class ContentRPM(BaseModel):
     class Config:
         orm_mode = True
 
+@dataclass(frozen=True)
+class ContentRpmList(BaseModel):
+    content_rpm: List[ContentRPM]
+
 
 class RPMList(BaseModel):
     rpm_list: List[ContentRPM]
@@ -309,6 +333,11 @@ class RPMlistagg(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class RpmAggList(BaseModel):
+    rpm_aggregation: List[RPMlistagg]
 
 
 @dataclass(frozen=True)
@@ -356,6 +385,11 @@ class Friction(BaseModel):
 
 
 @dataclass(frozen=True)
+class FrictionList(BaseModel):
+    friction: List[Friction]
+
+
+@dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]
@@ -364,16 +398,9 @@ class MeasurementLatLon(BaseModel):
         orm_mode = True
 
 
-class SpeedVariablesAgg(BaseModel):
-    ts_date: Union[str, None]
-    ts_time: Union[str, None]
-    vid: Union[int, None]
-    speed: Union[float, None]
-    lon: Union[float, None]
-    lat: Union[float, None]
-
-    class Config:
-        orm_mode = True
+@dataclass(frozen=True)
+class SegmentsList(BaseModel):
+    segments: List[MeasurementLatLon]
 
 
 @dataclass(frozen=True)
