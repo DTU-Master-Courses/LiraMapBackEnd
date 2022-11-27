@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 from math import atan2, acos, sin, cos, pi, pow, sqrt
+from pathlib import Path
 
 import dateutil.parser
 from sqlalchemy.sql import select
@@ -26,6 +27,10 @@ from lira_backend_api.core.schemas import (
     boundary,
 )
 
+from lira_backend_api.settings import settings
+
+sql_files_path = Path.cwd().joinpath("lira_backend_api/core/sql/").resolve()
+
 
 async def measurement_types(db: Connection):
     query = select(MeasurementTypes).order_by(MeasurementTypes.type)
@@ -41,19 +46,6 @@ async def get_measurementtype(measurement_type_id: str, db: Connection):
     result = await db.fetch_one(query)
 
     return result
-
-
-async def get_measurementmodel(measurement_model_id: str, db: Connection):
-
-    query = select(MeasurementModel).where(MeasurementModel.id == measurement_model_id)
-    result = await db.fetch_one(query)
-
-    return result
-    # return (
-    #     db.query(MeasurementModel)
-    #     .filter(MeasurementModel.id == measurement_model_id)
-    #     .first()
-    # )
 
 
 async def get_drdmeasurement(drdmeasurement_id: str, db: Connection):
@@ -238,12 +230,15 @@ async def get_ride(trip_id: str, tag: str, db: Connection):
         end_city=end_city_json,
     )
 
-    return result 
+    return result
+
 
 async def get_trips(db: Connection):
-    query = open('lira_backend_api/core/sql/func_alltrips.sql','r').read()
+    # query = open('../lira_backend_api/core/sql/func_alltrips.sql','r').read()
+    query = open(sql_files_path.joinpath("func_alltrips.sql"), "r").read()
     res = await db.fetch_all(query)
-    return res 
+    return res
+
 
 def average_values(list):
     x = sum(list[0]) / len(list[0])
@@ -345,8 +340,8 @@ def hillClimbingCalc(slope, car_mass):
 
 
 def aerodynamicCalc(velocity):
-    #Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
-    #A in m^2 is the cross-sectional area of the car
+    # Where cd is the air drag coefficient, rho in kg/m3 is the density of the air
+    # A in m^2 is the cross-sectional area of the car
     rho = 1.225
     A = 2.3316
     cd = 0.29
@@ -354,17 +349,22 @@ def aerodynamicCalc(velocity):
 
 
 def tireRollResistCalc(velocity, car_mass):
-    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
-    #gw in m/s2 is the gravitational acceleration
-    krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
+    # Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    # gw in m/s2 is the gravitational acceleration
+    krt = [0.01 * (1 + (i * 3.6) / 100) for i in velocity]
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
 
 
 async def get_variable_list(trip_id: str, db: Connection):
-    #Saving these values in a database for all trips would save a lot of computation time
-    #Query to acquire messages from Measurements table
-    query = open('lira_backend_api/core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
+    # Saving these values in a database for all trips would save a lot of computation time
+    # Query to acquire messages from Measurements table
+    # query = open('lira_backend_api/core/sql/func_measurements_scrape.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_measurements_scrape.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     result = await db.fetch_all(query)
     return result
 
@@ -372,25 +372,40 @@ async def get_variable_list(trip_id: str, db: Connection):
 # TODO This function is currently broken on async
 # Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
 async def get_speed_list(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    # query = open('lira_backend_api/core/sql/func_speedlist.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_speedlist.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
 
 
 async def get_speed_list_agg(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    # query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_speedlist.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-  
+    print("result length = ", len(res))
+    return res
+
 
 async def get_climbingforce(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    # query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open(sql_files_path.joinpath("func_climbingforce.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-        
+    print("result length = ", len(res))
+    return res
+
 
 # TODO This function is currently broken on async
 # Not working as inteded yet, use trip_id = 2857262b-71db-49df-8db6-a042987bf0eb to see some non zero output
@@ -470,124 +485,56 @@ async def get_segments(trip_id: str, db: Connection):
     return results
 
 
-# TODO this function is currently broken on async
-async def get_acceleration_hack(trip_id: str, db: Connection):
-    # Saving these values in a database for all trips would save a lot of computation time
-    variable_list, average_variable_list = list(), list()
-    created_date, latitude_previous, longitude_previous = None, None, None
-    distance = 0
-    speed = 0
-    # Create list filled with empty lists
-    for _ in range(7):
-        average_variable_list.append(list())
-    # Query to acquire messages from Measurements table
-    query = (
-        select(MeasurementModel.message, MeasurementModel.lat, MeasurementModel.lon)
-        .where(
-            MeasurementModel.fk_trip == trip_id,
-            MeasurementModel.lon is not None,
-            MeasurementModel.lat is not None,
-        )
-        .filter(
-            or_(
-                MeasurementModel.tag == "obd.spd",
-                MeasurementModel.tag == "obd.spd_veh",
-                MeasurementModel.tag == "acc.xyz",
-            )
-        )
-        .order_by(MeasurementModel.created_date)
-    )
-    result = await db.fetch_all(query)
-
-    try:
-        for value in result:
-            latitude, longitude = value[1], value[2]
-            jsonobj = json.loads(value[0])
-            if jsonobj.get("obd.spd_veh.value") is not None:
-                speed = jsonobj.get("obd.spd_veh.value")
-            if jsonobj.get("obd.spd.value") is not None:
-                speed = jsonobj.get("obd.spd.value")
-            if (
-                jsonobj.get("acc.xyz.x")
-                and jsonobj.get("acc.xyz.y")
-                and jsonobj.get("acc.xyz.z") is not None
-            ):
-                x = jsonobj.get(
-                    "acc.xyz.x"
-                )  # xyz-vector based on data from the database.
-                y = jsonobj.get("acc.xyz.y")  # The reference frame is the car itself.
-                z = jsonobj.get(
-                    "acc.xyz.z"
-                )  # The acceleration in the z direction is influenced by the gravitational pull
-                # Assuming created date is at least not None.
-                json_created_date = jsonobj.get("@ts")
-                created_date = convert_date_test(json_created_date)
-                # Only need the date once.
-                if average_variable_list[6] == []:
-                    average_variable_list[6].append(created_date)
-                # This statement is called when a dataset with a different date is encountered.
-                # This starts the process of calculating and storing values and clearing variable_list
-                elif average_variable_list[6][0] != created_date:
-                    x, y, z, latitude, longitude, speed = average_values(
-                        average_variable_list
-                    )
-                    # True when there is a previous dataset to compare
-                    if latitude_previous:
-                        # At the first iteration there is no comparison lat and lon
-                        distance += distanceCalc(
-                            latitude, latitude_previous, longitude, longitude_previous
-                        )
-                    variable_list.append(
-                        {
-                            "x": x,
-                            "y": y,
-                            "z": z,
-                            "lat": latitude,
-                            "lon": longitude,
-                            "magnitude": magnitudeCalc(x, y),
-                            "speed": speed,
-                            "distance": distance,
-                            "created_date": created_date,
-                        }
-                    )
-                    # Used to calculate the change in distance from point to point
-                    latitude_previous = latitude
-                    longitude_previous = longitude
-                    clear_average_variable_list(average_variable_list)
-                append_variable_list(
-                    average_variable_list, x, y, z, latitude, longitude, speed
-                )
-    except ValueError:
-        pass
-    # this is a hack for bad data
-    return {"variables": variable_list}
-
 async def get_rpm_list(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_rpmlist.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_rpmlist.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
+
 
 async def get_rpm_LR(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_rpmlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_rpmlist_agg.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
 
+
 async def get_trip_friction(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_friction.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_friction.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
+    print("result length = ", len(res))
     return res
-    
+
+
 async def get_speed_list_agg(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_speedlist_agg.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_speedlist_agg.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res     
-  
+    print("result length = ", len(res))
+    return res
+
+
 async def get_climbingforce(trip_id: str, db: Connection):
-    query = open('lira_backend_api/core/sql/func_climbingforce.sql','r').read().replace('+trip_id+', trip_id)
+    query = (
+        open("lira_backend_api/core/sql/func_climbingforce.sql", "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
     res = await db.fetch_all(query)
-    print("result length = ",len(res))
-    return res   
+    print("result length = ", len(res))
+    return res

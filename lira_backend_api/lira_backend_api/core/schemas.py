@@ -9,8 +9,7 @@ from datetime import datetime
 from sqlalchemy import BigInteger
 from collections import namedtuple
 
-#from sqlalchemy import JSON
-
+# from sqlalchemy import JSON
 
 
 @dataclass(frozen=True)
@@ -44,6 +43,7 @@ class Device:
 
     class Config:
         orm_mode = True
+
 
 @dataclass(frozen=True)
 class Trip:
@@ -91,7 +91,7 @@ class AllTrip:
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
     fully_imported: Union[bool, None]
-    
+
     class Config:
         orm_mode = True
 
@@ -221,6 +221,7 @@ class ContentVariables(BaseModel):
     class Config:
         orm_mode = True
 
+
 class SpeedVariables(BaseModel):
     ts: Union[datetime, None]
     vid: Union[int, None]
@@ -229,15 +230,17 @@ class SpeedVariables(BaseModel):
     speed: Union[float, None]
     lon: Union[float, None]
     lat: Union[float, None]
-    
+
     class Config:
         orm_mode = True
-               
+
+
 class SpeedList(BaseModel):
     speed_list: List[SpeedVariables]
 
     class Config:
         orm_mode = True
+
 
 class SpeedVariablesAgg(BaseModel):
     ts_date: Union[str, None]
@@ -246,9 +249,10 @@ class SpeedVariablesAgg(BaseModel):
     speed: Union[float, None]
     lon: Union[float, None]
     lat: Union[float, None]
-    
+
     class Config:
         orm_mode = True
+
 
 class ClimbingForce(BaseModel):
     vid: Union[int, None]
@@ -260,9 +264,10 @@ class ClimbingForce(BaseModel):
     lon: Union[float, None]
     lat: Union[float, None]
     climbingforce: Union[float, None]
-    
+
     class Config:
         orm_mode = True
+
 
 @dataclass(frozen=True)
 class ContentRPM(BaseModel):
@@ -272,13 +277,17 @@ class ContentRPM(BaseModel):
     lat: Union[float, None]
     rpm_fl: Union[float, None]
     rpm_rl: Union[float, None]
+
     class Config:
         orm_mode = True
-               
+
+
 class RPMList(BaseModel):
     rpm_list: List[ContentRPM]
+
     class Config:
         orm_mode = True
+
 
 class RPMlistagg(BaseModel):
     tripid: Union[UUID, None]
@@ -288,7 +297,7 @@ class RPMlistagg(BaseModel):
     lat: Union[float, None]
     rpm_fl: Union[float, None]
     rpm_rl: Union[float, None]
-    
+
     class Config:
         orm_mode = True
 
@@ -330,11 +339,12 @@ class Friction(BaseModel):
     lat: Union[float, None]
     rpm_fl: Union[float, None]
     rpm_rl: Union[float, None]
-    v_func:  Union[float, None]
+    v_func: Union[float, None]
     friction: Union[float, None]
 
     class Config:
         orm_mode = True
+
 
 @dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):
@@ -352,9 +362,11 @@ class SpeedVariablesAgg(BaseModel):
     speed: Union[float, None]
     lon: Union[float, None]
     lat: Union[float, None]
-    
+
     class Config:
         orm_mode = True
+
+
 class ClimbingForce(BaseModel):
     vid: Union[int, None]
     ts_date: Union[str, None]
@@ -365,6 +377,6 @@ class ClimbingForce(BaseModel):
     lon: Union[float, None]
     lat: Union[float, None]
     climbingforce: Union[float, None]
-    
+
     class Config:
         orm_mode = True

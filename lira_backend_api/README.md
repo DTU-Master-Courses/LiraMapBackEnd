@@ -136,3 +136,4 @@ docker run -p "5432:5432" -e "POSTGRES_PASSWORD=lira_backend_api" -e "POSTGRES_U
 ```bash
 pytest -vv .
 ```
+

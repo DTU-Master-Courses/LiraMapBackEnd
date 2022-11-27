@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     with environment variables.
     """
 
-    project_name: str = os.getenv("PROJECT_NAME", "lira-map-fastapi")
+    project_name: str = os.getenv("PROJECT_NAME", "lira_backend_api")
     project_version: str = os.getenv("PROJECT_VERSION", "0.0.1")
     host: str = os.getenv("API_HOST_IP", "127.0.0.1")
     port: int = int(os.getenv("API_PORT", 8000))
