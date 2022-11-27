@@ -209,13 +209,14 @@ class MeasurementLatLon(BaseModel):
 class ContentVariables(BaseModel):
     ts_date: Union[str, None]
     ts_time: Union[str, None]
-    az: Union[float, None]
-    ay: Union[float, None]
-    ax: Union[float, None]
     speed: Union[float, None]
-    lon: Union[float, None]
+    acc_long: Union[float, None]
+    acc_yaw: Union[float, None]
+    brk_trq_req_elec: Union[float, None]
+    trac_cons: Union[float, None]
+    whl_trq_est: Union[float, None]
     lat: Union[float, None]
-    magnitude: Union[float, None]
+    lon: Union[float, None]
 
     class Config:
         orm_mode = True
@@ -303,9 +304,18 @@ class RPMlistagg(BaseModel):
 
 @dataclass(frozen=True)
 class ContentEnergy(BaseModel):
-    power: Union[float, None]
     energy: Union[float, None]
+    power: Union[float, None]
     bearing: Union[float, None]
+    distance: Union[float, None]
+    inertial_force: Union[float, None]
+    inertial_energy: Union[float, None]
+    hill_climbing_force: Union[float, None]
+    hill_climbing_energy: Union[float, None]
+    aerodynamic_force: Union[float, None]
+    aerodynamic_energy: Union[float, None]
+    rolling_resistance_force: Union[float, None]
+    rolling_resistance_energy: Union[float, None]
     created_date: Union[datetime, None]
 
     class Config:
