@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-# from sqlalchemy.orm import Session
 from databases.core import Connection
 
 from lira_backend_api.core.schemas import SourceType

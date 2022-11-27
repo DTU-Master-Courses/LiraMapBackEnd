@@ -1,15 +1,11 @@
-import json
 from typing import Any, List, Union
 
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from datetime import datetime
-from sqlalchemy import BigInteger
 from collections import namedtuple
-
-# from sqlalchemy import JSON
 
 
 @dataclass(frozen=True)
@@ -407,17 +403,3 @@ class SegmentsList(BaseModel):
 class ClimbingForceList(BaseModel):
     climbing_force: List[ClimbingForce]
 
-
-class ClimbingForce(BaseModel):
-    vid: Union[int, None]
-    ts_date: Union[str, None]
-    ts_time: Union[str, None]
-    az: Union[float, None]
-    ay: Union[float, None]
-    ax: Union[float, None]
-    lon: Union[float, None]
-    lat: Union[float, None]
-    climbingforce: Union[float, None]
-
-    class Config:
-        orm_mode = True

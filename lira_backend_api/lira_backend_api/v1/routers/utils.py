@@ -1,5 +1,4 @@
 from datetime import datetime
-import json
 from math import atan2, acos, sin, cos, pi, pow, sqrt
 from pathlib import Path
 
@@ -7,10 +6,6 @@ import dateutil.parser
 from sqlalchemy.sql import select
 
 from databases.core import Connection
-from sqlalchemy.orm import Session
-from sqlalchemy import null, or_, and_
-from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.types import Unicode, JSON
 from lira_backend_api.core.models import (
     DRDMeasurement,
     MeasurementTypes,
@@ -20,14 +15,6 @@ from lira_backend_api.core.models import (
     SourceType,
     MapReference,
 )
-
-# TODO move schema processing to the endpoint
-from lira_backend_api.core.schemas import (
-    TripsReturn,
-    boundary,
-)
-
-from lira_backend_api.settings import settings
 
 sql_files_path = Path.cwd().joinpath("lira_backend_api/core/sql/").resolve()
 

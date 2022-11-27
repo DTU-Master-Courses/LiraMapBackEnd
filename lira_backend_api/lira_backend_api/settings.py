@@ -1,4 +1,3 @@
-import enum
 import os
 from pathlib import Path
 from tempfile import gettempdir
@@ -10,16 +9,6 @@ from yarl import URL
 
 TEMP_DIR = Path(gettempdir())
 load_dotenv()
-
-# class LogLevel(str, enum.Enum):  # noqa: WPS600
-#     """Possible log levels."""
-
-#     NOTSET = "NOTSET"
-#     DEBUG = "DEBUG"
-#     INFO = "INFO"
-#     WARNING = "WARNING"
-#     ERROR = "ERROR"
-#     FATAL = "FATAL"
 
 
 class Settings(BaseSettings):
@@ -41,8 +30,6 @@ class Settings(BaseSettings):
 
     # Current environment
     environment: str = os.getenv("DEPLOY_ENVIRONMENT", "dev")
-
-    # log_level: LogLevel = LogLevel.INFO
 
     # Variables for the database
     db_host: str = os.getenv("DB_HOST", "localhost")

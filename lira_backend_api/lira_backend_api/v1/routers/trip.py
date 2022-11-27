@@ -1,4 +1,3 @@
-from typing import List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -6,25 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
 from lira_backend_api.core.schemas import (
-    MapReference,
-    MeasurementLatLon,
     Trip,
     Trips,
-    AllTrip,
     MeasurementLatLon,
-    # Power,
-    SpeedList,
-    SpeedVariables,
-    SpeedVariablesAgg,
     Energy,
-    ContentVariables,
-    Acceleration,
-    RPMList,
-    ContentRPM,
-    RPMlistagg,
-    Friction,
-    SpeedVariablesAgg,
-    ClimbingForce,
     ClimbingForceList,
     AccelerationList,
 SpeedVariablesList,
@@ -39,11 +23,8 @@ from lira_backend_api.v1.routers.utils import (
     get_trips,
     get_variable_list,
     get_segments,
-    # get_power,
     get_speed_list,
-    get_speed_list_agg,
     get_energy,
-    # get_climbingforce,
     get_rpm_LR,
     get_rpm_list,
     get_trip_friction,
