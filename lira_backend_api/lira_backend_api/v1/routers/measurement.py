@@ -3,10 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from databases.core import Connection
 
 
-from lira_backend_api.core.schemas import (
-    MeasurementTypes,
-    MeasurementTypesList
-)
+from lira_backend_api.core.schemas import MeasurementTypes, MeasurementTypesList
 from lira_backend_api.v1.routers.utils import (
     measurement_types,
 )
@@ -28,4 +25,4 @@ async def get_measurement_types(db: Connection = Depends(get_connection)):
         result_dict = dict(result._mapping.items())
         results_modified.append(MeasurementTypes(*result_dict.values()))
 
-    return { "measurement_types": results_modified }
+    return {"measurement_types": results_modified}

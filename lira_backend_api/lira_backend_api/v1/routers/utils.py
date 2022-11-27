@@ -191,9 +191,9 @@ def inertialCalc(longitudinal_acceleration, car_mass):
 
 
 def tireRollResistCalc(velocity, car_mass):
-    #Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
-    #gw in m/s2 is the gravitational acceleration
-    krt = [0.01 * (1+(i * 3.6) / 100) for i in velocity]
+    # Where krt = 0.01.*(1+(obd.spd_veh*3.6)./100) is the rolling resistant coefficient)
+    # gw in m/s2 is the gravitational acceleration
+    krt = [0.01 * (1 + (i * 3.6) / 100) for i in velocity]
     gw = 9.80665
     return [car_mass * gw * i for i in krt]
 
@@ -267,24 +267,24 @@ async def get_energy(trip_id: str, db: Connection):
     dictionary = await get_variable_list(trip_id, db)
     for rec in dictionary:
         result = tuple(rec.values())
-        #result index from 0 to 9 ts_date, ts_time, az, ay,
-        #ax, speed, acc_long, acc_yaw, lat, lon
+        # result index from 0 to 9 ts_date, ts_time, az, ay,
+        # ax, speed, acc_long, acc_yaw, lat, lon
         speed = float(result[5]) / 3.6 if result[5] else 0
-        #offset of 198 according to car data validation
-        #resolution changed from 1 to 0.05
-        #longitudinal acceleration - units of meters
-        acc_long = (float(result[6]) - 198) * 0.05 if result[6] else 0 #m/s^2
-        #Offset of 2047
-        acc_yaw = (float(result[7]) - 2047) if result[7] else 0 #in degrees a second
+        # offset of 198 according to car data validation
+        # resolution changed from 1 to 0.05
+        # longitudinal acceleration - units of meters
+        acc_long = (float(result[6]) - 198) * 0.05 if result[6] else 0  # m/s^2
+        # Offset of 2047
+        acc_yaw = (float(result[7]) - 2047) if result[7] else 0  # in degrees a second
 
-        #Bearing is the direction of the vehicle
+        # Bearing is the direction of the vehicle
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
             bearing = bearingCalc(result[8], next_[8], result[9], next_[9])
         if (dictionary.index(rec)) != 0:
             previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
             distance = distanceCalc(result[8], previous_[8], result[9], previous_[9])
-        #Division by 3.6 to convert km/h to m/s
+        # Division by 3.6 to convert km/h to m/s
         Xvel = cos(bearing) * float(speed)  # * cos(Z-Bearing)
         Yvel = sin(bearing) * float(speed)  # * cos(Z-Bearing)
         # Zvel = sin(Z-Bearing)
@@ -294,11 +294,20 @@ async def get_energy(trip_id: str, db: Connection):
         hill_climbing_force = hillClimbingCalc(acc_yaw, car_mass)
         aerodynamic_force = aerodynamicCalc(velocity)
         rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
-        force_vector = [aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(velocity))]
-        P = scalarProductPower(velocity, force_vector) + (inertial_force + hill_climbing_force) * magnitudeCalc(velocity[0], velocity[1])
-        force = magnitudeCalc(force_vector[0], force_vector[1]) + inertial_force + hill_climbing_force
-        E += (1/3600) * distance * force
-        date = str(result[0] + ' ' + result[1])
+        force_vector = [
+            aerodynamic_force[i] + rolling_resistance_force[i]
+            for i in range(len(velocity))
+        ]
+        P = scalarProductPower(velocity, force_vector) + (
+            inertial_force + hill_climbing_force
+        ) * magnitudeCalc(velocity[0], velocity[1])
+        force = (
+            magnitudeCalc(force_vector[0], force_vector[1])
+            + inertial_force
+            + hill_climbing_force
+        )
+        E += (1 / 3600) * distance * force
+        date = str(result[0] + " " + result[1])
         energy.append(
             {
                 "power": P,
@@ -306,13 +315,23 @@ async def get_energy(trip_id: str, db: Connection):
                 "bearing": bearing,
                 "distance": distance,
                 "inertial_force": inertial_force,
-                "inertial_energy": (1/3600) * distance * inertial_force,
+                "inertial_energy": (1 / 3600) * distance * inertial_force,
                 "hill_climbing_force": hill_climbing_force,
-                "hill_climbing_energy": (1/3600) * distance * hill_climbing_force,
-                "aerodynamic_force": magnitudeCalc(aerodynamic_force[0], aerodynamic_force[1]),
-                "aerodynamic_energy": (1/3600) * distance * magnitudeCalc(aerodynamic_force[0], aerodynamic_force[1]),
-                "rolling_resistance_force": magnitudeCalc(rolling_resistance_force[0], rolling_resistance_force[1]),
-                "rolling_resistance_energy": (1/3600) * distance * magnitudeCalc(rolling_resistance_force[0], rolling_resistance_force[1]),
+                "hill_climbing_energy": (1 / 3600) * distance * hill_climbing_force,
+                "aerodynamic_force": magnitudeCalc(
+                    aerodynamic_force[0], aerodynamic_force[1]
+                ),
+                "aerodynamic_energy": (1 / 3600)
+                * distance
+                * magnitudeCalc(aerodynamic_force[0], aerodynamic_force[1]),
+                "rolling_resistance_force": magnitudeCalc(
+                    rolling_resistance_force[0], rolling_resistance_force[1]
+                ),
+                "rolling_resistance_energy": (1 / 3600)
+                * distance
+                * magnitudeCalc(
+                    rolling_resistance_force[0], rolling_resistance_force[1]
+                ),
                 "created_date": date,
             }
         )
@@ -364,6 +383,3 @@ async def get_trip_friction(trip_id: str, db: Connection):
     res = await db.fetch_all(query)
     print("result length = ", len(res))
     return res
-
-
-

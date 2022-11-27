@@ -105,7 +105,6 @@ class Trips:
         orm_mode = True
 
 
-
 @dataclass(frozen=True)
 class SourceType:
     id: UUID
@@ -306,6 +305,7 @@ class ContentRPM(BaseModel):
     class Config:
         orm_mode = True
 
+
 @dataclass(frozen=True)
 class ContentRpmList(BaseModel):
     content_rpm: List[ContentRPM]
@@ -402,4 +402,3 @@ class SegmentsList(BaseModel):
 @dataclass(frozen=True)
 class ClimbingForceList(BaseModel):
     climbing_force: List[ClimbingForce]
-

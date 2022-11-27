@@ -30,4 +30,3 @@ async def setup_db():
 async def get_connection() -> Connection:
     async with lira_database.connection() as connection:
         yield connection
-

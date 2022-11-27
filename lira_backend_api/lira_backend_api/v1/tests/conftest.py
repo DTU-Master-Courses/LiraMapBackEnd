@@ -4,10 +4,11 @@ from lira_backend_api.__main__ import app
 from httpx import AsyncClient
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def client():
     with TestClient(app) as c:
         yield c
+
 
 @pytest.fixture
 async def Asyclient():

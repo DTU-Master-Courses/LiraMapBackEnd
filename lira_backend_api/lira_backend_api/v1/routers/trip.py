@@ -11,12 +11,12 @@ from lira_backend_api.core.schemas import (
     Energy,
     ClimbingForceList,
     AccelerationList,
-SpeedVariablesList,
-ContentRpmList,
-FrictionList,
-SpeedVariablesAggList,
-SegmentsList,
-RpmAggList,
+    SpeedVariablesList,
+    ContentRpmList,
+    FrictionList,
+    SpeedVariablesAggList,
+    SegmentsList,
+    RpmAggList,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -55,7 +55,7 @@ async def get_all_trips(db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=500, detail="Something unexpected happened")
 
-    return { "trips": results }
+    return {"trips": results}
 
 
 @router.get("/speed_aggregation/{trip_id}", response_model=SpeedVariablesAggList)
@@ -65,7 +65,7 @@ async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
 
-    return { "speed_aggregation": results }
+    return {"speed_aggregation": results}
 
 
 @router.get("/climbing_force/{trip_id}", response_model=ClimbingForceList)
@@ -76,7 +76,7 @@ async def get_sget_climbingforce_trip(
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
 
-    return { "climbing_force": results }
+    return {"climbing_force": results}
 
 
 # FIXME: rename endpoint for clarity ("list of variables" could be lots of things)
@@ -89,7 +89,7 @@ async def get_variables(trip_id, db: Connection = Depends(get_connection)):
             status_code=404, detail="Trip does not contain acceleration data"
         )
 
-    return { "acceleration": results }
+    return {"acceleration": results}
 
 
 @router.get("/speed/{trip_id}", response_model=SpeedVariablesList)
@@ -99,7 +99,7 @@ async def get_speed(trip_id, db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
 
-    return { "speed": results }
+    return {"speed": results}
 
 
 @router.get("/energy/{trip_id}", response_model=Energy)
@@ -135,7 +135,7 @@ async def get_trip_segments(trip_id, db: Connection = Depends(get_connection)):
                 )
             )
 
-    return { "segments": results_list }
+    return {"segments": results_list}
 
 
 @router.get("/rpm/{trip_id}", response_model=ContentRpmList)
@@ -145,7 +145,7 @@ async def get_all_rpm(trip_id, db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
 
-    return { "content_rpm": results }
+    return {"content_rpm": results}
 
 
 @router.get("/rpm_aggregation/{trip_id}", response_model=RpmAggList)
@@ -155,7 +155,7 @@ async def get_rpm_aggr(trip_id, db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
 
-    return { "rpm_aggregation": results }
+    return {"rpm_aggregation": results}
 
 
 @router.get("/friction/{trip_id}", response_model=FrictionList)
@@ -165,4 +165,4 @@ async def get_friction_trip(trip_id, db: Connection = Depends(get_connection)):
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain data")
 
-    return { "friction": results }
+    return {"friction": results}
