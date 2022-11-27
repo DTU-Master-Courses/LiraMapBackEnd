@@ -3,7 +3,7 @@ from typing import Generator
 import pytest
 from starlette.testclient import TestClient
 import json
-from lira_backend_api.main import app
+from lira_backend_api.__main__ import app
 from httpx import AsyncClient
 
 

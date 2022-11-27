@@ -9,6 +9,7 @@ from lira_backend_api.core.schemas import (
     MapReference,
     MeasurementLatLon,
     Trip,
+    Trips,
     AllTrip,
     MeasurementLatLon,
     # Power,
@@ -24,6 +25,7 @@ from lira_backend_api.core.schemas import (
     Friction,
     SpeedVariablesAgg,
     ClimbingForce,
+    ClimbingForceList,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -58,15 +60,14 @@ async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection
     return trip_response
 
 
-# KT: Migrated to new approach
-@router.get("", response_model=List[AllTrip])
+@router.get("", response_model=Trips)
 async def get_all_trips(db: Connection = Depends(get_connection)):
     results = await get_trips(db)
 
     if results is None:
         raise HTTPException(status_code=500, detail="Something unexpected happened")
-    else:
-        return results
+
+    return { "trips": results }
 
 
 @router.get("/speed_aggregation/{trip_id}", response_model=List[SpeedVariablesAgg])
@@ -78,15 +79,15 @@ async def get_speed_agg(trip_id, db: Connection = Depends(get_connection)):
         return results
 
 
-@router.get("/climbing_force/{trip_id}", response_model=List[ClimbingForce])
+@router.get("/climbing_force/{trip_id}", response_model=ClimbingForceList)
 async def get_sget_climbingforce_trip(
     trip_id, db: Connection = Depends(get_connection)
 ):
     results = await get_climbingforce(str(trip_id), db)
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain speed data")
-    else:
-        return results
+
+    return { "climbing_force": results }
 
 
 # FIXME: rename endpoint for clarity ("list of variables" could be lots of things)

@@ -203,7 +203,7 @@ def angleVectCalc(a, b, maga, magb):
 
 def scalarProductPower(velocity, force_vector):
     velocity_mag = magnitudeCalc(velocity[0], velocity[1])
-    force_mag = magnitudeCalc(force_vector[0], force_vector[1]) 
+    force_mag = magnitudeCalc(force_vector[0], force_vector[1])
     angle = angleVectCalc(velocity, force_vector, velocity_mag, force_mag)
     return velocity_mag * force_mag * cos(angle)
 
@@ -327,25 +327,25 @@ async def get_energy(trip_id: str, db: Connection):
     E = 0.0
     bearing = 0
     velocity = [0, 0]
-    distance = 0 
+    distance = 0
     dictionary = await get_variable_list(trip_id, db)
     for rec in dictionary:
         result = tuple(rec.values())
         #result index from 0 to 9 ts_date, ts_time, az, ay,
         #ax, speed, acc_long, acc_yaw, lat, lon
-        speed = float(result[5]) / 3.6
+        speed = float(result[5]) / 3.6 if result[5] else 0
         #offset of 198 according to car data validation
         #resolution changed from 1 to 0.05
         #longitudinal acceleration - units of meters
         acc_long = (float(result[6]) - 198) * 0.05 if result[6] else 0 #m/s^2
         #Offset of 2047
         acc_yaw = (float(result[7]) - 2047) if result[7] else 0 #in degrees a second
-        
+
         #Bearing is the direction of the vehicle
         if (dictionary.index(rec)) + 1 != len(dictionary):
             next_ = tuple(dictionary[dictionary.index(rec) + 1].values())
             bearing = bearingCalc(result[8], next_[8], result[9], next_[9])
-        if (dictionary.index(rec)) != 0:    
+        if (dictionary.index(rec)) != 0:
             previous_ = tuple(dictionary[dictionary.index(rec) - 1].values())
             distance = distanceCalc(result[8], previous_[8], result[9], previous_[9])
         #Division by 3.6 to convert km/h to m/s
@@ -358,7 +358,7 @@ async def get_energy(trip_id: str, db: Connection):
         hill_climbing_force = hillClimbingCalc(acc_yaw, car_mass)
         aerodynamic_force = aerodynamicCalc(velocity)
         rolling_resistance_force = tireRollResistCalc(velocity, car_mass)
-        force_vector = [aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(velocity))] 
+        force_vector = [aerodynamic_force[i] + rolling_resistance_force[i] for i in range(len(velocity))]
         P = scalarProductPower(velocity, force_vector) + (inertial_force + hill_climbing_force) * magnitudeCalc(velocity[0], velocity[1])
         force = magnitudeCalc(force_vector[0], force_vector[1]) + inertial_force + hill_climbing_force
         E += (1/3600) * distance * force
