@@ -31,6 +31,7 @@ from lira_backend_api.v1.routers.utils import (
     get_trip_friction,
     get_speed_list_agg,
     get_climbingforce,
+    get_acceleration,
 )
 
 router = APIRouter(prefix="/trips")
@@ -81,9 +82,9 @@ async def get_sget_climbingforce_trip(
 
 
 # FIXME: rename endpoint for clarity ("list of variables" could be lots of things)
-@router.get("/acceleration/{trip_id}", response_model=AccelerationList)
+@router.get("/acceleration/{trip_id}", response_model=Acceleration)
 async def get_variables(trip_id, db: Connection = Depends(get_connection)):
-    results = await get_variable_list(str(trip_id), db)
+    results = await get_acceleration(str(trip_id), db)
 
     if results is None:
         raise HTTPException(

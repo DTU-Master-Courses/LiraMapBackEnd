@@ -212,6 +212,16 @@ def aerodynamicCalc(velocity):
     return [0.5 * rho * A * cd * i**2 for i in velocity]
 
 
+async def get_acceleration(trip_id: str, db: Connection):
+    query = (
+        open(sql_files_path.joinpath("func_acceleration.sql"), "r")
+        .read()
+        .replace("+trip_id+", trip_id)
+    )
+    result = await db.fetch_all(query)
+    return result
+
+
 async def get_variable_list(trip_id: str, db: Connection):
     query = (
         open(sql_files_path.joinpath("func_measurements_scrape.sql"), "r")
