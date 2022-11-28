@@ -1,3 +1,4 @@
+# test measurement main:@HUIYULEO s212648 
 import pytest
 from httpx import AsyncClient
 
@@ -10,13 +11,12 @@ async def test_get_single_source(async_client: AsyncClient) -> None:
     response = await async_client.get(url=url, params = params)
 
     assert response.status_code == 200
-    # assert response.content.decode() == '"OK"'
+    assert response.json() != None
 
 async def test_get_inexistent_single_source(async_client: AsyncClient) -> None:
-    # async def run(Asyclient):
     url= "/sourcetype/id"
     params = {"source_id":"8b195100-3c87-4912-a333-3fe2b9c32e1a"}
-    res = await async_client.get(url=url, params = params)
-    print(res.status_code)
-    assert res.status_code == 404
-    assert res.json() == {'detail': 'Source Type not found'}
+    response = await async_client.get(url=url, params = params)
+
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Source Type not found'}

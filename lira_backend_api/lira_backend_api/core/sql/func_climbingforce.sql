@@ -7,7 +7,7 @@ select
            as row_number
 	 FROM public."Measurements"
 	where 
-	"FK_Trip" = '2857262b-71db-49df-8db6-a042987bf0eb'-- '+trip_id+'
+	"FK_Trip" = '+trip_id+' --'2857262b-71db-49df-8db6-a042987bf0eb'
 	 and 
 	"T" = 'acc.xyz'  
 ),

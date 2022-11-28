@@ -345,6 +345,7 @@ async def get_segments(trip_id: str, db: Connection):
             (MeasurementModel.fk_trip == trip_id) & (MeasurementModel.tag == "acc.xyz")
         )
         .order_by(MeasurementModel.timestamp)
+        .limit(10000)
     )
 
     results = await db.fetch_all(query)

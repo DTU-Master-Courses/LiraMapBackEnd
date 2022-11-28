@@ -1,3 +1,5 @@
+#test_mapreference main:@HUIYULEO s212648 
+
 import pytest
 import json
 from httpx import AsyncClient
@@ -22,7 +24,6 @@ async def test_get_inexistent_mapreference_id(async_client: AsyncClient) -> None
     url = "/mapreference/id/" + w_mapference_id
     res = await async_client.get(url=url)
     assert res.status_code == 404
-    print(res.json())
     assert res.json() == {'detail': 'No values for mapreference id'}
 
 
