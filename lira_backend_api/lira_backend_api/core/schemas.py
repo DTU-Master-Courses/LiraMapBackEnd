@@ -231,6 +231,7 @@ class ContentVariables(BaseModel):
         orm_mode = True
 
 
+# TODO: REMOVE
 @dataclass(frozen=True)
 class AccelerationList(BaseModel):
     acceleration: List[ContentVariables]

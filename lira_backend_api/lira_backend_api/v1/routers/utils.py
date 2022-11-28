@@ -63,7 +63,7 @@ async def get_deviceid(device_id: str, db: Connection):
     query = select(Device).where(Device.id == device_id)
     result = await db.fetch_one(query)
 
-    if result == None:
+    if result is None:
         return None
 
     return result
@@ -335,7 +335,7 @@ async def get_energy(trip_id: str, db: Connection):
                 "created_date": date,
             }
         )
-    return {"energy": energy}
+    return energy
 
 
 async def get_segments(trip_id: str, db: Connection):

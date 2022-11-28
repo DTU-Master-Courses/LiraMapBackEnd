@@ -38,7 +38,6 @@ def test_get_inexistent_single_trip():
 def test_get_all_trips():
     async def run_test(client):
         res = client.get("/trips/")
-        print(len(res.json()))
         assert res.status_code == 200
         assert (len(res.json())) == 150
 
@@ -69,7 +68,6 @@ def test_get_inexistent_acceleration_trip():
 def test_get_inexistent_trip_segments():
     async def run_test(client):
         res = client.get("/trips/segments/7e746b5e-0d7b-4c1b-9564-72f61fa858e6")
-        print(res.json())
         if res.json() == [] and res.status_code == 200:
             result = {"detail": "Not Found"}
         assert result == {"detail": "Not Found"}

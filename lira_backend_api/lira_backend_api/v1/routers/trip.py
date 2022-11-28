@@ -10,6 +10,7 @@ from lira_backend_api.core.schemas import (
     MeasurementLatLon,
     Energy,
     ClimbingForceList,
+    Acceleration,
     AccelerationList,
     SpeedVariablesList,
     ContentRpmList,
@@ -105,10 +106,11 @@ async def get_speed(trip_id, db: Connection = Depends(get_connection)):
 @router.get("/energy/{trip_id}", response_model=Energy)
 async def get_energy_trip(trip_id, db: Connection = Depends(get_connection)):
     results = await get_energy(str(trip_id), db)
+
     if results is None:
         raise HTTPException(status_code=404, detail="Trip does not contain data")
-    else:
-        return results
+
+    return { "energy": results}
 
 
 @router.get("/segments/{trip_id}", response_model=SegmentsList)
