@@ -1,15 +1,11 @@
-import json
 from typing import Any, List, Union
 
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from datetime import datetime
-from sqlalchemy import BigInteger
 from collections import namedtuple
-
-# from sqlalchemy import JSON
 
 
 @dataclass(frozen=True)
@@ -17,6 +13,11 @@ class MeasurementTypes:
     id: UUID
     created_date: datetime
     type: str
+
+
+@dataclass(frozen=True)
+class MeasurementTypesList(BaseModel):
+    measurement_types: List[MeasurementTypes]
 
 
 @dataclass(frozen=True)
@@ -91,6 +92,14 @@ class AllTrip:
     created_date: Union[datetime, None]
     updated_date: Union[datetime, None]
     fully_imported: Union[bool, None]
+
+    class Config:
+        orm_mode = True
+
+
+@dataclass(frozen=True)
+class Trips:
+    trips: List[AllTrip]
 
     class Config:
         orm_mode = True
@@ -222,6 +231,12 @@ class ContentVariables(BaseModel):
         orm_mode = True
 
 
+# TODO: REMOVE
+@dataclass(frozen=True)
+class AccelerationList(BaseModel):
+    acceleration: List[ContentVariables]
+
+
 class SpeedVariables(BaseModel):
     ts: Union[datetime, None]
     vid: Union[int, None]
@@ -233,6 +248,11 @@ class SpeedVariables(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class SpeedVariablesList(BaseModel):
+    speed: List[SpeedVariables]
 
 
 class SpeedList(BaseModel):
@@ -252,6 +272,11 @@ class SpeedVariablesAgg(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class SpeedVariablesAggList(BaseModel):
+    speed_aggregation: List[SpeedVariablesAgg]
 
 
 class ClimbingForce(BaseModel):
@@ -282,6 +307,11 @@ class ContentRPM(BaseModel):
         orm_mode = True
 
 
+@dataclass(frozen=True)
+class ContentRpmList(BaseModel):
+    content_rpm: List[ContentRPM]
+
+
 class RPMList(BaseModel):
     rpm_list: List[ContentRPM]
 
@@ -300,6 +330,11 @@ class RPMlistagg(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+@dataclass(frozen=True)
+class RpmAggList(BaseModel):
+    rpm_aggregation: List[RPMlistagg]
 
 
 @dataclass(frozen=True)
@@ -347,6 +382,11 @@ class Friction(BaseModel):
 
 
 @dataclass(frozen=True)
+class FrictionList(BaseModel):
+    friction: List[Friction]
+
+
+@dataclass(frozen=True)
 class MeasurementLatLon(BaseModel):
     lat: Union[float, None]
     lon: Union[float, None]
@@ -355,28 +395,11 @@ class MeasurementLatLon(BaseModel):
         orm_mode = True
 
 
-class SpeedVariablesAgg(BaseModel):
-    ts_date: Union[str, None]
-    ts_time: Union[str, None]
-    vid: Union[int, None]
-    speed: Union[float, None]
-    lon: Union[float, None]
-    lat: Union[float, None]
-
-    class Config:
-        orm_mode = True
+@dataclass(frozen=True)
+class SegmentsList(BaseModel):
+    segments: List[MeasurementLatLon]
 
 
-class ClimbingForce(BaseModel):
-    vid: Union[int, None]
-    ts_date: Union[str, None]
-    ts_time: Union[str, None]
-    az: Union[float, None]
-    ay: Union[float, None]
-    ax: Union[float, None]
-    lon: Union[float, None]
-    lat: Union[float, None]
-    climbingforce: Union[float, None]
-
-    class Config:
-        orm_mode = True
+@dataclass(frozen=True)
+class ClimbingForceList(BaseModel):
+    climbing_force: List[ClimbingForce]

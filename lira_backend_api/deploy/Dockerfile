@@ -5,7 +5,7 @@ RUN apt-get update \
 
 RUN pip install -U pip setuptools
 
-RUN pip install poetry==1.1.13
+RUN pip install poetry==1.2.2
 
 # Configuring poetry
 RUN poetry config virtualenvs.create false

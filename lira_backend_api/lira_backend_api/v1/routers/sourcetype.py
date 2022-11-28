@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-# from sqlalchemy.orm import Session
 from databases.core import Connection
 
 from lira_backend_api.core.schemas import SourceType
@@ -17,10 +16,9 @@ async def get_single_source(source_id: str, db: Connection = Depends(get_connect
     if result is None:
         raise HTTPException(status_code=404, detail="Source Type not found")
 
-    else:
-        return SourceType(
-            id=result.id,
-            source_name=result.source_name,
-            created_date=result.created_date,
-            updated_date=result.updated_date,
-        )
+    return SourceType(
+        id=result.id,
+        source_name=result.source_name,
+        created_date=result.created_date,
+        updated_date=result.updated_date,
+    )
