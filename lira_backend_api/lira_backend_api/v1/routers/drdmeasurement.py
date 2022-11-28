@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 
 # from sqlalchemy.orm import Session
 
@@ -18,6 +18,8 @@ async def get_DRDmeasurement_model(
 ):
     result = await get_drdmeasurement(drdmeasurement_id, db)
 
+    if result is None:
+            raise HTTPException(status_code=404, detail="drdmeasurement not found")
     result_dict = dict(result._mapping.items())
 
     # This could result in a serialization error for testing; we might want to put this into a helper function,

@@ -1,16 +1,22 @@
-import asyncio
-from typing import Generator
 import pytest
-from fastapi.testclient import TestClient
-import json
-from lira_backend_api.main import app
-from lira_backend_api.v1.tests.conftest import *
+from httpx import AsyncClient
+
+pytestmark = pytest.mark.asyncio
 
 
-@pytest.mark.anyio
-def test_get_single_source():
-    async def run_test(client):
-        res = client.get("/sourcetype/id/8b195100-3c87-4912-a315-3fe2b9c32e1a")
-        print  (res.json())
-        print (res.status_code)
-        assert res.status_code == 200
+async def test_get_single_source(async_client: AsyncClient) -> None:
+    url= "/sourcetype/id"
+    params = {"source_id":"8b195100-3c87-4912-a315-3fe2b9c32e1a"}
+    response = await async_client.get(url=url, params = params)
+
+    assert response.status_code == 200
+    # assert response.content.decode() == '"OK"'
+
+async def test_get_inexistent_single_source(async_client: AsyncClient) -> None:
+    # async def run(Asyclient):
+    url= "/sourcetype/id"
+    params = {"source_id":"8b195100-3c87-4912-a333-3fe2b9c32e1a"}
+    res = await async_client.get(url=url, params = params)
+    print(res.status_code)
+    assert res.status_code == 404
+    assert res.json() == {'detail': 'Source Type not found'}

@@ -1,29 +1,26 @@
-import asyncio
-from typing import Generator
+from typing import AsyncGenerator, Generator
+
 import pytest
-from starlette.testclient import TestClient
-import json
-from lira_backend_api.main import app
+from fastapi.testclient import TestClient
 from httpx import AsyncClient
 
+from lira_backend_api.database.db import lira_database
+from lira_backend_api.__main__ import app
 
-# @pytest.fixture
-# def anyio_backend():
-#     return 'asyncio'
 
-# @pytest.fixture(scope='session')
-# def event_loop() -> Generator:
-#     """Create an instance of the default event loop for each test case."""
-#     loop = asyncio.get_event_loop_policy().new_event_loop()
-#     yield loop
-#     loop.close()
+@pytest.fixture()
+def client() -> Generator:
+    yield TestClient(app)
 
-@pytest.fixture(scope='module')
-def client():
-    with TestClient(app) as c:
-        yield c
 
-@pytest.fixture
-async def Asyclient():
-    async with AsyncClient(app=app, base_url="http://localhost:8000") as ac:
+@pytest.fixture(autouse=True)
+async def db() -> AsyncGenerator:
+    await lira_database.connect()
+    yield
+    await lira_database.disconnect()
+
+
+@pytest.fixture()
+async def async_client() -> AsyncGenerator:
+    async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac

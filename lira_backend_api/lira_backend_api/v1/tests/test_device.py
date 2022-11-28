@@ -1,14 +1,14 @@
-# test_device
+import pytest
+from httpx import AsyncClient
 
-import asyncio
-from fastapi.testclient import TestClient
+pytestmark = pytest.mark.asyncio
 
-import json
-from lira_backend_api.v1.tests.conftest import *
 
-def test_get_device_id(client):
-    # async def run(Asyclient):
-    response = client.get("/device/47690661-f343-4591-920c-50dcd59f74e2")
+async def test_get_device_id(async_client: AsyncClient) -> None:
+    dev_id = "47690661-f343-4591-920c-50dcd59f74e2"
+    url = "/device/" + dev_id
+    response = await async_client.get(url=url)
+
     assert response.status_code == 200
     assert response.json() == {
         'id': '47690661-f343-4591-920c-50dcd59f74e2',
@@ -17,9 +17,10 @@ def test_get_device_id(client):
         'fk_sourcetype': 'fb64715d-09d1-4fd9-8912-685364c7d446'
         }
 
-def test_get_inexistent_device_id(client):
+async def test_get_inexistent_device_id(async_client: AsyncClient) -> None:
     # async def run(Asyclient):
-    res = client.get("/device/47690661-f343-4491-920c-50dcd59f75e1")
-    print(res.status_code)
-    assert res.status_code == 404
-    assert res.json() == {'detail': 'device not found'}
+    W_dev_id = "47690661-f343-4491-920c-50dcd59f75e1"
+    url = "/device/" + W_dev_id
+    response = await async_client.get(url=url)
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'device not found'}
