@@ -169,3 +169,11 @@ async def get_friction_trip(trip_id, db: Connection = Depends(get_connection)):
         raise HTTPException(status_code=404, detail="Trip does not contain data")
 
     return {"friction": results}
+
+@router.get("/physics/id/{trip_id}")
+async def get_trip_physics(task_id: int, db: Connection = Depends(get_connection)):
+    result = await get_physics(str(task_id), db)
+    if result is None:
+        raise HTTPException(status_code=500, detail="Error while generating physics report")
+
+    return trip_response
