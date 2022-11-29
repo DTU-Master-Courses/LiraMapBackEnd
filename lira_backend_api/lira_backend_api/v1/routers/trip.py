@@ -1,6 +1,8 @@
+import io
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse, StreamingResponse, Response
 
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
@@ -18,6 +20,7 @@ from lira_backend_api.core.schemas import (
     SpeedVariablesAggList,
     SegmentsList,
     RpmAggList,
+    AllPhysics,
 )
 from lira_backend_api.v1.routers.utils import (
     get_trip,
@@ -32,6 +35,7 @@ from lira_backend_api.v1.routers.utils import (
     get_speed_list_agg,
     get_climbingforce,
     get_acceleration,
+    get_physics,
 )
 
 router = APIRouter(prefix="/trips")
@@ -170,10 +174,27 @@ async def get_friction_trip(trip_id, db: Connection = Depends(get_connection)):
 
     return {"friction": results}
 
-@router.get("/physics/id/{trip_id}")
-async def get_trip_physics(task_id: int, db: Connection = Depends(get_connection)):
-    result = await get_physics(str(task_id), db)
-    if result is None:
+@router.get("/physics/id/{task_id}", response_model=AllPhysics)
+async def get_trip_physics(task_id, db: Connection = Depends(get_connection)):
+    results = await get_physics(int(task_id), db)
+
+    if results is None:
         raise HTTPException(status_code=500, detail="Error while generating physics report")
 
-    return trip_response
+    # speed_aggregation
+    # climbing_force
+    # acceleration
+    # speed
+    # energy
+    # content_rpm
+    # friction
+
+
+    # response = result_buffer
+    #
+    # headers = {
+    #     'Content-Disposition': f'attachment; filename="trip-{task_id}.csv"'
+    # }
+    #
+    # return Response(content=response, headers=headers)
+    return results
