@@ -41,3 +41,4 @@ SELECT
 	*,
 	sqrt(pow(ax,2) + pow(ay,2)) as magnitude
 	from agg
+)
