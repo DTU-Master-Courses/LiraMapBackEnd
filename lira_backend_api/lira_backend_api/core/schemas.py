@@ -196,10 +196,22 @@ class ContentAcceleration(BaseModel):
         orm_mode = True
 
 
-# TODO: REMOVE ME
+@dataclass(frozen=True)
+class OldAcceleration(BaseModel):
+    ts_date: Union[str, None]
+    ts_time: Union[str, None]
+    az: Union[float, None]
+    ay: Union[float, None]
+    ax: Union[float, None]
+    speed: Union[float, None]
+    lon: Union[float, None]
+    lat: Union[float, None]
+    magnitude: Union[float, None]
+
+
 @dataclass(frozen=True)
 class Acceleration(BaseModel):
-    acceleration: List[ContentAcceleration]
+    acceleration: List[OldAcceleration]
 
     class Config:
         orm_mode = True
@@ -403,3 +415,14 @@ class SegmentsList(BaseModel):
 @dataclass(frozen=True)
 class ClimbingForceList(BaseModel):
     climbing_force: List[ClimbingForce]
+
+
+@dataclass(frozen=True)
+class AllPhysics(BaseModel):
+    speed_aggregation: List[SpeedVariablesAgg]
+    climbing_force: List[ClimbingForce]
+    acceleration: List[ContentVariables]
+    speed: List[SpeedVariables]
+    energy: List[ContentEnergy]
+    content_rpm: List[ContentRPM]
+    friction: List[Friction]
