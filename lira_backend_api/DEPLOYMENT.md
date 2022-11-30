@@ -48,16 +48,16 @@ now we are going to build and start  the code on the vm
 - ssh into the vm using the following command in a new GitBash window
 
 
->ssh s194305@se2-b.compute.dtu.dk
+>ssh s123456@se2-b.compute.dtu.dk
 
-- Then once you have logged in using you dtu password run the following command:
+- Then once you have logged in using you dtu password run the following command from the "frontend" folder:
 
 
 >sudo docker-compose -f deploy/docker-compose.yml --project-directory . build
 
 
 This will build the front-end on the vm. 
-- Now we can build the backend and bring up both front- and back-end with the following command:
+- Now we can build the backend and bring up both front- and back-end with the following command from the "backend" folder:
 
 >sudo docker-compose -f deploy/docker-compose.prod.yml --env-file ./.env --project-directory . up --build
 
