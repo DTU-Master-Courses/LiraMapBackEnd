@@ -1,3 +1,4 @@
+import io
 from datetime import datetime
 from math import atan2, acos, sin, cos, pi, pow, sqrt
 from pathlib import Path
@@ -393,3 +394,48 @@ async def get_trip_friction(trip_id: str, db: Connection):
     res = await db.fetch_all(query)
     print("result length = ", len(res))
     return res
+
+
+async def get_physics(task_id: int, db: Connection):
+    # First we have to get the Trip UUID from the Task ID
+    query = (
+        select(Trip)
+        .where(
+            (Trip.task_id == task_id)
+        )
+    )
+    res = await db.fetch_one(query)
+
+    if res is None:
+        return None
+
+    trip_id = str(res["TripId"])
+
+    speed_agg_results = await get_speed_list_agg(trip_id=trip_id, db=db)
+    climbing_force_results = await get_climbingforce(trip_id=trip_id, db=db)
+    accel_results = await get_variable_list(trip_id=trip_id, db=db)
+    speed_results = await get_speed_list(trip_id=trip_id, db=db)
+    energy_results = await get_energy(trip_id=trip_id, db=db)
+    rpm_results = await get_rpm_list(trip_id=trip_id, db=db)
+    friction_results = await get_trip_friction(trip_id=trip_id, db=db)
+
+    massive_json = {
+        "speed_aggregation": speed_agg_results,
+        "climbing_force": climbing_force_results,
+        "acceleration": accel_results,
+        "speed": speed_results,
+        "energy": energy_results,
+        "content_rpm": rpm_results,
+        "friction": friction_results,
+    }
+
+    return massive_json
+
+    # buffer = io.BytesIO()
+    #
+    # example = "liramap csv contents,more stuffs, even more!!!, yes"
+    #
+    # buffer.write(example.encode("utf-8"))
+    #
+    # return buffer.getvalue()
+

@@ -415,3 +415,14 @@ class SegmentsList(BaseModel):
 @dataclass(frozen=True)
 class ClimbingForceList(BaseModel):
     climbing_force: List[ClimbingForce]
+
+
+@dataclass(frozen=True)
+class AllPhysics(BaseModel):
+    speed_aggregation: List[SpeedVariablesAgg]
+    climbing_force: List[ClimbingForce]
+    acceleration: List[ContentVariables]
+    speed: List[SpeedVariables]
+    energy: List[ContentEnergy]
+    content_rpm: List[ContentRPM]
+    friction: List[Friction]
