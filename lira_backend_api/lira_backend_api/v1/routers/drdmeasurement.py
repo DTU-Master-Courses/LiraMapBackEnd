@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,HTTPException
 
 from databases.core import Connection
 
@@ -15,6 +15,8 @@ async def get_DRDmeasurement_model(
 ):
     result = await get_drdmeasurement(drdmeasurement_id, db)
 
+    if result is None:
+            raise HTTPException(status_code=404, detail="drdmeasurement not found")
     result_dict = dict(result._mapping.items())
 
     return DRDMeasurement(*result_dict.values())
