@@ -24,21 +24,21 @@ As a quick overview we first need to run OpenVPN. Then in WSL we First build the
 repositories to.
 - Run this command in the parent folder of the two repositories:
 
->scp -r **./YOURPATH/LiraMapBackEnd** **s123456**@se2-b.compute.dtu.dk:/home/**s123456**/code/backend
+>scp -r **./LiraMapBackEnd/lira_backend_api** **s123456**@se2-b.compute.dtu.dk:/home/**s123456**/code/backend
 
 
 *We will be doing this in our wsl environment but if you cloned the repository to windows the repositories should be accessible from GitBash.*
 - run the same command for the backend:
 
 
->scp -r **./YOURPATH/LiraMapFrontEnd** **s123456**@se2-b.compute.dtu.dk:/home/**s123456**/code/frontend
+>scp -r **./LiraMapFrontEnd** **s123456**@se2-b.compute.dtu.dk:/home/**s123456**/code/frontend
 
     
 
 *this should give the following structure on the vm:
 
     |-code
-    |   |-fontend
+    |   |-frontend
     |   |   |-...
     |   |-backend
     |   |   |-...
