@@ -14,7 +14,7 @@ As a quick overview we first need to run OpenVPN. Then in WSL we First build the
     Docker
     Docker Compose
 - Ensure that the vm has external access to 3rd party repositories
-- Connect to the DTU firewall using OpenVPN.
+- Connect to the DTU VPN using OpenVPN.
 
 **s123456** = your id from dtu 
 
