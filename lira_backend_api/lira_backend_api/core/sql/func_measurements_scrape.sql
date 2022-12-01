@@ -1,17 +1,19 @@
+-- Main Dev: Wangrandk
+-- Supporting Devs: HUIYULEO, Tswagerman
 with useful as(
-select 
+select
 	lat,
 	lon,
 	message
 	 FROM public."Measurements"
-	where 
+	where
 	"FK_Trip" ='+trip_id+'
 	 and
 	(
     "T" = 'obd.spd_veh'
      or
 	"T" = 'obd.acc_yaw'
-	 or 
+	 or
 	"T" = 'obd.acc_long'
 	 or
 	"T" = 'obd.brk_trq_req_elec'
@@ -20,10 +22,10 @@ select
 	 or
 	"T" = 'obd.whl_trq_est'
 	)
-	and 
+	and
 	(
 	cast(message::json->>'obd.spd_veh.value' as decimal(6,3)) > 0
-	or 
+	or
 	cast(message::json->>'obd.acc_yaw.value' as decimal(10,3)) > 0
 	or
 	cast(message::json->>'obd.acc_long.value' as decimal(10,3)) > 0
@@ -34,12 +36,12 @@ select
 	or
 	cast(message::json->>'obd.whl_trq_est.value' as decimal(10,3)) > 0
 	)
-	and 
+	and
 	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2) not like '%+%'
 	limit 100000
 ),
 agg as(
-SELECT	
+SELECT
 	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1) as ts_date,
     SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)  as ts_time,
 	--Coalesce to return 0 when value equals NULL
@@ -49,15 +51,15 @@ SELECT
 	round(avg(cast(message::json->>'obd.brk_trq_req_elec' as decimal(10,3))), 2) as brk_trq_req_elec,
 	round(avg(cast(message::json->>'obd.trac_cons.value' as decimal(10,3))), 2) as trac_cons,
     round(avg(cast(message::json->>'whl_trq_est.value' as decimal(10,3))), 2) as whl_trq_est,
-	avg(lat) as lat, 
+	avg(lat) as lat,
 	avg(lon) as lon
 	from useful
-	 	
-	group by 
-	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1), 
-    SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)	
+
+	group by
+	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1),
+    SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)
 	)
-	
-	select 
+
+	select
 	*
 	from agg

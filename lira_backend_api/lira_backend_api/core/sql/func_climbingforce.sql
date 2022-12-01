@@ -1,3 +1,5 @@
+-- Main Dev: Wangrandk
+-- Supporting Devs: HUIYULEO, Tswagerman
 with useful as(
 select
 	lat,

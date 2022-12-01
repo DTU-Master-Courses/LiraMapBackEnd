@@ -1,3 +1,5 @@
+# Main Dev: Mikfor
+# Supporting Devs: Tswagerman, wangrandk, HUIYULEO, ViktorRindom, PossibleNPC
 from fastapi import APIRouter, Depends, HTTPException
 
 from databases.core import Connection

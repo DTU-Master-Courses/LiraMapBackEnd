@@ -1,5 +1,7 @@
+-- Main Dev: Wangrandk
+-- Supporting Devs: HUIYULEO, Tswagerman
 with useful as(
-select 
+select
 	"TripId" as id,
 	"TaskId" AS task_id,
 	date_trunc('second', "StartTimeUtc") as start_time_utc,
@@ -24,10 +26,10 @@ select
 	"Created_Date" as created_date,
 	"Updated_Date" as updated_date,
 	"Fully_Imported" as fully_imported
-	 FROM public."Trips"	
+	 FROM public."Trips"
 	limit 490
--- 	where 
--- 	"TripId" = '2857262b-71db-49df-8db6-a042987bf0eb'-- '+trip_id+'	
+-- 	where
+-- 	"TripId" = '2857262b-71db-49df-8db6-a042987bf0eb'-- '+trip_id+'
 )
 select *
 from useful

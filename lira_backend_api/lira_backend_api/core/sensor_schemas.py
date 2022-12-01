@@ -1,3 +1,5 @@
+# Main Dev: PossibleNPC
+# Supporting Devs: Mikfor, Tswagerman, wangrandk, ViktorRindom, HUIYULEO
 from pydantic import BaseModel
 from datetime import datetime
 
