@@ -1,3 +1,5 @@
+# Main Dev: PossibleNPC
+# Supporting Devs: Mikfor, Tswagerman, wangrandk, HUIYULEO, ViktorRindom
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -17,16 +19,13 @@ altitude_database = databases.Database(ALTITUDE_ASYNC_URL)
 lira_async_engine = create_async_engine(LIRA_ASYNC_URL, pool_pre_ping=True)
 altitude_async_engine = create_async_engine(ALTITUDE_ASYNC_URL, pool_pre_ping=True)
 
-# TODO: Investigate the Azure DB setup to create the model, schemas, and Base metadata object; create Altitude Base Object
 Base = declarative_base()
 
-# TODO: Hook up Altitude Base Object to DB
 async def setup_db():
     async with lira_async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
 
-# TODO: Create get_connection() for Altitude DB as well; focusing on Lira DB first
 async def get_connection() -> Connection:
     async with lira_database.connection() as connection:
         yield connection

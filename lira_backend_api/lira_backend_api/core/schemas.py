@@ -1,3 +1,5 @@
+# Main Dev: HUIYULEO
+# Supporting Devs: Mikfor, Tswagerman, wangrandk, PossibleNPC, ViktorRindom
 from typing import Any, List, Union
 
 from uuid import UUID
@@ -243,7 +245,6 @@ class ContentVariables(BaseModel):
         orm_mode = True
 
 
-# TODO: REMOVE
 @dataclass(frozen=True)
 class AccelerationList(BaseModel):
     acceleration: List[ContentVariables]

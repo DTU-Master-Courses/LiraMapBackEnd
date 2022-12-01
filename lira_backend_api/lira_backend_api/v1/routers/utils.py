@@ -1,4 +1,5 @@
-import io
+# Main Dev: Tswagerman
+# Supporting Devs: Mikfor, wangrandk, HUIYULEO, ViktorRindom, PossibleNPC
 from datetime import datetime
 from math import atan2, acos, sin, cos, pi, pow, sqrt
 from pathlib import Path
@@ -241,7 +242,6 @@ async def get_speed_list(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -252,7 +252,6 @@ async def get_speed_list_agg(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -263,7 +262,6 @@ async def get_climbingforce(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -371,7 +369,6 @@ async def get_rpm_list(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -382,7 +379,6 @@ async def get_rpm_LR(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -393,7 +389,6 @@ async def get_trip_friction(trip_id: str, db: Connection):
         .replace("+trip_id+", trip_id)
     )
     res = await db.fetch_all(query)
-    print("result length = ", len(res))
     return res
 
 
@@ -431,12 +426,3 @@ async def get_physics(task_id: int, db: Connection):
     }
 
     return massive_json
-
-    # buffer = io.BytesIO()
-    #
-    # example = "liramap csv contents,more stuffs, even more!!!, yes"
-    #
-    # buffer.write(example.encode("utf-8"))
-    #
-    # return buffer.getvalue()
-

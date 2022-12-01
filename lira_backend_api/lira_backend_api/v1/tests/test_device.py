@@ -1,4 +1,5 @@
-#test_device main:@HUIYULEO s212648 support: @Ran, @Kerian
+# Main Dev: HUIYULEO
+# Supporting Devs: wangrandk, PossibleNPC
 
 import pytest
 from httpx import AsyncClient

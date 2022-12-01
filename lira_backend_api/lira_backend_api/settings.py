@@ -1,3 +1,5 @@
+# Main Dev: PossibleNPC
+# Supporting Devs: Mikfor, Tswagerman, wangrandk, HUIYULEO, ViktorRindom
 import os
 from pathlib import Path
 from tempfile import gettempdir

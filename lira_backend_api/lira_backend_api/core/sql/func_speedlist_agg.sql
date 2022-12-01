@@ -1,4 +1,6 @@
- SELECT
+-- Main Dev: Wangrandk
+-- Supporting Devs: HUIYULEO, Tswagerman
+SELECT
 	SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',1) as ts_date,
     SPLIT_PART(SPLIT_PART(message::json->>'@ts','.',1),'T',2)  as ts_time,
 	message::json->>'@vid' as vid,

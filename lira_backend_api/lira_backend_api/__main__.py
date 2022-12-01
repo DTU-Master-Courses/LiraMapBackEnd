@@ -1,3 +1,5 @@
+# Main Dev: PossibleNPC
+# Supporting Devs: Mikfor, Tswagerman, wangrandk, HUIYULEO, ViktorRindom
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +22,6 @@ app.include_router(device.router)
 app.include_router(sourcetype.router)
 app.include_router(mapreference.router)
 
-# TODO: We need to change the origins of this for production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,14 +36,12 @@ async def startup():
     if not lira_database.is_connected:
         await lira_database.connect()
         await setup_db()
-    # TODO: We need to do the same for Altitude Database
 
 
 @app.on_event("shutdown")
 async def shutdown():
     if lira_database.is_connected:
         await lira_database.disconnect()
-    # TODO: We need to do the same for Altitude Database
 
 
 if __name__ == "__main__":

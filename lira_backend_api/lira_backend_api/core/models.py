@@ -1,3 +1,5 @@
+# Main Dev: Mikfor
+# Supporting Devs: HUIYULEO, Tswagerman, wangrandk, PossibleNPC, ViktorRindom
 from lira_backend_api.database.db import Base
 
 from sqlalchemy import INTEGER, Column, DateTime, Text, ForeignKey

@@ -1,4 +1,5 @@
-#pytest setting @HUIYULEO s212648
+# Main Dev: HUIYULEO
+# Supporting Devs: wangrandk, PossibleNPC
 
 from typing import AsyncGenerator, Generator
 

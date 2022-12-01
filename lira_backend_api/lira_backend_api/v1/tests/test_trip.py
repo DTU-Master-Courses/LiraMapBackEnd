@@ -1,4 +1,5 @@
-#test_trip main:@HUIYULEO s212648 support: @Ran
+# Main Dev: HUIYULEO
+# Supporting Devs: wangrandk
 import pytest
 from httpx import AsyncClient
 
