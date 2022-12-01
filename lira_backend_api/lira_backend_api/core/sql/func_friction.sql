@@ -1,5 +1,5 @@
--- Main Dev: Wangrandk
--- Supporting Devs: HUIYULEO, Tswagerman
+-- Main Dev: HUIYULEO
+-- Supporting Devs: Wangrandk, Tswagerman
 with useful as(
 select
 	"Measurements"."FK_Trip" as tripid,

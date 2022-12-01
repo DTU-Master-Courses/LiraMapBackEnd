@@ -1,5 +1,5 @@
--- Main Dev: Wangrandk
--- Supporting Devs: HUIYULEO, Tswagerman
+-- Main Dev: HUIYULEO
+-- Supporting Devs: Wangrandk, Tswagerman
 SELECT
 	"Measurements"."FK_Trip" as tripid,
 	message::json->>'@ts' as created_date,
