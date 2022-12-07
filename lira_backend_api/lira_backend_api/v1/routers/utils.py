@@ -3,8 +3,10 @@
 from datetime import datetime
 from math import atan2, acos, sin, cos, pi, pow, sqrt
 from pathlib import Path
+from typing import Union
 
 import dateutil.parser
+from sqlalchemy import and_
 from sqlalchemy.sql import select
 
 from databases.core import Connection
@@ -49,11 +51,18 @@ async def get_mapreference(mapreference_id: str, db: Connection):
     result = await db.fetch_one(query)
 
     return result
+    
 
-
-async def get_trip(trip_id: str, db: Connection):
-    query = select(Trip).where(Trip.id == trip_id)
-    result = await db.fetch_one(query)
+async def get_trip(trip_id: str, tag: Union[str, None], db: Connection):
+    if tag:
+        query_tag = select(MeasurementModel.timestamp, MeasurementModel.tag, MeasurementModel.message)\
+        .where(MeasurementModel.tag == tag)\
+        .join(Trip, Trip.id == trip_id)\
+        .order_by(MeasurementModel.timestamp)
+        result = await db.fetch_all(query_tag)
+    else:
+        query = select(Trip).where(Trip.id == trip_id)
+        result = await db.fetch_one(query)
 
     if result is None:
         return None
