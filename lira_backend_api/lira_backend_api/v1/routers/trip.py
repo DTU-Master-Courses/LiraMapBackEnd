@@ -55,8 +55,8 @@ async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Conne
         # val = result1.get("obd.asr_trq_req_dyn.value")
         for measurement in result:
             counter +=1
-            if counter % 10 != 0:
-                continue
+            # if counter % 10 != 0:
+            #     continue
             tag_key = f"{tag}.value"
             tag_value = measurement[2].get(tag_key)
             if tag_value is None:

@@ -51,14 +51,15 @@ async def get_mapreference(mapreference_id: str, db: Connection):
     result = await db.fetch_one(query)
 
     return result
-    
+
 
 async def get_trip(trip_id: str, tag: Union[str, None], db: Connection):
     if tag:
-        query_tag = select(MeasurementModel.timestamp, MeasurementModel.tag, MeasurementModel.message)\
-        .where(MeasurementModel.tag == tag)\
-        .join(Trip, Trip.id == trip_id)\
-        .order_by(MeasurementModel.timestamp)
+        query_tag = (select(MeasurementModel.timestamp, MeasurementModel.tag, MeasurementModel.message)
+                    .join(Trip, Trip.id == trip_id)
+                    .filter(MeasurementModel.fk_trip == Trip.id)
+                    .filter(MeasurementModel.tag == tag)
+                    .order_by(MeasurementModel.timestamp))
         result = await db.fetch_all(query_tag)
     else:
         query = select(Trip).where(Trip.id == trip_id)
