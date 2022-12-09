@@ -45,7 +45,7 @@ router = APIRouter(prefix="/trips")
 
 @router.get("/id/{trip_id}", response_model=Trip | List[MeasurementTagValues] | List[MeasurementTagAcceleration])
 async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Connection = Depends(get_connection)):
-    if tag != "acc.xyz":
+    if tag != "acc.xyz" and tag is not None and tag != '':
         measurements = []
         counter = 0
         result = await get_trip(str(trip_id), tag, db)
