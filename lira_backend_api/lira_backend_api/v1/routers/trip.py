@@ -43,14 +43,14 @@ from lira_backend_api.v1.routers.utils import (
 router = APIRouter(prefix="/trips")
 
 
-@router.get("/id/{trip_id}", response_model=Trip | List[MeasurementTagValues] | List[MeasurementTagAcceleration])
+@router.get("/id/{trip_id}", response_model=Union[Trip | List[MeasurementTagValues] | List[MeasurementTagAcceleration]])
 async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Connection = Depends(get_connection)):
     if tag != "acc.xyz" and tag is not None and tag != '':
         measurements = []
         counter = 0
         result = await get_trip(str(trip_id), tag, db)
-        if result is None:
-            raise HTTPException(status_code=404, detail="Trip not found")
+        if result is None or len(result) == 0:
+            raise HTTPException(status_code=404, detail="Information not available.")
         # result1 = result[0][3]
         # val = result1.get("obd.asr_trq_req_dyn.value")
         for measurement in result:
@@ -63,7 +63,7 @@ async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Conne
                 continue
             measurements.append(MeasurementTagValues(measurement[0], measurement[1], tag_value))
         if len(measurements) == 0:
-            raise HTTPException(status_code=500, detail="Value not available")
+            raise HTTPException(status_code=500, detail="Trip tag information not available.")
             #measurement_result = [MeasurementTagValues(*dict(measurement._mapping.items()).values()) for measurement in result]
         return measurements
         # if val is None:
