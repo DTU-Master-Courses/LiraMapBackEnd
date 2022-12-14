@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 from datetime import datetime
 from collections import namedtuple
+from decimal import Decimal
 
 
 @dataclass(frozen=True)
@@ -38,9 +39,10 @@ class MeasurementModel:
 
 @dataclass(frozen=True)
 class MeasurementTagValues:
-    timestamp: datetime
-    tag: Union[str, None]
-    value: Union[float, None]
+    date: str
+    time: str
+    tag: str
+    value: Decimal
 
 @dataclass(frozen=True)
 class MeasurementTagAcceleration:

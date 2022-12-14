@@ -55,12 +55,13 @@ async def get_mapreference(mapreference_id: str, db: Connection):
 
 async def get_trip(trip_id: str, tag: Union[str, None], db: Connection):
     if tag:
-        query_tag = (select(MeasurementModel.timestamp, MeasurementModel.tag, MeasurementModel.message)
-                    .join(Trip, Trip.id == trip_id)
-                    .filter(MeasurementModel.fk_trip == Trip.id)
-                    .filter(MeasurementModel.tag == tag)
-                    .order_by(MeasurementModel.timestamp))
-        result = await db.fetch_all(query_tag)
+        query = (
+            open(sql_files_path.joinpath("func_measurements_tag_agg.sql"), "r")
+            .read()
+            .replace("+trip_id+", trip_id)
+            .replace("+tag+", tag)
+        )
+        result = await db.fetch_all(query)
     else:
         query = select(Trip).where(Trip.id == trip_id)
         result = await db.fetch_one(query)
