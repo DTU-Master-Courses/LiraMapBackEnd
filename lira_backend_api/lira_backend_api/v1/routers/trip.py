@@ -43,7 +43,7 @@ from lira_backend_api.v1.routers.utils import (
 router = APIRouter(prefix="/trips")
 
 
-@router.get("/id/{trip_id}", response_model=Union[Trip | List[MeasurementTagValues]])
+@router.get("/id/{trip_id}", response_model=Union[Trip , List[MeasurementTagValues]])
 async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Connection = Depends(get_connection)):
     if tag != "acc.xyz" and tag is not None and tag != '':
         measurements = []

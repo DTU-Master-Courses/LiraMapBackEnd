@@ -25,6 +25,15 @@ async def test_get_single_trip(async_client: AsyncClient) -> None:
                           'created_date': '2020-08-26T11:45:20.290879+00:00',
                           'updated_date': '0001-01-01T00:00:00+00:00', 'fully_imported': True}
 
+async def test_get_single_trip_tag(async_client: AsyncClient) -> None:
+    trip_id = "2857262b-71db-49df-8db6-a042987bf0eb"
+    url = "/trips/id/" + trip_id
+    params = "tag=obd.rpm_fl"
+    res = await async_client.get(url=url,params=params)
+    data = res.json()
+    assert res.status_code == 200
+    assert (res.json()) != []
+    assert data[0]['tag'] == "obd.rpm_fl"
 
 # given a false id, expecting a 404 error.
 async def test_get_inexistent_single_trip(async_client: AsyncClient) -> None:
