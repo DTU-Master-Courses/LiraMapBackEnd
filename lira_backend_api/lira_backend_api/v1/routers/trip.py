@@ -1,5 +1,7 @@
 # Main Dev: HUIYULEO
 # Supporting Devs: Mikfor, wangrandk, Tswagerman, ViktorRindom, PossibleNPC
+import json
+from typing import List, Union
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -7,6 +9,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from databases.core import Connection
 from lira_backend_api.database.db import get_connection
 from lira_backend_api.core.schemas import (
+    MeasurementTagAcceleration,
+    MeasurementTagValues,
     Trip,
     Trips,
     MeasurementLatLon,
@@ -39,17 +43,24 @@ from lira_backend_api.v1.routers.utils import (
 router = APIRouter(prefix="/trips")
 
 
-@router.get("/id/{trip_id}", response_model=Trip)
-async def get_single_trip(trip_id: UUID, db: Connection = Depends(get_connection)):
-    result = await get_trip(str(trip_id), db)
-    if result is None:
-        raise HTTPException(status_code=404, detail="Trip not found")
-
-    trip_result = dict(result._mapping.items())
-
-    trip_response = Trip(*trip_result.values())
-
-    return trip_response
+@router.get("/id/{trip_id}", response_model=Union[Trip , List[MeasurementTagValues]])
+async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Connection = Depends(get_connection)):
+    if tag != "acc.xyz" and tag is not None and tag != '':
+        measurements = []
+        result = await get_trip(str(trip_id), tag, db)
+        if result is None or len(result) == 0:
+            raise HTTPException(status_code=404, detail="Information not available.")
+        for measurement in result:
+            # We have to unpack this way since we don't care about the Trip ID column
+            measurements.append(MeasurementTagValues(measurement[1], measurement[2], measurement[3], measurement[4]))
+        return measurements
+    else:
+        result = await get_trip(str(trip_id), None, db)
+        if result is None:
+            raise HTTPException(status_code=404, detail="Trip not found")
+        trip_result = dict(result._mapping.items())
+        trip_response = Trip(*trip_result.values())
+        return trip_response
 
 
 @router.get("", response_model=Trips)
