@@ -45,7 +45,7 @@ router = APIRouter(prefix="/trips")
 
 @router.get("/id/{trip_id}", response_model=Union[Trip , List[MeasurementTagValues]])
 async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Connection = Depends(get_connection)):
-    if tag != "acc.xyz" and tag is not None and tag != '':
+    if tag != "acc.xyz" and tag is not None and tag != "":
         measurements = []
         result = await get_trip(str(trip_id), tag, db)
         if result is None or len(result) == 0:
@@ -54,13 +54,14 @@ async def get_single_trip(trip_id: UUID, tag: Union[str, None] = None ,db: Conne
             # We have to unpack this way since we don't care about the Trip ID column
             measurements.append(MeasurementTagValues(measurement[1], measurement[2], measurement[3], measurement[4]))
         return measurements
-    else:
+    if tag is None and tag != "":
         result = await get_trip(str(trip_id), None, db)
         if result is None:
             raise HTTPException(status_code=404, detail="Trip not found")
         trip_result = dict(result._mapping.items())
         trip_response = Trip(*trip_result.values())
         return trip_response
+    raise HTTPException(status_code=404, detail="Information not available.")
 
 
 @router.get("", response_model=Trips)
